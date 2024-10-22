@@ -1,4 +1,7 @@
-﻿using API.Data;
+﻿using API.Controllers;
+using API.Data;
+using API.IRepositories;
+using API.Repositories;
 using Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +17,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => {
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<ISizeRepo, SizeRepo>();
+builder.Services.AddScoped<IBrandRepo, BrandRepo>();
+builder.Services.AddScoped<IMaterialRepo, MaterialRepo>();
+builder.Services.AddScoped<IImageRepo, ImageRepo>();
+builder.Services.AddScoped<IProductRepos, ProductRepos>();
 
 // Add services to the container.
 

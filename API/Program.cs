@@ -1,4 +1,6 @@
 ﻿using API.Data;
+using API.IRepositories;
+using API.Repositories;
 using Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => {
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IPromotionRepos, PromotionRepos>();
+builder.Services.AddScoped<IVoucherRepos, VoucherRepos>();
 
 // Add services to the container.
 

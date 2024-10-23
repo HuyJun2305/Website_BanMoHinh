@@ -19,6 +19,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
 
 builder.Services.AddScoped<IPromotionRepos, PromotionRepos>();
 builder.Services.AddScoped<IVoucherRepos, VoucherRepos>();
+builder.Services.AddScoped<ISizeRepo, SizeRepo>();
+builder.Services.AddScoped<IBrandRepo, BrandRepo>();
+builder.Services.AddScoped<IMaterialRepo, MaterialRepo>();
+builder.Services.AddScoped<IImageRepo, ImageRepo>();
+builder.Services.AddScoped<IProductRepos, ProductRepos>();
 
 // Add services to the container.
 

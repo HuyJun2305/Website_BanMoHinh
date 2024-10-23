@@ -1,5 +1,4 @@
-﻿using API.Controllers;
-using API.Data;
+﻿using API.Data;
 using API.IRepositories;
 using API.Repositories;
 using Data.Models;
@@ -18,11 +17,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<ISizeRepo, SizeRepo>();
-builder.Services.AddScoped<IBrandRepo, BrandRepo>();
-builder.Services.AddScoped<IMaterialRepo, MaterialRepo>();
-builder.Services.AddScoped<IImageRepo, ImageRepo>();
-builder.Services.AddScoped<IProductRepos, ProductRepos>();
+builder.Services.AddScoped<IPromotionRepos, PromotionRepos>();
+builder.Services.AddScoped<IVoucherRepos, VoucherRepos>();
 
 // Add services to the container.
 

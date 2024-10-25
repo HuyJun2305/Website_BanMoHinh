@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Data.Models
@@ -13,6 +15,9 @@ namespace Data.Models
         public string Commune { get; set; }
         public string AddressDetail { get; set; }
         public string Description { get; set; }
+        [ForeignKey("Account")]
+        public Guid AccountId { get; set; }
+        [JsonIgnore]
         public virtual ApplicationUser Account { get; set; }    
 
     } 

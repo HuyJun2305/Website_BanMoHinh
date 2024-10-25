@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241015115602_base_Db")]
-    partial class base_Db
+    [Migration("20241024065359_dbnew")]
+    partial class dbnew
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -312,9 +312,6 @@ namespace API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("IdBrand")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IdImg")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("IdMaterial")

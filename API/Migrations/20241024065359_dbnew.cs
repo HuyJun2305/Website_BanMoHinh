@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace API.Migrations
 {
-    public partial class base_Db : Migration
+    public partial class dbnew : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -290,7 +290,6 @@ namespace API.Migrations
                     IdMaterial = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdPromotion = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdSize = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdImg = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SizeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),

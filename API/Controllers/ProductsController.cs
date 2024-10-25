@@ -55,7 +55,6 @@ namespace API.Controllers
                     IdBrand = product.IdBrand,
                     IdMaterial = product.IdMaterial,
                     IdPromotion = product.IdPromotion,
-                    IdImg = product.IdImg,
                     IdSize = product.IdSize,
                 };
                 await _productRepo.Create(product);
@@ -82,7 +81,6 @@ namespace API.Controllers
                     IdBrand = product.IdBrand,
                     IdMaterial = product.IdMaterial,
                     IdPromotion = product.IdPromotion,
-                    IdImg = product.IdImg,
                     IdSize = product.IdSize,
                 };
                 await _productRepo.Update(product);

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using XuongTT_API.Model;
 
 namespace API.Data
 {
@@ -32,6 +33,7 @@ namespace API.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Seed();
             base.OnModelCreating(builder);
         }
     }

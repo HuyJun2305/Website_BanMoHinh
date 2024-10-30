@@ -68,6 +68,7 @@ namespace API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -75,7 +76,6 @@ namespace API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ImgUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -85,7 +85,6 @@ namespace API.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
@@ -100,7 +99,6 @@ namespace API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
@@ -127,6 +125,65 @@ namespace API.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("828ded69-831f-43b0-8e89-dd535fbb9446"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "7ac9d2b7-e4c6-4029-a4b7-57dc8467f30a",
+                            Email = "admin@gmail.com",
+                            EmailConfirmed = false,
+                            ImgUrl = "",
+                            LockoutEnabled = false,
+                            Name = "khoong",
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAEAACcQAAAAEJBUG9thsOR0TmGt6TdE6+VhaqGCnMkUBtMP7sGYsRZG03Qs9oz8eOJvjbK6MIIv0Q==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "e353defd-1cbc-4ebb-8006-3bd5f7fa12af",
+                            TwoFactorEnabled = false,
+                            UserName = "admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("05c41b46-2643-4640-9c2a-0b408e450119"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "3511474f-2a5a-4dc4-879c-bff88e04e1a9",
+                            Email = "staff@gmail.com",
+                            EmailConfirmed = false,
+                            ImgUrl = "",
+                            LockoutEnabled = false,
+                            Name = "khoong",
+                            NormalizedEmail = "STAFF@GMAIL.COM",
+                            NormalizedUserName = "STAFF",
+                            PasswordHash = "AQAAAAEAACcQAAAAEFDgU9+eCqaL3TKCKDtZ9v72u4XOvI13FDcWmVURHfXsMYkRiRSN9wh08dPgpmlPQQ==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "cfd8f1a8-6745-49fd-b70f-55a9da5fd508",
+                            TwoFactorEnabled = false,
+                            UserName = "staff"
+                        },
+                        new
+                        {
+                            Id = new Guid("22238106-ccfd-4230-aa39-e434c3236ec4"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "6e6be376-a259-43f3-84da-01b06b67c63c",
+                            Email = "user1@gmail.com",
+                            EmailConfirmed = false,
+                            ImgUrl = "",
+                            LockoutEnabled = false,
+                            Name = "khoong",
+                            NormalizedEmail = "USER1@GMAIL.COM",
+                            NormalizedUserName = "USER1",
+                            PasswordHash = "AQAAAAEAACcQAAAAEO1+VNa+1vOXFu7X9u5Q7abc6QQfAEU9o1YA8GGkk7XZoNG5z25M89lMoQFX3lRflA==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "06a5a6ad-a824-497a-ad25-34c55de09702",
+                            TwoFactorEnabled = false,
+                            UserName = "user1"
+                        });
                 });
 
             modelBuilder.Entity("Data.Models.Brand", b =>
@@ -466,6 +523,29 @@ namespace API.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e5a9340c-6970-495d-81fa-1b8d752d59a4"),
+                            ConcurrencyStamp = "75d8d7de-1a7d-44a5-a9bd-70d3893da178",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("d1b25175-b093-4f3e-8db1-c3835c2e2d54"),
+                            ConcurrencyStamp = "6be576ba-a90c-4c4f-956c-37e4fb620306",
+                            Name = "Staff",
+                            NormalizedName = "STAFF"
+                        },
+                        new
+                        {
+                            Id = new Guid("529f2ca9-a866-441f-a755-b885ab6a9c78"),
+                            ConcurrencyStamp = "e8f43029-964b-4c79-8807-6eba7f6f2dda",
+                            Name = "Customer",
+                            NormalizedName = "CUSTOMER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -550,6 +630,23 @@ namespace API.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("828ded69-831f-43b0-8e89-dd535fbb9446"),
+                            RoleId = new Guid("e5a9340c-6970-495d-81fa-1b8d752d59a4")
+                        },
+                        new
+                        {
+                            UserId = new Guid("05c41b46-2643-4640-9c2a-0b408e450119"),
+                            RoleId = new Guid("d1b25175-b093-4f3e-8db1-c3835c2e2d54")
+                        },
+                        new
+                        {
+                            UserId = new Guid("22238106-ccfd-4230-aa39-e434c3236ec4"),
+                            RoleId = new Guid("529f2ca9-a866-441f-a755-b885ab6a9c78")
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -756,8 +853,7 @@ namespace API.Migrations
                 {
                     b.Navigation("Addresses");
 
-                    b.Navigation("Cart")
-                        .IsRequired();
+                    b.Navigation("Cart");
                 });
 
             modelBuilder.Entity("Data.Models.Cart", b =>

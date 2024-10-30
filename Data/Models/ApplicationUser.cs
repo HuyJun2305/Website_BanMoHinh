@@ -11,11 +11,12 @@ namespace Data.Models
 {
     public class ApplicationUser : IdentityUser<Guid>
     {
-        public string Name { get; set; }
-        public string PhoneNumber { get; set; }
+        public string? Name { get; set; }
+        public string? PhoneNumber { get; set; }
         [EmailAddress]
         public string Email { get; set; }
-        public string ImgUrl { get; set; }
+        public string? ImgUrl { get; set; }
+
         [JsonIgnore]
         public virtual ICollection<Address>? Addresses { get; set; }
         [JsonIgnore]

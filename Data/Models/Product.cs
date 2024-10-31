@@ -18,16 +18,17 @@ namespace Data.Models
         public Guid IdPromotion { get; set; }
 
         public Guid IdSize { get; set; }
-        public Guid IdImg { get; set; }
+        //public Guid IdImg { get; set; }
         [JsonIgnore]
         public virtual Size Size { get; set; }
         [JsonIgnore]
         public virtual Image Image { get; set; }
+        [JsonIgnore]
         public virtual Brand Brand { get; set; }
+        [JsonIgnore]
         public virtual Material Material { get; set; }
         [JsonIgnore]
         public virtual  Promotion Promotion { get; set; }
-
 
     }
 }

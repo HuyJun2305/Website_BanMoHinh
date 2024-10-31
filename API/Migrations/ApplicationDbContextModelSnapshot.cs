@@ -369,9 +369,6 @@ namespace API.Migrations
                     b.Property<Guid>("IdBrand")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdImg")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("IdMaterial")
                         .HasColumnType("uniqueidentifier");
 

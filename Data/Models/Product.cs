@@ -20,15 +20,13 @@ namespace Data.Models
         public Guid IdSize { get; set; }
         //public Guid IdImg { get; set; }
         [JsonIgnore]
-        public virtual Size Size { get; set; }
+        public virtual Size? Size { get; set; }
         [JsonIgnore]
-        public virtual Image Image { get; set; }
+        public virtual Brand? Brand { get; set; }
         [JsonIgnore]
-        public virtual Brand Brand { get; set; }
+        public virtual Material? Material { get; set; }
         [JsonIgnore]
-        public virtual Material Material { get; set; }
-        [JsonIgnore]
-        public virtual  Promotion Promotion { get; set; }
+        public virtual  Promotion? Promotion { get; set; }
 
     }
 }

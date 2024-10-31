@@ -54,10 +54,10 @@ namespace API.Controllers
                     Description = product.Description,
                     IdBrand = product.IdBrand,
                     IdMaterial = product.IdMaterial,
-                    IdPromotion = product.IdPromotion,
+                    
                     IdSize = product.IdSize,
                 };
-                await _productRepo.Create(product);
+                await _productRepo.Create(sp);
                 await _productRepo.SaveChanges();
             }
             catch (Exception ex)

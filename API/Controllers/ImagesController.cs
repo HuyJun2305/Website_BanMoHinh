@@ -32,14 +32,20 @@ namespace API.Controllers
         {
             try
             {
-                await _imageRepo.Create(image);
+                Image data = new Image()
+                {
+                    Id = image.Id,
+                    URL = image.URL,
+                    ProductId = image.ProductId,
+                };
+                await _imageRepo.Create(data);
+                await _imageRepo.SaveChanges();
 
             }
             catch (Exception ex)
             {
                 return Problem(ex.Message);
             }
-            _imageRepo.SaveChanges();
             return Content("Success!");
         }
         //
@@ -48,14 +54,19 @@ namespace API.Controllers
         {
             try
             {
-                await _imageRepo.Update(image);
-
+                Image data = new Image()
+                {
+                    Id = image.Id,
+                    URL = image.URL,
+                    ProductId = image.ProductId,
+                };
+                await _imageRepo.Update(data);
+                await _imageRepo.SaveChanges();
             }
             catch (Exception ex)
             {
                 return Problem(ex.Message);
             }
-            _imageRepo.SaveChanges();
             return Content("Success!");
         }
         //

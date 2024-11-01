@@ -59,30 +59,30 @@ builder.Services.AddSwaggerGen(options =>
 
 using var loggerFactory = LoggerFactory.Create(b => b.SetMinimumLevel(LogLevel.Trace).AddConsole());
 
-var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
+//var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
-    {
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
-            ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-            ClockSkew = new TimeSpan(0, 0, 5)
-        };
-        options.Events = new JwtBearerEvents
-        {
-            OnChallenge = ctx => LogAttempt(ctx.Request.Headers, "OnChallenge"),
-            OnTokenValidated = ctx => LogAttempt(ctx.Request.Headers, "OnTokenValidated")
-        };
-    });
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//    .AddJwtBearer(options =>
+//    {
+//        options.SaveToken = true;
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+//            ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+//            ClockSkew = new TimeSpan(0, 0, 5)
+//        };
+//        options.Events = new JwtBearerEvents
+//        {
+//            OnChallenge = ctx => LogAttempt(ctx.Request.Headers, "OnChallenge"),
+//            OnTokenValidated = ctx => LogAttempt(ctx.Request.Headers, "OnTokenValidated")
+//        };
+//    });
 
 const string policy = "defaultPolicy";
 

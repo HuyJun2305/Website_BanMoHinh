@@ -14,6 +14,6 @@ namespace Data.Models
         public bool Status { get; set; }
         public Guid ProductId { get; set; }
         [JsonIgnore]
-        public virtual Product Product { get; set; }
+        public virtual Product? Product { get; set; }
     }
 } 

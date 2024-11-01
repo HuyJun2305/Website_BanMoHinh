@@ -14,7 +14,7 @@ namespace API.Repositories
         }
         public async Task Create(Product product)
         {
-            if (await GetProductById(product.Id) != null) throw new DuplicateWaitObjectException($"Product : {product.Id} is existed!");
+            //if (await GetProductById(product.Id) != null) throw new DuplicateWaitObjectException($"Product : {product.Id} is existed!");
             await _context.Products.AddAsync(product);
         }
 

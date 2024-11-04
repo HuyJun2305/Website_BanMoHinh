@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Data.Models;
 using API.Data;
+using API.Repositories;
 
 namespace XuongTT_API.Controllers
 {
@@ -17,13 +18,13 @@ namespace XuongTT_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ApplicationDbContext _context;
+        private readonly CartRepo _cartRepo;
         private readonly IConfiguration _configuration;
-        public AuthenticationController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context)
+        public AuthenticationController(UserManager<ApplicationUser> userManager, IConfiguration configuration, CartRepo cartRepo)
         {
             _userManager = userManager;
             _configuration = configuration;
-            _context = context;
+            _cartRepo = cartRepo;
         }
 
         [HttpPost("Register")]
@@ -50,7 +51,7 @@ namespace XuongTT_API.Controllers
                 AccountId = newUser.Id,
                 Price = 0
             };
-            _context.Carts.Add(cart);
+            _cartRepo.Create(cart);
             if (result.Succeeded) return Ok("User tạo thành công");
             else return StatusCode(StatusCodes.Status500InternalServerError,$"Chưa tạo thành công user :{string.Join(" ", result.Errors.Select(e => e.Description))}");
 

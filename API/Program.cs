@@ -21,7 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => {
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.User.AllowedUserNameCharacters += " ")
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+        .AddTokenProvider("MyApp", typeof(DataProtectorTokenProvider<ApplicationUser>));
 
 builder.Services.AddScoped<IPromotionRepos, PromotionRepos>();
 builder.Services.AddScoped<IVoucherRepos, VoucherRepos>();
@@ -30,6 +30,8 @@ builder.Services.AddScoped<IBrandRepo, BrandRepo>();
 builder.Services.AddScoped<IMaterialRepo, MaterialRepo>();
 builder.Services.AddScoped<IImageRepo, ImageRepo>();
 builder.Services.AddScoped<IProductRepos, ProductRepos>();
+builder.Services.AddScoped<ICartRepo, CartRepo>();
+builder.Services.AddScoped<ICartDetailRepo, CartDetailRepo>();
 
 // Add services to the container.
 
@@ -42,7 +44,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         In = ParameterLocation.Header,
         Description = "Please enter 'Bearer [jwt]'",
-        Name = "Authorrization",
+        Name = "Authorization",
         Type = SecuritySchemeType.ApiKey
     });
     var scheme = new OpenApiSecurityScheme
@@ -50,7 +52,7 @@ builder.Services.AddSwaggerGen(options =>
         Reference = new OpenApiReference
         {
             Type = ReferenceType.SecurityScheme,
-            Id = "Bear"
+            Id = "Bearer"
         }
     };
 
@@ -59,30 +61,30 @@ builder.Services.AddSwaggerGen(options =>
 
 using var loggerFactory = LoggerFactory.Create(b => b.SetMinimumLevel(LogLevel.Trace).AddConsole());
 
-//var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
+var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
 
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//    .AddJwtBearer(options =>
-//    {
-//        options.SaveToken = true;
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
-//            ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-//            ClockSkew = new TimeSpan(0, 0, 5)
-//        };
-//        options.Events = new JwtBearerEvents
-//        {
-//            OnChallenge = ctx => LogAttempt(ctx.Request.Headers, "OnChallenge"),
-//            OnTokenValidated = ctx => LogAttempt(ctx.Request.Headers, "OnTokenValidated")
-//        };
-//    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+            ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            ClockSkew = new TimeSpan(0, 0, 5)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = ctx => LogAttempt(ctx.Request.Headers, "OnChallenge"),
+            OnTokenValidated = ctx => LogAttempt(ctx.Request.Headers, "OnTokenValidated")
+        };
+    });
 
 const string policy = "defaultPolicy";
 

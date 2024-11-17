@@ -10,7 +10,7 @@ using XuongTT_API.Model;
 
 namespace XuongTT_API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase

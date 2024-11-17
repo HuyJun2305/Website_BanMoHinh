@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace Data.Authentication
 {
-    public class LoginResponse
+    public class RefreshModel
     {
         [Required]
-        public string JwtToken { get; set; }
-        public DateTime Expiration { get; set; }
+        public string AccessToken { get; set; }
         [Required]
         public string RefreshToken { get; set; }
     }

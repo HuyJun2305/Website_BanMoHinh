@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using View.Iservices;
@@ -35,7 +36,6 @@ namespace View.Controllers
             {
                 vouchers = vouchers.Where(v => v.DayEnd <= toDate.Value).ToList();
             }
-
 
             if (!string.IsNullOrEmpty(status))
             {

@@ -16,6 +16,12 @@ namespace API.Controllers
         {
             _promotionRepos = promotionRepos;
         }
+        // GET: api/voucher
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Promotion>>> GetAllPromotion()
+        {
+            return await _promotionRepos.GetAllPromotion();
+        }
         // GET: api/Promotions/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Promotion>> GetPromotion(Guid id)

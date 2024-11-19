@@ -21,7 +21,7 @@ namespace View.Controllers
         public async Task<IActionResult> Index()
         {
             var viewContext = _promotionService.GetAllPromotion().Result;
-            if (viewContext == null) return View("'Product is null!'");
+            if (viewContext == null) return View("'Promotion is null!'");
             return View(viewContext.ToList());
         }
 

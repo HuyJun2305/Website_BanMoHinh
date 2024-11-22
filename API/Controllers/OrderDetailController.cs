@@ -18,14 +18,14 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDetail>>> Get()
         {
-            return await _orderDetailRepo.GetAllOrderDetail();
+            return await _orderDetailRepo.GetAllOrderDetails();
         }
 
         // GET api/<OrderDetailsController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDetail>> Get(Guid id)
         {
-            return await _orderDetailRepo.GetOrderdetailById(id);
+            return await _orderDetailRepo.GetOrderDetailById(id);
         }
 
         [HttpGet("OrderId/{id}")]

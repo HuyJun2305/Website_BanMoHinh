@@ -7,7 +7,7 @@ namespace API.IRepositories
         Task<List<CartDetail>> GetAllCartDetail();
         Task<CartDetail> GetCartDetailById(Guid id);
         Task Create(CartDetail cartdetail);
-        Task Update(CartDetail cartdetail);
+        Task Update(CartDetail cartdetail, Guid id);
         Task Delete(Guid id);
         Task SaveChanges();
     }

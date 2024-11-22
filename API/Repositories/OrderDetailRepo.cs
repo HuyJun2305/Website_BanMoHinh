@@ -35,10 +35,12 @@ namespace API.Repositories
             return await _context.OrderDetails.Where(od => od.Id == id) .Include(od => od.Order) .FirstOrDefaultAsync();
         }
 
-        public  async Task<List<OrderDetail>?> GetOrderDetailByOrderId(Guid id)
+        public  async Task<List<OrderDetail>?> GetOrderDetailsByOrderId(Guid id)
         {
             return await _context.OrderDetails.Where(od => od.OrderId == id).Include(od => od.Order).ToListAsync();
         }
+
+       
 
         public async Task SaveChanges()
         {

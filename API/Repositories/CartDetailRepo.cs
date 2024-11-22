@@ -41,10 +41,16 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(CartDetail cartdetail)
+        public async Task Update(CartDetail cartDetails, Guid id)
         {
-            if (await GetCartDetailById(cartdetail.Id)== null) throw new KeyNotFoundException("Not found this Id!");
-            _context.Entry(cartdetail).State = EntityState.Modified;
+            var updateItem = await _context.CartDetails.FindAsync(id);
+            //if (cartDetails != null)
+            //{
+            //    updateItem.Quanlity = cartDetails.Quanlity;
+            //    updateItem.TotalPrice = cartDetails.TotalPrice;
+            //}
+            _context.CartDetails.Update(updateItem);
+            await _context.SaveChangesAsync();
         }
     }
 }

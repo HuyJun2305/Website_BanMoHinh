@@ -10,7 +10,8 @@ namespace View.Controllers
     {
         private readonly IAuthenticationService _authenticationService;
         public event Action<string?>? LoginChange;
-        public AuthenticationController( IAuthenticationService authenticationService)
+
+        public AuthenticationController( IAuthenticationService authenticationService )
         {
             _authenticationService = authenticationService;
         }
@@ -21,13 +22,37 @@ namespace View.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
+            // Gọi dịch vụ xác thực để lấy JWT
             LoginResponse login = await _authenticationService.LoginAsync(model);
-            if (login == null) throw new UnauthorizedAccessException();
 
+            // Kiểm tra nếu đăng nhập không thành công
+            if (login == null)
+                throw new UnauthorizedAccessException();
 
-            ViewBag.Expiration = login.Expiration;
-            return RedirectToAction("Index","Home");
+            // Lưu JWT vào session
+            HttpContext.Session.SetString("JWT", login.JwtToken);
+
+            // Giải mã JWT để lấy thông tin role
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(login.JwtToken);
+
+            // Lấy role từ claim
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            // Kiểm tra role và chuyển hướng
+            if (role == "Admin" || role == "Staff")
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            else if (role == "Customer")
+            {
+                return RedirectToAction("Index", "HomeCustomer");
+            }
+
+            // Nếu không xác định được role, xử lý mặc định
+            return RedirectToAction("Login", "Authentication");
         }
+
         [HttpDelete]
         public async Task<IActionResult> Logout()
         {

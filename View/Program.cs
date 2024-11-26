@@ -17,6 +17,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IBrandServices, BrandServices>();
 builder.Services.AddHttpClient<ISizeServices, SizeServices>();
 builder.Services.AddHttpClient<IProductServices, ProductServices>();
+builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
 

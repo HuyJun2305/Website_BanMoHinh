@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using View.IServices;
+using View.ViewModel;
 
 namespace View.Controllers
 {
@@ -11,27 +12,27 @@ namespace View.Controllers
         private readonly ISizeServices _sizeServices;
         private readonly IBrandServices _brandServices;
         private readonly IMaterialServices _materialServices;
-        public ProductsController(IProductServices productServices, ISizeServices sizeServices, IBrandServices brandServices, IMaterialServices materialServices)
+        private readonly IImageServices _imageServices;
+        public ProductsController(IProductServices productServices, ISizeServices sizeServices, IBrandServices brandServices, IMaterialServices materialServices, IImageServices imageServices)
         {
             _productServer = productServices;
             _sizeServices = sizeServices;
             _brandServices = brandServices;
             _materialServices = materialServices;
+            _imageServices = imageServices;
         }
         //
         public async Task<IActionResult> Index()
         {
-            ViewData["IdSize"] = new SelectList(await _sizeServices.GetAllSizes(), "Id", "Weight", "Height", "Width");
-            ViewData["IdBrand"] = new SelectList(await _brandServices.GetAllBrands(), "Id", "Name");
-            ViewData["IdMateria"] = new SelectList(await _materialServices.GetAllMaterials(), "Id", "Name");
-
-            var viewContext = await _productServer.GetAllProduct();
-            if(viewContext == null || !viewContext.Any())
+            var products = _productServer.GetAllProduct().Result;
+            var selectedImage = _imageServices.GetAllImages().Result;
+            if (products == null) return View("'Product is null'");
+            var productData = new ProductIndex()
             {
-                ViewBag.Message = "No product details found.";
-                return View(new List<Product>());
-            }
-            return View(viewContext);
+                Products = products,
+                imageSPs = selectedImage,
+            };
+            return View(productData);
         }
         //
         public async Task<IActionResult> Details(Guid id)
@@ -45,7 +46,11 @@ namespace View.Controllers
             ViewData["IdSize"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Weight", "Height", "Width");
             ViewData["IdBrand"] = new SelectList(_brandServices.GetAllBrands().Result, "Id", "Name");
             ViewData["IdMaterial"] = new SelectList(_materialServices.GetAllMaterials().Result, "Id", "Name");
-            return View();
+            var dataImage = new ProductViewModel()
+            {
+                Images = _imageServices.GetAllImages().Result
+            };
+            return View(dataImage);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

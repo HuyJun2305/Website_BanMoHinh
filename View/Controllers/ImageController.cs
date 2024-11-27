@@ -47,7 +47,7 @@ namespace View.Controllers
                 await _imageServices.Create(image);
                 return RedirectToAction(nameof(Index));
             }
-            return View(image);
+            return Json(image);
         }
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -110,5 +110,8 @@ namespace View.Controllers
             await _imageServices.Delete(id);
             return RedirectToAction(nameof(Index));
         }
+
+
+       
     }
 }

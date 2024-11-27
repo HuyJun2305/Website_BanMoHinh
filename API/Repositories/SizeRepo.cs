@@ -20,10 +20,10 @@ namespace API.Repositories
 
         public async Task Delete(Guid id)
         {
-            var size = await GetSizeById(id);
-            if (size == null) throw new KeyNotFoundException("Not found this size!");
-            if (_context.Products.Where(p => p.IdSize == id).Any()) throw new Exception("This size has used for some product!");
-            _context.Sizes.Remove(size);
+            //var size = await GetSizeById(id);
+            //if (size == null) throw new KeyNotFoundException("Not found this size!");
+            //if (_context.Products.Where(p => p.IdSize == id).Any()) throw new Exception("This size has used for some product!");
+            //_context.Sizes.Remove(size);
         }
 
         public async Task<List<Size>> GetAllSize()

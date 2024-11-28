@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using View.IServices;
-using View.Servicecs;
-using View.ViewModel;
+using View.Services;
+using View.ViewModels;
 
 namespace View.Controllers
 {

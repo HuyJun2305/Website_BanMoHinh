@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using View.IServices;
-using View.Servicecs;
-using View.ViewModel;
+using View.Services;
+using View.ViewModels;
 
 namespace View.Controllers
 {
@@ -25,15 +25,15 @@ namespace View.Controllers
         //
         public async Task<IActionResult> Index()
         {
-            var products = _productServer.GetAllProduct().Result;
-            var selectedImage = _imageServices.GetAllImages().Result;
-            if (products == null) return View("'Product is null'");
-            var productData = new ProductIndex()
-            {
-                Products = products,
-                Images = selectedImage,
-            };
-            return View(productData);
+                var products = _productServer.GetAllProduct().Result;
+                var selectedImage = _imageServices.GetAllImages().Result;
+                if (products == null) return View("'Product is null'");
+                var productData = new ProductIndex()
+                {
+                    Products = products,
+                    Images = selectedImage,
+                };
+                return View(productData);
         }
         //
         public async Task<IActionResult> Details(Guid id)

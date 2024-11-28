@@ -1,7 +1,7 @@
 ﻿using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace View.ViewModel
+namespace View.ViewModels
 {
     public class BrandViewModel
     {

@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using View.IServices;
 
-namespace View.Servicecs
+namespace View.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
@@ -21,7 +21,7 @@ namespace View.Servicecs
         public async ValueTask<string> GetJwtAsync()
         {
             if (string.IsNullOrEmpty(_jwtCache))
-                _jwtCache =  Login.JwtToken;
+                _jwtCache = Login.JwtToken;
             return _jwtCache;
         }
         public async Task LogoutAsync()

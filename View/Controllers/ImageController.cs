@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using View.IServices;
-using View.Servicecs;
+using View.Services;
 
 namespace View.Controllers
 {

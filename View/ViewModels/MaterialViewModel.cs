@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Data.Models;
 
-namespace View.ViewModel
+namespace View.ViewModels
 {
     public class MaterialViewModel
     {

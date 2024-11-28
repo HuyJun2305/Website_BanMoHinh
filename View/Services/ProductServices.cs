@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using View.IServices;
 
-namespace View.Servicecs
+namespace View.Services
 {
     public class ProductServices : IProductServices
     {

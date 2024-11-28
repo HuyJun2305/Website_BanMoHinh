@@ -1,9 +1,9 @@
 ﻿using Data.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace View.ViewModel
+namespace View.ViewModels
 {
-    
+
     public class ProductIndex
     {
         public IEnumerable<Product>? Products { get; set; }
@@ -26,9 +26,9 @@ namespace View.ViewModel
         public List<ProductViewModel> ProductDetails { get; set; } = new List<ProductViewModel>();
     }
     public class ImageSP
-        {
-            public string Url { get; set; }
-            public Guid ProductId { get; set; }
-        }
-    
+    {
+        public string Url { get; set; }
+        public Guid ProductId { get; set; }
+    }
+
 }

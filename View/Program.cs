@@ -1,5 +1,5 @@
 using View.IServices;
-using View.Servicecs;
+using View.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

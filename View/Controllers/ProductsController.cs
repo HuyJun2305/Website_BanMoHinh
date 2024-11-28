@@ -22,12 +22,22 @@ namespace View.Controllers
             _materialServices = materialServices;
             _imageServices = imageServices;
         }
-        //
+        //Tìm kiếm theo tên 
+        public async Task<IActionResult> FilterProducts(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null)
+        {
+            var product = await _productServer.GetFilteredProduct(searchQuery, sizeId, brandId, materialId);
+            return Json(product);
+        }
+        //Get danh sách
         public async Task<IActionResult> Index()
         {
                 var products = _productServer.GetAllProduct().Result;
                 var selectedImage = _imageServices.GetAllImages().Result;
-                if (products == null) return View("'Product is null'");
+                if (products == null || !products.Any())
+                {
+                    ViewBag.Message = "No product details found.";
+                    return View(new List<Product>());
+                } 
                 var productData = new ProductIndex()
                 {
                     Products = products,

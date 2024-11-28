@@ -38,7 +38,7 @@ namespace XuongTT_API.Controllers
         public async Task<IActionResult> Register([FromBody] DangKyModel model)
         {
             _logger.LogInformation("call register");
-
+            
             var existingUser = await _userManager.FindByNameAsync(model.Username);
             if (existingUser != null) return Conflict("User đã tồn tại.");
 
@@ -80,7 +80,9 @@ namespace XuongTT_API.Controllers
 
             if (user == null || !await _userManager.CheckPasswordAsync(user,model.Password)) return Unauthorized();
 
-            JwtSecurityToken token = GenerateJwt(model.Username);
+            var role = _userManager.GetRolesAsync(user).ToString();
+
+            JwtSecurityToken token = GenerateJwt(model.Username,role);
 
             _logger.LogInformation("Login Succeed");
 
@@ -109,7 +111,7 @@ namespace XuongTT_API.Controllers
 
             if (user is null || !isValid) return Unauthorized();
 
-            var token = GenerateJwt(principal.Identity.Name);
+            var token = GenerateJwt(principal.Identity.Name,_userManager.GetRolesAsync(user).ToString());
 
             _logger.LogInformation("Refresh succeed");
             return Ok(new LoginResponse
@@ -158,11 +160,12 @@ namespace XuongTT_API.Controllers
         }
 
 
-        private JwtSecurityToken GenerateJwt(string username)
+        private JwtSecurityToken GenerateJwt(string username,string role)
         {
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role,role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

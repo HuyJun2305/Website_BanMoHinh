@@ -21,12 +21,16 @@ namespace View.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            LoginResponse login = await _authenticationService.LoginAsync(model);
-            if (login == null) throw new UnauthorizedAccessException();
+            string role = await _authenticationService.LoginAsync(model);
+            if (role == null) throw new UnauthorizedAccessException();
+            var username = model.Username;
+            HttpContext.Session.SetString("username", username);
+            if (role != "Customer")
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
-
-            ViewBag.Expiration = login.Expiration;
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index","HomeCustomer");
         }
         [HttpDelete]
         public async Task<IActionResult> Logout()

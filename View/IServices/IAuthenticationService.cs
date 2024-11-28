@@ -5,7 +5,8 @@ namespace View.IServices
     public interface IAuthenticationService
     {
         ValueTask<string> GetJwtAsync();
-        Task<LoginResponse> LoginAsync(LoginModel model);
+        ValueTask<string> LoginAsync(LoginModel model);
         Task LogoutAsync();
+        Task<bool> RefreshAsync();
     }
 }

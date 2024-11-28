@@ -72,7 +72,10 @@ namespace XuongTT_API.Model
                 users[2].PasswordHash = passwordHasher.HashPassword(users[2], "Pa$$word1");
                 
                 userRoles.Add(new IdentityUserRole<Guid> { UserId = users[0].Id,RoleId = roles.First(q => q.Name == "Admin").Id });
+                userRoles.Add(new IdentityUserRole<Guid> { UserId = users[0].Id,RoleId = roles.First(q => q.Name == "Staff").Id });
+                userRoles.Add(new IdentityUserRole<Guid> { UserId = users[0].Id,RoleId = roles.First(q => q.Name == "Customer").Id });
                 userRoles.Add(new IdentityUserRole<Guid> { UserId = users[1].Id,RoleId = roles.First(q => q.Name == "Staff").Id });
+                userRoles.Add(new IdentityUserRole<Guid> { UserId = users[1].Id,RoleId = roles.First(q => q.Name == "Customer").Id });
                 userRoles.Add(new IdentityUserRole<Guid> { UserId = users[2].Id,RoleId = roles.First(q => q.Name == "Customer").Id });
 
             builder.Entity<IdentityUserRole<Guid>>().HasData(userRoles);

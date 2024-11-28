@@ -1,4 +1,5 @@
 ﻿
+using Data.DTO;
 using Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +36,15 @@ namespace XuongTT_API.Controllers
             return Ok(_userManager.Users);
             //return Ok(/*_reviewRepo.Users*/_dbContext.Users.ToList());
         } 
+        [HttpGet("GetRoles/{username}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<IdentityRole<Guid>>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public  async Task<ActionResult<List<string>>> GetRoles(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            return Ok(await _userManager.GetRolesAsync(user));
+            //return Ok(/*_reviewRepo.Users*/_dbContext.Users.ToList());
+        } 
         
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationUser))]
@@ -55,7 +65,7 @@ namespace XuongTT_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] ApplicationUser value,string roleName, string pass)
+        public async Task<IActionResult> Create([FromBody] UserData data)
         {
             
 
@@ -63,16 +73,16 @@ namespace XuongTT_API.Controllers
 
             ApplicationUser user = new ApplicationUser()
                 {
-                    UserName = value.UserName,
-                    Email = value.Email,
-                    Name = value.Name,
-                    PhoneNumber = value.PhoneNumber,
-                    ImgUrl = value.ImgUrl,
+                    UserName = data.Username,
+                    Email = data.Email,
+                    Name = data.Name,
+                    PhoneNumber = data.PhoneNumber,
+                    ImgUrl = data.ImgUrl,
                 };
-            user.PasswordHash = passwordHasher.HashPassword(user, pass);
+            user.PasswordHash = passwordHasher.HashPassword(user, data.Password);
             IdentityResult result = await _userManager.CreateAsync(user);
 
-                IdentityResult resultRole = await _userManager.AddToRoleAsync(user, roleName);
+                IdentityResult resultRole = await _userManager.AddToRolesAsync(user, data.role);
             if (result.Succeeded)
             {
                 if (resultRole.Succeeded)
@@ -84,39 +94,38 @@ namespace XuongTT_API.Controllers
 
 
         }
-        [HttpPut]
+        [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Edit([FromBody] ApplicationUser value,string roleName, string pass)
+        public async Task<ActionResult> Edit([FromBody] UserData value, string id)
         {
             var passwordHasher = new PasswordHasher<ApplicationUser>();
-            var user1 = await _userManager.FindByNameAsync(value.UserName);
+            var user1 = await _userManager.FindByIdAsync(id);
             if (user1 == null) { return NotFound(); }
             else
             {
-                var id = user1.Id;
-                user1.UserName = value.UserName;
-                user1.PasswordHash = passwordHasher.HashPassword(user1, pass) ;
+                
+                user1.UserName = value.Username;
+                user1.PasswordHash = passwordHasher.HashPassword(user1, value.Password) ;
                 user1.Email = value.Email;
                 user1.PhoneNumber = value.PhoneNumber;
                 user1.Name = value.Name;
-                user1.PhoneNumber = value.PhoneNumber;
                 user1.ImgUrl = value.ImgUrl;
                 var result = await _userManager.UpdateAsync(user1);
                 IdentityResult addRoleResultStaff;
                 IdentityResult addRoleResultAdmin;
                 IdentityResult removeRoleResultAdmin;
-                if (!await _userManager.IsInRoleAsync(user1,roleName))
+                if (result.Succeeded)
                 {
-                    if (roleName == "Admin")
+                    
+                    if (value.role.Contains("Admin"))
                     {
                         addRoleResultStaff = await  _userManager.AddToRoleAsync(user1, "Staff");
                         addRoleResultAdmin = await  _userManager.AddToRoleAsync(user1, "Admin");
-                        if (result.Succeeded)
-                        {
+                        
                             if (addRoleResultAdmin.Succeeded)
                             {
                                 if (addRoleResultStaff.Succeeded)
@@ -135,26 +144,31 @@ namespace XuongTT_API.Controllers
                     else
                     {
                         removeRoleResultAdmin = await _userManager.RemoveFromRoleAsync(user1, "Admin");
-                        addRoleResultStaff = await _userManager.AddToRoleAsync(user1, "Staff");
-                        if (result.Succeeded)
+                        if (removeRoleResultAdmin.Succeeded)
                         {
+                            return Ok("Đã Xóa Khỏi Admin");
+                        }
+                        if (!await _userManager.IsInRoleAsync(user1, "Staff"))
+                        {
+                            addRoleResultStaff = await _userManager.AddToRoleAsync(user1, "Staff");
                             if (addRoleResultStaff.Succeeded)
                             {
-                                if (removeRoleResultAdmin.Succeeded)
-                                {
-                                    return Ok("Đã Xóa Khỏi Admin");
-                                }
                                 return Ok("Sửa thành công Staff");
                             }
-                            else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", addRoleResultStaff.Errors.Select(e => e.Description))}");
-                        }
-                        else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa Sửa thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+                                else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", addRoleResultStaff.Errors.Select(e => e.Description))}");
 
-                    }
+                            }
+
+
+
+                        }
                 }
+
+                
+
                 return Ok("Sửa thành công");
                 
-            }
+            
         }
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]

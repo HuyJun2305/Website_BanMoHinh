@@ -11,9 +11,12 @@ namespace Data.Models
     public class Cart
     {
         public Guid Id { get; set; }
-        public decimal Price { get; set; }
+
         [ForeignKey("Account")]
         public Guid AccountId { get; set; }
+
+        public decimal TotalPrice { get; set; }
+
         [JsonIgnore]
         public virtual ApplicationUser? Account  { get; set; }
         [JsonIgnore]

@@ -50,7 +50,6 @@ namespace API.Controllers
                 Cart ct = new Cart()
                 {
                     Id = cart.Id,
-                    Price = cart.Price,
                     Account = cart.Account,
                     AccountId = cart.AccountId
 
@@ -73,7 +72,6 @@ namespace API.Controllers
                 Cart ct = new Cart()
                 {
                     Id = cart.Id,
-                    Price = cart.Price,
                     Account = cart.Account,
                     AccountId = cart.AccountId
 
@@ -87,20 +85,6 @@ namespace API.Controllers
             }
             return NoContent();
         }
-        //Delete Product
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCart(Guid id)
-        {
-            try
-            {
-                await _cartRepo.Delete(id);
-                await _cartRepo.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                return Problem(ex.Message);
-            }
-            return NoContent();
-        }
+        
     }
 }

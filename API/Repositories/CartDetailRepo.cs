@@ -13,42 +13,60 @@ namespace API.Repositories
         {
             _context = context;
         }
-        public async Task Create(CartDetail cartdetail)
+
+        public async Task Create(CartDetail cartDetails)
         {
-            if (await GetCartDetailById(cartdetail.Id) != null) throw new DuplicateWaitObjectException($"Product : {cartdetail.Id} is existed!");
-            await _context.CartDetails.AddAsync(cartdetail);
+            bool exists = await _context.CartDetails.AnyAsync(c => c.Id == cartDetails.Id);
+            if (exists)
+            {
+                throw new DuplicateWaitObjectException("This cartDetails is existed!");
+            }
+            await _context.CartDetails.AddAsync(cartDetails);
+            await _context.SaveChangesAsync();
         }
 
         public async Task Delete(Guid id)
         {
-            var cartdetail = await GetCartDetailById(id);
-            if (cartdetail == null) throw new KeyNotFoundException("Not found this Id!");
-            _context.CartDetails.Remove(cartdetail);
+            var deleteItem = await _context.CartDetails.FindAsync(id);
+            if (deleteItem == null)
+            {
+                throw new KeyNotFoundException($"CartDetail with Id {id} not found.");
+            }
+            _context.CartDetails.Remove(deleteItem);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<CartDetail>> GetAllCartDetail()
         {
-            return await _context.CartDetails.Include(p => p.Cart).Include(p => p.Product).ToListAsync();
+            var lstCartDetails = await _context.CartDetails
+                                .Include(pd => pd.Product)
+                            .ToListAsync();
+            return lstCartDetails;
+        }
+
+        public async Task<List<CartDetail>?> GetCartDetailByCartId(Guid cartId)
+        {
+            return await _context.CartDetails
+                            .Where(cd => cd.CartId == cartId)
+                                .Include(pd => pd.Product)
+                            .ToListAsync();
         }
 
         public async Task<CartDetail> GetCartDetailById(Guid id)
         {
-            return await _context.CartDetails.Include(p => p.Cart).Include(p => p.Product).FirstOrDefaultAsync();
+            return await _context.CartDetails.FindAsync(id);
         }
 
-        public async Task SaveChanges()
-        {
-            await _context.SaveChangesAsync();
-        }
+
 
         public async Task Update(CartDetail cartDetails, Guid id)
         {
             var updateItem = await _context.CartDetails.FindAsync(id);
-            //if (cartDetails != null)
-            //{
-            //    updateItem.Quanlity = cartDetails.Quanlity;
-            //    updateItem.TotalPrice = cartDetails.TotalPrice;
-            //}
+            if (cartDetails != null)
+            {
+                updateItem.Quatity = cartDetails.Quatity;
+                updateItem.TotalPrice = cartDetails.TotalPrice;
+            }
             _context.CartDetails.Update(updateItem);
             await _context.SaveChangesAsync();
         }

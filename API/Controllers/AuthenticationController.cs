@@ -52,7 +52,6 @@ namespace XuongTT_API.Controllers
             {
                 Id = Guid.NewGuid(),
                 AccountId = newUser.Id,
-                Price = 0
             };
             _cartRepo.Create(cart);
 

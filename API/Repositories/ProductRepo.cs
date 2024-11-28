@@ -27,9 +27,9 @@ namespace API.Repositories
 
         public async Task<List<Product>> GetAllProduct()
         {
-            return await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).ToListAsync();
+            var result = await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).ToListAsync();
+            return result;
         }
-
         public async Task<Product> GetProductById(Guid id)
         {
             return await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).FirstOrDefaultAsync();

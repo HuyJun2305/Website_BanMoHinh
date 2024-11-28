@@ -44,11 +44,9 @@ namespace View.Controllers
         //
         public IActionResult Create()
         {
-            ViewData["IdSize-Weight"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Weight");
-            ViewData["IdSize-Height"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Height");
-            ViewData["IdSize-Width"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Width");
-            ViewData["IdBrand"] = new SelectList(_brandServices.GetAllBrands().Result, "Id", "Name");
-            ViewData["IdMaterial"] = new SelectList(_materialServices.GetAllMaterials().Result, "Id", "Name");
+            ViewData["SizeId"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Value");
+            ViewData["BrandId"] = new SelectList(_brandServices.GetAllBrands().Result, "Id", "Name");
+            ViewData["MaterialId"] = new SelectList(_materialServices.GetAllMaterials().Result, "Id", "Name");
             var dataImage = new ProductViewModel()
             {
                 Images = _imageServices.GetAllImages().Result
@@ -56,7 +54,7 @@ namespace View.Controllers
             return View(dataImage);
         }
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Price, Name, Description, IdBrand, IdSize-Weight, IdSize-Height, IdSize-Width, IdMaterial")] Product product)
+        public async Task<IActionResult> Create([Bind("Price, Name, Description, BrandId, SizeId, MaterialId")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -81,14 +79,11 @@ namespace View.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdSize"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Weight", "Height", "Width");
-            ViewData["IdBrand"] = new SelectList(_brandServices.GetAllBrands().Result, "Id", "Name");
-            ViewData["IdMaterial"] = new SelectList(_materialServices.GetAllMaterials().Result, "Id", "Name");
             return View(product);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id,[Bind("Price, Name, Description, IdBrand, IdSize, IdMaterial")] Product product)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Price, Name, Description, BrandId, SizeId, MaterialId")] Product product)
         {
             if(id != product.Id)
             {
@@ -106,9 +101,6 @@ namespace View.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdSize"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Weight", "Height", "Width");
-            ViewData["IdBrand"] = new SelectList(_brandServices.GetAllBrands().Result, "Id", "Name");
-            ViewData["IdMaterial"] = new SelectList(_materialServices.GetAllMaterials().Result, "Id", "Name");
             return View(product);
         }
         //

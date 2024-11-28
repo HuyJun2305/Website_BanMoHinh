@@ -1,3 +1,4 @@
+using View.Handlers;
 using View.IServices;
 using View.Services;
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,12 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddTransient<AuthenticationHandler>();
+
+builder.Services.AddHttpClient("ServerApi")
+                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7280" ?? ""))
+                .AddHttpMessageHandler<AuthenticationHandler>();
 builder.Services.AddAuthorizationCore();
 //
 builder.Services.AddControllersWithViews();
@@ -17,6 +24,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IBrandServices, BrandServices>();
 builder.Services.AddHttpClient<ISizeServices, SizeServices>();
 builder.Services.AddHttpClient<IProductServices, ProductServices>();
+builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();

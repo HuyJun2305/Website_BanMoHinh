@@ -1,5 +1,6 @@
 ﻿using Data.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Security.Claims;
@@ -13,6 +14,8 @@ namespace View.Services
         private readonly HttpClient _httpClient;
         private string? _jwtCache;
         private static LoginResponse Login;
+
+        public event Action<string?>? LoginChange;
         public AuthenticationService(/*IHttpClientFactory factory*/HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -31,16 +34,22 @@ namespace View.Services
 
             // Gửi request tới API
             var response = await _httpClient.DeleteAsync(requestURL);
+
             Login = null;
+
+            _jwtCache = null;
+
+            LoginChange?.Invoke(null);
 
         }
 
         private static string GetUsername(string token)
         {
             var jwt = new JwtSecurityToken(token);
+            
             return jwt.Claims.First(c => c.Type == ClaimTypes.Name).Value;
         }
-        public async Task<LoginResponse> LoginAsync(LoginModel model)
+        public async ValueTask<string> LoginAsync(LoginModel model)
         {
             //var response = await _factory.CreateClient("ServerApi").PostAsync("api/Authentication/Login", JsonContent.Create(model));
             string requestURL = "https://localhost:7280/api/Authentication/Login";
@@ -54,14 +63,44 @@ namespace View.Services
             var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
             if (content == null) throw new InvalidDataException();
-            else
-            {
+            
                 _jwtCache = content.JwtToken;
-                Login = content;
+            Login = content;
+
+            var jwt = new JwtSecurityToken(Login.JwtToken);
+
+            var role = jwt.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+
+            return role;
+        }
+        public async Task<bool> RefreshAsync()
+        {
+            var model = new RefreshModel
+            {
+                AccessToken = Login.JwtToken,
+                RefreshToken = Login.RefreshToken
+            };
+            string requestURL = "https://localhost:7280/api/Authentication/Refresh";
+
+            // Gửi request tới API
+            var response = await _httpClient.PostAsJsonAsync(requestURL, model);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                await LogoutAsync();
+
+                return false;
             }
 
+            var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-            return content;
+            if (content == null)
+                throw new InvalidDataException();
+
+            Login = content;
+            _jwtCache = content.JwtToken;
+            return true;
+
         }
     }
 }

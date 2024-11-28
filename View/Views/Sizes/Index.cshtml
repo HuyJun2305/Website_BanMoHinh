@@ -45,9 +45,7 @@
                             {
                                 <tr>
                                     <td></td> <!-- STT sẽ được tính bằng JavaScript -->
-                                    <td>@item.Weight</td>
-                                    <td>@item.Height</td>
-                                    <td>@item.Width</td>
+                                    <td>@item.Value</td>
                                     <td>
                                         <span class="badge @((item.Status ? "bg-success" : "bg-danger"))">
                                             @(item.Status ? "Active" : "Inactive")
@@ -60,7 +58,7 @@
                                                 @(item.Status ? "Deactivate" : "Activate")
                                             </button>
                                         </form>
-                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSoleModal" data-id="@item.Id" data-name="@item.Weight && @item.Height && @item.Width" data-status="@item.Status">Sửa</button>
+                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSoleModal" data-id="@item.Id" data-name="@item.Value" data-status="@item.Status">Sửa</button>
                                         <form asp-action="DeleteConfirmed" asp-route-id="@item.Id" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa mục này không?');">
                                                 Xóa
@@ -93,19 +91,9 @@
                                 <input type="hidden" asp-for="Sizes" />
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                 <div class="mb-3">
-                                    <label asp-for="NewSize.Weight" class="form-label">Cân nặng (gram) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Weight" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
-                                    <span asp-validation-for="NewSize.Weight" class="text-danger"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="NewSize.Height" class="form-label">Chiều cao (cm) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Height" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
-                                    <span asp-validation-for="NewSize.Height" class="text-danger"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="NewSize.Width" class="form-label">Độ rộng (cm) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Width" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
-                                    <span asp-validation-for="NewSize.Width" class="text-danger"></span>
+                                    <label asp-for="NewSize.Value" class="form-label">Cân nặng (gram) - Chiều cao (cm) - Độ rộng (cm) <span class="text-danger">*</span></label>
+                                    <input asp-for="NewSize.Value" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
+                                    <span asp-validation-for="NewSize.Value" class="text-danger"></span>
                                 </div>
 
                                 <div class="form-group form-check">
@@ -137,20 +125,12 @@
                                 <input type="hidden" asp-for="Sizes" />
                                 <input type="hidden" asp-for="NewSize.Id" id="editMaterialId" />
                                 <div class="mb-3">
-                                    <label asp-for="NewSize.Weight" class="form-label">Cân nặng (gram) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Weight" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
-                                    <span asp-validation-for="NewSize.Weight" class="text-danger"></span>
+                                    <label asp-for="NewSize.Value" class="form-label">Cân nặng (gram) - Chiều cao (cm) - Độ rông (cm) <span class="text-danger">*</span></label>
+                                    <input asp-for="NewSize.Value" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
+                                    <span asp-validation-for="NewSize.Value" class="text-danger"></span>
                                 </div>
-                                <div class="mb-3">
-                                    <label asp-for="NewSize.Height" class="form-label">Chiều cao (cm) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Height" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
-                                    <span asp-validation-for="NewSize.Height" class="text-danger"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="NewSize.Width" class="form-label">Độ rộng (cm) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Width" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
-                                    <span asp-validation-for="NewSize.Width" class="text-danger"></span>
-                                </div>                                <div class="form-group form-check">
+                                
+                                <div class="form-group form-check">
                                     <label class="form-check-label">
                                         <input class="form-check-input" asp-for="NewSize.Status" id="editMaterialStatus" /> @Html.DisplayNameFor(model => model.NewSize.Status)
                                     </label>

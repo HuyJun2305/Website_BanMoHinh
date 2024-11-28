@@ -10,9 +10,7 @@ namespace Data.Models
     public class Size
     {
         public Guid Id { get; set; }
-        public float Weight { get; set; }
-        public float Height { get; set; }
-        public float Width { get; set; }
+        public string Value { get; set; }
         public bool Status { get; set; }
 
     }

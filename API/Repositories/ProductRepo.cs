@@ -27,12 +27,12 @@ namespace API.Repositories
 
         public async Task<List<Product>> GetAllProduct()
         {
-            return await _context.Products.Include(p => p.Brand).Include(p => p.Material).ToListAsync();
+            return await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).ToListAsync();
         }
 
         public async Task<Product> GetProductById(Guid id)
         {
-            return await _context.Products.Include(p => p.Brand).Include(p => p.Material).FirstOrDefaultAsync();
+            return await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).FirstOrDefaultAsync();
         }
 
         public async Task SaveChanges()

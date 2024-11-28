@@ -18,9 +18,9 @@ namespace Data.Models
         public Guid IdPromotion { get; set; }
 
         public Guid IdSize { get; set; }
-        public virtual Size? Size { get; set; }
-        public virtual Brand? Brand { get; set; }
-        public virtual Material? Material { get; set; }
+        public virtual Size Size { get; set; }
+        public virtual Brand Brand { get; set; }
+        public virtual Material Material { get; set; }
         public virtual  Promotion? Promotion { get; set; }
 
     }

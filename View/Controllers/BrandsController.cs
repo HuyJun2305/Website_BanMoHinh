@@ -9,38 +9,45 @@ namespace View.Controllers
 {
     public class BrandsController : Controller
     {
-        private readonly IBrandServices _brandService;
-        public BrandsController(IBrandServices brandServices)
+        private readonly IBrandServices _brandServices;
+
+        public BrandsController(IBrandServices context)
         {
-            _brandService = brandServices;
+            _brandServices = context;
         }
-        //Danh sách (GET)
+
+        // GET: Brands
         public async Task<IActionResult> Index(int currentPage = 1, int rowsPerPage = 10)
         {
-            var all = await _brandService.GetAllBrands();
-            //
-            var totalAll = all.Count();
-            var totalPages = (int)Math.Ceiling((double)totalAll / rowsPerPage);
-            var pagedBrand = all.Skip((currentPage - 1) * rowsPerPage).Take(rowsPerPage).ToList();
+            var materials = await _brandServices.GetAllBrands();
+
+            // Phân trang
+            var totalMaterials = materials.Count();
+            var totalPages = (int)Math.Ceiling((double)totalMaterials / rowsPerPage);
+            var pagedMaterials = materials.Skip((currentPage - 1) * rowsPerPage).Take(rowsPerPage).ToList();
+
             var viewModel = new BrandViewModel
             {
-                brands = pagedBrand,
+                brands = pagedMaterials,
                 Brand = new Brand(),
             };
+
             ViewBag.CurrentPage = currentPage;
             ViewBag.RowsPerPage = rowsPerPage;
             ViewBag.TotalPages = totalPages;
+
             return View(viewModel);
         }
-        //Chi tiết 
+
+        // GET: Brands/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
-            if (_brandService.GetAllBrands() == null)
+            if (_brandServices.GetAllBrands() == null)
             {
                 return NotFound();
             }
 
-            var brand = await _brandService.GetBrandById(id);
+            var brand = await _brandServices.GetBrandById(id);
             if (brand == null)
             {
                 return NotFound();
@@ -48,69 +55,85 @@ namespace View.Controllers
 
             return View(brand);
         }
-        //Thêm
+
+        // GET: Brands/Create
         public IActionResult Create()
         {
             return View();
         }
+
+        // POST: Brands/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Guid id, Brand brand)
+        public async Task<IActionResult> Create(BrandViewModel brandViewModel)
         {
-            if (brand.Id != null)
+            if (ModelState.IsValid)
             {
-                brand.Id = Guid.NewGuid();
-                await _brandService.Create(brand);
+                brandViewModel.Brand.Id = Guid.NewGuid();
+                await _brandServices.Create(brandViewModel.Brand);
                 return RedirectToAction(nameof(Index));
             }
             return RedirectToAction(nameof(Index));
         }
-        //Sửa
+
+        // GET: Brands/Edit/5
         public async Task<IActionResult> Edit(Guid id)
         {
-            if (_brandService.GetAllBrands() == null)
+            if (_brandServices.GetAllBrands() == null)
             {
                 return NotFound();
             }
 
-            var brand = await _brandService.GetBrandById(id);
+            var brand = await _brandServices.GetBrandById(id);
             if (brand == null)
             {
                 return NotFound();
             }
             return View(brand);
         }
+
+        // POST: Brands/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Brand brand)
+        public async Task<IActionResult> Edit(Guid id, BrandViewModel brandViewModel)
         {
-            if (id != brand.Id)
+            if (ModelState.IsValid)
             {
-                return NotFound();
-            }
-            if(brand.Id != null)
-            { 
                 try
                 {
-                    await _brandService.Update(brand);
+                    await _brandServices.Update(brandViewModel.Brand);
                 }
-                catch (Exception ex)
+                catch (DbUpdateConcurrencyException)
                 {
-                    return Content(ex.Message);
+                    var existingMaterial = await _brandServices.GetBrandById(brandViewModel.Brand.Id);
+                    if (existingMaterial == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
+                brandViewModel.brands = await _brandServices.GetAllBrands();
                 return RedirectToAction(nameof(Index));
             }
             return BadRequest("Lỗi không sửa được");
         }
-        //Xóa
+
+        // GET: Brands/Delete/5
         public async Task<IActionResult> Delete(Guid id)
         {
-            if (_brandService.GetAllBrands() == null)
+            if (_brandServices.GetAllBrands() == null)
             {
                 return NotFound();
             }
 
-            var brand = await _brandService.GetBrandById(id);
+            var brand = await _brandServices.GetBrandById(id);
             if (brand == null)
             {
                 return NotFound();
@@ -118,19 +141,33 @@ namespace View.Controllers
 
             return View(brand);
         }
-        //
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+
+        // POST: Brands/Delete/5
+        [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_brandService.GetAllBrands() == null)
+            if (_brandServices.GetAllBrands() == null)
             {
                 return Problem("Entity set 'Brand'  is null.");
             }
 
-            await _brandService.Delete(id);
+            await _brandServices.Delete(id);
 
             return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(Guid id)
+        {
+            var material = await _brandServices.GetBrandById(id);
+            if (material == null)
+            {
+                return NotFound();
+            }
+
+            material.Status = !material.Status;
+            await _brandServices.Update(material);
+
+            return RedirectToAction("Index");
         }
     }
 }

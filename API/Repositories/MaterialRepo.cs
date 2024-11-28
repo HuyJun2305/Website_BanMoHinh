@@ -23,7 +23,7 @@ namespace API.Repositories
         {
             var data = await GetMaterialById(id);
             if (data == null) throw new KeyNotFoundException("Not found this material!");
-            if (_context.Products.Where(p => p.IdMaterial == id).Any()) throw new Exception("This material has used for some product!");
+            if (_context.Products.Where(p => p.MaterialId == id).Any()) throw new Exception("This material has used for some product!");
             _context.Materials.Remove(data);
         }
 

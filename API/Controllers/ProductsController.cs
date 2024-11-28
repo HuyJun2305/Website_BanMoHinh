@@ -52,10 +52,10 @@ namespace API.Controllers
                     Name = product.Name,
                     Price = product.Price,
                     Description = product.Description,
-                    IdBrand = product.IdBrand,
-                    IdMaterial = product.IdMaterial,
+                    BrandId = product.BrandId,
+                    MaterialId = product.MaterialId,
+                    SizeId = product.SizeId
                     
-                    IdSize = product.IdSize,
                 };
                 await _productRepo.Create(sp);
                 await _productRepo.SaveChanges();
@@ -78,10 +78,9 @@ namespace API.Controllers
                     Name = product.Name,
                     Price = product.Price,
                     Description = product.Description,
-                    IdBrand = product.IdBrand,
-                    IdMaterial = product.IdMaterial,
-                    IdPromotion = product.IdPromotion,
-                    IdSize = product.IdSize,
+                    BrandId = product.BrandId,
+                    MaterialId = product.MaterialId,
+                    SizeId = product.SizeId
                 };
                 await _productRepo.Update(product);
                 await _productRepo.SaveChanges();

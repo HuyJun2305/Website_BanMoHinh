@@ -1,88 +1,171 @@
 ﻿@model View.ViewModel.ProductViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Thêm Sản Phẩm";
+    Layout = "_LayoutAdmin";
 }
 
-<h1>Create</h1>
+<div class="container mt-5">
+    <h3 class="mb-4">Thêm sản phẩm</h3>
+    <div class="card">
+        <div class="card-header bg-primary text-white text-center">
+            <h5>Thông Tin Sản Phẩm</h5>
+        </div>
+        <div class="card-body">
+            <form id="productForm" enctype="multipart/form-data" method="post">
+                <div class="row">
+                    <!-- Product Name -->
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label asp-for="Name" class="form-label">Tên Sản Phẩm <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="Nhập tên sản phẩm" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <!-- Price -->
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label asp-for="Price" class="form-label">Giá <span class="text-danger">*</span></label>
+                            <input asp-for="Price" class="form-control" placeholder="Nhập gi sản phẩm" required />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                    </div>
 
-<h4>Thêm sản phẩm</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form id="productForm" asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdBrand" class="control-label"></label>
-                <select asp-for="IdBrand" class="form-control">
-                    <option value="">Chọn thương hiệu</option>
-                    @foreach (var brand in (IEnumerable<SelectListItem>)ViewData["IdBrand"])
-                    {
-                        <option value="@brand.Value">@brand.Text</option>
-                    }
-                </select>
-                <span asp-validation-for="IdBrand" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdMaterial" class="control-label"></label>
-                <select asp-for="IdMaterial" class="form-control">
-                    <option value="">Chọn chất liệu</option>
-                    @foreach (var material in (IEnumerable<SelectListItem>)ViewData["IdMaterial"])
-                    {
-                        <option value="@material.Value">@material.Text</option>
-                    }
-                </select>
-                <span asp-validation-for="IdMaterial" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdPromotion" class="control-label"></label>
-                <input asp-for="IdPromotion" class="form-control" />
-                @*<select asp-for="IdPromotion" class="form-control">
-                    <option value="">Chọn loại giảm giá</option>
-                    @foreach (var promotion in (IEnumerable<SelectListItem>)ViewData["IdPromotion"])
-                    {
-                        <option value="@promotion.Value">@promotion.Text</option>
-                    }
-                </select>*@
-                <span asp-validation-for="IdPromotion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdSize" class="control-label"></label>
-                <select asp-for="IdSize" class="form-control">
-                    <option value="">Chọn size</option>
-                    @foreach (var size in (IEnumerable<SelectListItem>)ViewData["IdSize"])
-                    {
-                        <option value="@size.Value">@size.Text</option>
-                    }
-                </select>
-                <span asp-validation-for="IdSize" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+                    <!-- Brand -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label asp-for="BrandId" class="form-label">Thương Hiệu <span class="text-danger">*</span></label>
+                            <select asp-for="BrandId" class="form-control" required>
+                                <option value="">Chọn thương hiệu</option>
+                                @foreach (var brand in (IEnumerable<SelectListItem>)ViewData["BrandId"])
+                                {
+                                    <option value="@brand.Value">@brand.Text</option>
+                                }
+                            </select>
+                            <span asp-validation-for="BrandId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Material -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label asp-for="MaterialId" class="form-label">Chất Liệu <span class="text-danger">*</span></label>
+                            <select asp-for="MaterialId" class="form-control" required>
+                                <option value="">Chọn chất liệu</option>
+                                @foreach (var material in (IEnumerable<SelectListItem>)ViewData["MaterialId"])
+                                {
+                                    <option value="@material.Value">@material.Text</option>
+                                }
+                            </select>
+                            <span asp-validation-for="MaterialId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <!-- Size -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label asp-for="SizeId" class="form-label">Kích thước <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-2">
+                                <select asp-for="SizeId" class="form-control" required>
+                                    <option value="">------</option>
+                                    @foreach (var size in (IEnumerable<SelectListItem>)ViewData["SizeId"])
+                                    {
+                                        <option value="@size.Value">@size.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <span asp-validation-for="SizeId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+
+                    <!-- File Upload -->
+                    <div class="col-md-12 mb-3">
+                        <label for="files" class="form-label">Thêm Ảnh Sản Phẩm <span class="text-danger">*</span></label>
+                        <input type="file" name="files" id="files" multiple class="form-control" required />
+                    </div>
+
+
+                    <!-- Description -->
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label asp-for="Description" class="form-label">Mô Tả Sản Phẩm</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Nhập mô tả sản phẩm"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- Submit Button -->
+                    <div class="col-md-12 text-center">
+                        <button type="submit" class="btn btn-primary">Tạo Sản Phẩm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('productForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            let form = e.target;
+            let formData = new FormData(form);
+
+            // Kiểm tra xem có ảnh nào được chọn hay không
+            let imageFiles = document.getElementById('files').files;
+            if (imageFiles.length === 0) {
+                alert('Vui lòng chọn ít nhất một ảnh.');
+                return; // Dừng xử lý nếu không có ảnh
+            }
+
+            try {
+                // Tạo sản phẩm
+                let productResponse = await fetch('/Products/Create', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (productResponse.ok) {
+                    let productData = await productResponse.json();
+                    if (productData.success) {
+                        alert('Tạo sản phẩm thành công!');
+
+                        let productId = productData.productId;
+
+                        // Tải ảnh
+                        for (let file of imageFiles) {
+                            let imageFormData = new FormData();
+                            imageFormData.append('imageFile', file);
+                            imageFormData.append('productId', productId);
+
+                            let uploadResponse = await fetch('/Products/Upload', {
+                                method: 'POST',
+                                body: imageFormData,
+                            });
+
+                            if (uploadResponse.ok) {
+                                let uploadData = await uploadResponse.json();
+                                if (!uploadData.success) {
+                                    alert(`Lỗi tải ảnh: ${uploadData.message}`);
+                                }
+                            } else {
+                                alert('Lỗi mạng khi tải ảnh.');
+                            }
+                        }
+                        window.location.reload(); // Tải lại trang hoặc điều hướng
+                    } else {
+                        alert(productData.message || 'Lỗi tạo sản phẩm.');
+                    }
+                } else {
+                    alert('Lỗi mạng khi tạo sản phẩm.');
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('Đã xảy ra lỗi trong quá trình xử lý.');
+            }
+        });
+    </script>
 }

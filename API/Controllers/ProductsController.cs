@@ -14,6 +14,17 @@ namespace API.Controllers
         {
             _productRepo = productRepos;
         }
+        //Tìm kiếm sản phẩm 
+        [HttpGet("filterAndsearch")]
+        public async Task<ActionResult<List<Product>>>  FilterProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null,Guid? materialId = null)
+            {
+                var product = await _productRepo.GetFilteredProduct(searchQuery, sizeId, brandId, materialId);
+                if(product == null || product.Count == 0)
+                {
+                    return NotFound();
+                }
+                return Ok(product);
+            }
         //Get all
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProduct()

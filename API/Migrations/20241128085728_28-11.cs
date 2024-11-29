@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace API.Migrations
 {
-    public partial class _111 : Migration
+    public partial class _2811 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -56,7 +56,7 @@ namespace API.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,7 +69,7 @@ namespace API.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,9 +97,8 @@ namespace API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Weight = table.Column<float>(type: "real", nullable: false),
-                    Height = table.Column<float>(type: "real", nullable: false),
-                    Width = table.Column<float>(type: "real", nullable: false)
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -285,14 +284,10 @@ namespace API.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IdBrand = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdMaterial = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdPromotion = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdSize = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SizeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SizeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PromotionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -302,12 +297,14 @@ namespace API.Migrations
                         name: "FK_Products_Brands_BrandId",
                         column: x => x.BrandId,
                         principalTable: "Brands",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Products_Materials_MaterialId",
                         column: x => x.MaterialId,
                         principalTable: "Materials",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Products_Promotions_PromotionId",
                         column: x => x.PromotionId,
@@ -317,7 +314,8 @@ namespace API.Migrations
                         name: "FK_Products_Sizes_SizeId",
                         column: x => x.SizeId,
                         principalTable: "Sizes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -379,7 +377,6 @@ namespace API.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     URL = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<bool>(type: "bit", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -424,9 +421,9 @@ namespace API.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("03aa8a22-8287-41a2-a33f-24249583dde3"), "8920384d-d7f8-4fd5-aac0-ad781396027d", "Admin", "ADMIN" },
-                    { new Guid("385c5b59-a55c-4911-98cf-3a7955aab731"), "b1ed1234-4f9e-4d60-a567-61e42e28a30f", "Staff", "STAFF" },
-                    { new Guid("632effdb-7e6d-406a-8b09-08564c4e8458"), "983a423d-7343-48e8-a2e2-6b1fdd6c54c9", "Customer", "CUSTOMER" }
+                    { new Guid("2c9810f7-27cf-437f-9dd2-1b974866c93e"), "1e893392-f3fd-42ee-b7f3-14f4079a1cd1", "Staff", "STAFF" },
+                    { new Guid("4f9a13e0-6ee6-45fe-a12d-872b520eaaab"), "05f2d4d9-dc04-4598-aa21-92c3856cec99", "Customer", "CUSTOMER" },
+                    { new Guid("c44757a2-6103-4e37-8f37-3ca2a40fdb79"), "ff171fce-aaf1-4b4d-9894-9eccb5ecfb35", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(
@@ -434,25 +431,25 @@ namespace API.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "ImgUrl", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("2ede68c8-39a1-4d9a-88fb-8eead2fc98e4"), 0, "ffe00d37-f8b4-4b27-a122-d9f258178879", "admin@gmail.com", false, "", false, null, "khoong", "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAEAACcQAAAAEGQxpcCIXTL6eI6729H1ARrzTyogPy2jyTZphhdkGApCHuadxU9kUZ2RsxunjRexvw==", "chua co", false, "5f4bb2ba-8201-4b03-9aae-ab0bb5aa3030", false, "admin" },
-                    { new Guid("aa4615f6-70c3-48cb-a96c-2213189df6d0"), 0, "4b5311a9-3369-4e2e-b3b4-92c9789f5e1c", "user1@gmail.com", false, "", false, null, "khoong", "USER1@GMAIL.COM", "USER1", "AQAAAAEAACcQAAAAEM9c07pxfHhyzY7VlsuMHqG/cZ7HNSy61/kvllqkk7rWTrI07EUBrXXRztjHfVgefg==", "chua co", false, "432b377d-8cee-4eca-ae97-c0d2bb93a2b5", false, "user1" },
-                    { new Guid("fc9d01bf-1a75-43f8-8eaa-3b6915dce99a"), 0, "8bb3434b-5d9e-4358-8d5e-d73fce203f80", "staff@gmail.com", false, "", false, null, "khoong", "STAFF@GMAIL.COM", "STAFF", "AQAAAAEAACcQAAAAEL8BJx4iJRskWCgk9BgkcWdElcquXN8Lh8THvTx5QhyxxtoVthqUeH8ZdwdARWBm+w==", "chua co", false, "3e2b1ac0-ebee-4f48-bba7-ccc71965db3a", false, "staff" }
+                    { new Guid("27fbcabb-e601-4e58-ad53-85c902d2fbea"), 0, "cc41f4d8-4465-4943-b2fa-dace6a507270", "admin@gmail.com", false, "", false, null, "khoong", "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAEAACcQAAAAEFDOnLWGFrc9SbI9r+IGzip+4n3a7j81hYcZBp4jYw27Poo6mlP60WiHhmfBcAMqjQ==", "chua co", false, "01cf212e-2217-4114-9a59-830d20560639", false, "admin" },
+                    { new Guid("6e1c5355-4016-489b-8bf3-88a4b98ef195"), 0, "0a98918f-bb55-4612-93dd-988310216c7a", "user1@gmail.com", false, "", false, null, "khoong", "USER1@GMAIL.COM", "USER1", "AQAAAAEAACcQAAAAEEJGh9ggzteWj3t+5O8AzybA6zbT95VHAho5LYK6SCUVI9maNchk+C7/rRawgkSmiQ==", "chua co", false, "2fd1e8b5-3354-4c4e-a0eb-f2955f3e6402", false, "user1" },
+                    { new Guid("a98a57be-00d5-4272-9551-9a53377d27f4"), 0, "2fca16b4-458c-4434-996a-3734d9eccd27", "staff@gmail.com", false, "", false, null, "khoong", "STAFF@GMAIL.COM", "STAFF", "AQAAAAEAACcQAAAAEEhjTTfbPNbmLyoez0N/0f9xpWFRtstGRFDBcGgY2ADUJJwsJgyAP7L9looaB7AEbg==", "chua co", false, "615912b2-d715-4203-9bbd-d2ef85f0f641", false, "staff" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("03aa8a22-8287-41a2-a33f-24249583dde3"), new Guid("2ede68c8-39a1-4d9a-88fb-8eead2fc98e4") });
+                values: new object[] { new Guid("c44757a2-6103-4e37-8f37-3ca2a40fdb79"), new Guid("27fbcabb-e601-4e58-ad53-85c902d2fbea") });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("632effdb-7e6d-406a-8b09-08564c4e8458"), new Guid("aa4615f6-70c3-48cb-a96c-2213189df6d0") });
+                values: new object[] { new Guid("4f9a13e0-6ee6-45fe-a12d-872b520eaaab"), new Guid("6e1c5355-4016-489b-8bf3-88a4b98ef195") });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("385c5b59-a55c-4911-98cf-3a7955aab731"), new Guid("fc9d01bf-1a75-43f8-8eaa-3b6915dce99a") });
+                values: new object[] { new Guid("2c9810f7-27cf-437f-9dd2-1b974866c93e"), new Guid("a98a57be-00d5-4272-9551-9a53377d27f4") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Addresses_AccountId",

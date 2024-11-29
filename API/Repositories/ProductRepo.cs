@@ -45,5 +45,34 @@ namespace API.Repositories
             if (await GetProductById(product.Id) == null) throw new KeyNotFoundException("Not found this Id!");
             _context.Entry(product).State = EntityState.Modified;
         }
+        public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null)
+        {
+            var query = _context.Products
+                .Include(p => p.Size)
+                .Include(p => p.Brand)
+                .Include(p => p.Material)
+                .AsQueryable();
+            //lọc theo Size
+            if (sizeId.HasValue)
+            {
+                query = query.Where(p=> p.Size.Id == sizeId.Value);
+            }
+            //Lọc thương hiệu 
+            if (brandId.HasValue)
+            {
+                query = query.Where(p=>p.Brand.Id == brandId.Value);
+            }
+            //
+            if (materialId.HasValue)
+            {
+                query = query.Where(p=>p.Material.Id == materialId.Value);
+            }
+            //tìm kiếm theo tên sản phẩm 
+            if(!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query.Where(p=>p.Name.Contains(searchQuery));
+            }
+            return await query.ToListAsync();
+        }
     }
 }

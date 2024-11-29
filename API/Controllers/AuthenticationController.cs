@@ -81,6 +81,7 @@ namespace XuongTT_API.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user,model.Password)) return Unauthorized();
 
             var role = _userManager.GetRolesAsync(user).ToString();
+            var refreshToken = await _userManager.GetAuthenticationTokenAsync(user, "MyApp", "RefeshToken");
 
             JwtSecurityToken token = GenerateJwt(model.Username,role);
 
@@ -88,7 +89,8 @@ namespace XuongTT_API.Controllers
 
             return Ok(new LoginResponse
             { JwtToken = new JwtSecurityTokenHandler().WriteToken(token),
-            Expiration = token.ValidTo});
+            Expiration = token.ValidTo,
+            RefreshToken = refreshToken});
 
         }
 

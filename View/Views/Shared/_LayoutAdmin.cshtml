@@ -28,14 +28,16 @@
                         <div>
                             @if (User.Identity.IsAuthenticated)
                             {
-                                    <div>
-                                        Hello, @User.FindFirst("Name")?.Value
-                                    </div>
+                                <div>
+                                    Hello, @User.Identity.Name
+                                    
+                                </div>
                             }
                             else
                             {
-                                    <span>Welcome, Guest!</span>
+                                <span>Welcome, Guest!</span>
                             }
+                            
                         </div>
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">

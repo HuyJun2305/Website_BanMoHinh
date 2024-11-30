@@ -28,10 +28,10 @@ namespace API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -290,11 +290,10 @@ namespace API.Migrations
                     IdMaterial = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdPromotion = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdSize = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdImg = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SizeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PromotionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    SizeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PromotionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -303,26 +302,22 @@ namespace API.Migrations
                         name: "FK_Products_Brands_BrandId",
                         column: x => x.BrandId,
                         principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Products_Materials_MaterialId",
                         column: x => x.MaterialId,
                         principalTable: "Materials",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Products_Promotions_PromotionId",
                         column: x => x.PromotionId,
                         principalTable: "Promotions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Products_Sizes_SizeId",
                         column: x => x.SizeId,
                         principalTable: "Sizes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -429,9 +424,9 @@ namespace API.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("40583376-12d3-4dcd-9345-a29f29d83b81"), "788322f9-2503-4078-a728-f4d98284fefc", "Customer", "CUSTOMER" },
-                    { new Guid("44ca2de9-888a-46ea-bfcb-b721eb70abd3"), "2133a7d3-0ed0-4074-a495-aa0c42d56f33", "Staff", "STAFF" },
-                    { new Guid("fc58b1bb-eea7-4d5b-b542-49cb9de88049"), "e8871b0e-0ba2-4c20-9367-e25bbb152001", "Admin", "ADMIN" }
+                    { new Guid("819ddbc6-93d8-48ae-b3df-5485f4602ce3"), "99dc7143-1178-4e78-9c23-891e17a3aa2c", "Customer", "CUSTOMER" },
+                    { new Guid("c55d4014-ef07-4e8f-b306-3e97759db733"), "bca255e1-151c-40e0-9461-31c6c062f510", "Admin", "ADMIN" },
+                    { new Guid("f2aadca4-7f8a-49bc-9896-13dbb59e2b23"), "9ebbeaeb-2137-46df-8c60-44afbc5ea60b", "Staff", "STAFF" }
                 });
 
             migrationBuilder.InsertData(
@@ -439,25 +434,23 @@ namespace API.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "ImgUrl", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("a37d7bc8-383a-4afd-bf32-075aaf7a3e12"), 0, "bc02925a-639f-4546-99bf-5cf1e04e8d36", "admin@gmail.com", false, "", false, null, "khoong", "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAEAACcQAAAAECtdP4P8jRHlYlXBXoF9mmoe914htM9Ql0DEN7luQf5V2zK5Te8vJZrjDbY89s250w==", "chua co", false, "88021f15-1d75-4a69-a6ae-77321e7b916c", false, "admin" },
-                    { new Guid("d2f6e596-b2be-498e-ae90-5ccb6de61221"), 0, "e662d13d-14e3-4fc0-8366-dd95f2fb2107", "staff@gmail.com", false, "", false, null, "khoong", "STAFF@GMAIL.COM", "STAFF", "AQAAAAEAACcQAAAAEHh3hWjV/3fSwhBQZQLp2i7vQY/XKIaa/lXUOsHOMHcCKIw682fEIRVujsVW+Y03Jg==", "chua co", false, "e538e485-5205-4e38-a877-264659745d62", false, "staff" },
-                    { new Guid("df68584d-48b2-4b73-b2ba-473bbb8ad758"), 0, "f0cdabbc-da83-42ca-a1a8-060c590feb5d", "user1@gmail.com", false, "", false, null, "khoong", "USER1@GMAIL.COM", "USER1", "AQAAAAEAACcQAAAAEGa7weK8sr3dnhPg34sQA9Fn2ex5YEQQIklMF8pE6AgmIBx8i4Z/KMJhtIMC1eEgUQ==", "chua co", false, "45da50ab-b6d9-4970-a898-8c8330d795f5", false, "user1" }
+                    { new Guid("a9c83116-644d-438a-b959-556378e27623"), 0, "95a9cfaf-9101-453b-bee6-dbabe01e3234", "user1@gmail.com", false, "", false, null, "khoong", "USER1@GMAIL.COM", "USER1", "AQAAAAEAACcQAAAAEHOxU5n4BlruZDX5v4l548UbbvxVmp/HlZZ6hadOD5Lu9KJ+g+xYMmzZnibY/0dTQw==", "chua co", false, "0fdf5b85-5adb-4622-9ce9-eb8766499259", false, "user1" },
+                    { new Guid("c0d8f849-55a1-4912-bc8b-68fdda11bba8"), 0, "35f0afad-f2a5-4bab-9c8e-c06408da90be", "staff@gmail.com", false, "", false, null, "khoong", "STAFF@GMAIL.COM", "STAFF", "AQAAAAEAACcQAAAAEKovdvT5KpWlM0O3IWa4/6SQpZGOCsigBK1KvesQHZ/fbYbqgCNwHR5Fwh1vDzPIig==", "chua co", false, "0965de08-5284-42e2-8fef-861d01ee8c4d", false, "staff" },
+                    { new Guid("fda4516f-62e2-419d-8056-de4e08617de5"), 0, "4d33ce7d-768f-4312-85ca-bfe86d46f454", "admin@gmail.com", false, "", false, null, "khoong", "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAEAACcQAAAAEDHKsIRuM4xKA6aHjX+/QdQ/ne5FIgnONVEnT4F3GdbupaFvQkzT1xQJ99vr9E9v0Q==", "chua co", false, "e8421978-4cec-42c9-8969-2346d36c9756", false, "admin" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("fc58b1bb-eea7-4d5b-b542-49cb9de88049"), new Guid("a37d7bc8-383a-4afd-bf32-075aaf7a3e12") });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUserRoles",
-                columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("44ca2de9-888a-46ea-bfcb-b721eb70abd3"), new Guid("d2f6e596-b2be-498e-ae90-5ccb6de61221") });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUserRoles",
-                columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("40583376-12d3-4dcd-9345-a29f29d83b81"), new Guid("df68584d-48b2-4b73-b2ba-473bbb8ad758") });
+                values: new object[,]
+                {
+                    { new Guid("819ddbc6-93d8-48ae-b3df-5485f4602ce3"), new Guid("a9c83116-644d-438a-b959-556378e27623") },
+                    { new Guid("819ddbc6-93d8-48ae-b3df-5485f4602ce3"), new Guid("c0d8f849-55a1-4912-bc8b-68fdda11bba8") },
+                    { new Guid("f2aadca4-7f8a-49bc-9896-13dbb59e2b23"), new Guid("c0d8f849-55a1-4912-bc8b-68fdda11bba8") },
+                    { new Guid("819ddbc6-93d8-48ae-b3df-5485f4602ce3"), new Guid("fda4516f-62e2-419d-8056-de4e08617de5") },
+                    { new Guid("c55d4014-ef07-4e8f-b306-3e97759db733"), new Guid("fda4516f-62e2-419d-8056-de4e08617de5") },
+                    { new Guid("f2aadca4-7f8a-49bc-9896-13dbb59e2b23"), new Guid("fda4516f-62e2-419d-8056-de4e08617de5") }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Addresses_AccountId",
@@ -522,8 +515,7 @@ namespace API.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Images_ProductId",
                 table: "Images",
-                column: "ProductId",
-                unique: true);
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderId",

@@ -42,7 +42,9 @@ namespace XuongTT_API.Controllers
             var existingUser = await _userManager.FindByNameAsync(model.Username);
             if (existingUser != null) return Conflict("User đã tồn tại.");
 
-            var newUser = new ApplicationUser { UserName = model.Username ,
+            var newUser = new ApplicationUser { 
+                                        //Id =  Guid.NewGuid(),
+                                        UserName = model.Username ,
                                         Addresses = new List<Address>(),
                                         Email =model.Email ,
                                         SecurityStamp = Guid.NewGuid().ToString()
@@ -59,10 +61,17 @@ namespace XuongTT_API.Controllers
             newUser.Cart = cart;
 
             var result = await _userManager.CreateAsync(newUser, model.Password);
-            _userManager.AddToRoleAsync(newUser, "Customer");
+            
             if (result.Succeeded)
             {
                 _logger.LogInformation("register thành công");
+                var role = await _userManager.AddToRoleAsync(newUser, "Customer");
+                if (role.Succeeded)
+                {
+                    _logger.LogInformation("register thành công");
+                    return Ok("Add Customer tạo thành công");
+                }
+                else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công user :{string.Join(" ", role.Errors.Select(e => e.Description))}");
                 return Ok("User tạo thành công"); 
             }
             else return StatusCode(StatusCodes.Status500InternalServerError,$"Chưa tạo thành công user :{string.Join(" ", result.Errors.Select(e => e.Description))}");

@@ -1,9 +1,11 @@
 ﻿using Data.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text;
 using View.IServices;
 
 namespace View.Services
@@ -11,14 +13,17 @@ namespace View.Services
     public class AuthenticationService : IAuthenticationService
     {
         //private readonly IHttpClientFactory _factory;
+
+        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private string? _jwtCache;
         private static LoginResponse Login;
 
         public event Action<string?>? LoginChange;
-        public AuthenticationService(/*IHttpClientFactory factory*/HttpClient httpClient)
+        public AuthenticationService(/*IHttpClientFactory factory*/HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
+            _configuration = configuration;
             //_factory = factory;
         }
         public async ValueTask<string> GetJwtAsync()
@@ -49,6 +54,7 @@ namespace View.Services
             
             return jwt.Claims.First(c => c.Type == ClaimTypes.Name).Value;
         }
+        
         public async ValueTask<string> LoginAsync(LoginModel model)
         {
             //var response = await _factory.CreateClient("ServerApi").PostAsync("api/Authentication/Login", JsonContent.Create(model));
@@ -67,11 +73,8 @@ namespace View.Services
                 _jwtCache = content.JwtToken;
             Login = content;
 
-            var jwt = new JwtSecurityToken(Login.JwtToken);
 
-            var role = jwt.Claims.First(c => c.Type == ClaimTypes.Role).Value;
-
-            return role;
+            return Login.JwtToken;
         }
         public async Task<bool> RefreshAsync()
         {

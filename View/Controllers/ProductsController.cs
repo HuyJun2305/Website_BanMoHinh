@@ -14,13 +14,17 @@ namespace View.Controllers
         private readonly IBrandServices _brandServices;
         private readonly IMaterialServices _materialServices;
         private readonly IImageServices _imageServices;
-        public ProductsController(IProductServices productServices, ISizeServices sizeServices, IBrandServices brandServices, IMaterialServices materialServices, IImageServices imageServices)
+        private readonly ICategoryServices _categoryServices;
+        public ProductsController(IProductServices productServices, ISizeServices sizeServices,
+            IBrandServices brandServices, IMaterialServices materialServices,
+            IImageServices imageServices, ICategoryServices categoryServices)
         {
             _productServer = productServices;
             _sizeServices = sizeServices;
             _brandServices = brandServices;
             _materialServices = materialServices;
             _imageServices = imageServices;
+            _categoryServices = categoryServices;
         }
         //Tìm kiếm theo tên 
         public async Task<IActionResult> FilterProducts(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null)
@@ -33,11 +37,6 @@ namespace View.Controllers
         {
                 var products = _productServer.GetAllProduct().Result;
                 var selectedImage = _imageServices.GetAllImages().Result;
-                if (products == null || !products.Any())
-                {
-                    ViewBag.Message = "No product details found.";
-                    return View(new List<Product>());
-                } 
                 var productData = new ProductIndex()
                 {
                     Products = products,
@@ -59,6 +58,7 @@ namespace View.Controllers
             ViewData["SizeId"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Value");
             ViewData["BrandId"] = new SelectList(_brandServices.GetAllBrands().Result, "Id", "Name");
             ViewData["MaterialId"] = new SelectList(_materialServices.GetAllMaterials().Result, "Id", "Name");
+            ViewData["CategoryId"] = new SelectList(_categoryServices.GetAllCategories().Result, "Id", "Name");
             var dataImage = new ProductViewModel()
             {
                 Images = _imageServices.GetAllImages().Result
@@ -66,7 +66,7 @@ namespace View.Controllers
             return View(dataImage);
         }
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Price, Name, Description, BrandId, SizeId, MaterialId")] Product product)
+        public async Task<IActionResult> Create([Bind("Price, Name, Description, BrandId, SizeId, MaterialId, CategoryId")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -95,7 +95,7 @@ namespace View.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Price, Name, Description, BrandId, SizeId, MaterialId")] Product product)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Price, Name, Description, BrandId, SizeId, MaterialId, CategoryId")] Product product)
         {
             if(id != product.Id)
             {
@@ -226,5 +226,29 @@ namespace View.Controllers
 
             return Json(new { success = true, images });
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> LinkImages([FromBody] ProductViewModel productIndex)
+        {
+            if (productIndex == null || productIndex.SelectedImageIds == null || !productIndex.SelectedImageIds.Any())
+            {
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+            }
+
+            foreach (var imageId in productIndex.SelectedImageIds)
+            {
+                var image = await _imageServices.GetImageById(Guid.Parse(imageId));
+                if (image != null)
+                {
+                    image.ProductId = productIndex.Id;
+                    await _imageServices.Update(image);
+                }
+            }
+
+            return Json(new { success = true });
+        }
+
+
     }
 }

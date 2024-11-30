@@ -23,6 +23,8 @@ namespace Data.Models
         public virtual Brand? Brand { get; set; }
         public Guid MaterialId { get; set; }
         public virtual Material? Material { get; set; }
+        public Guid CategoryId { get; set; }
+        public virtual Category? Category { get; set; }
 
 
         public Guid? PromotionId { get; set; }

@@ -23,15 +23,15 @@
                         </div>
                     </div>
                     <!-- Price -->
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-6 mb-3">
                         <div class="form-group">
                             <label asp-for="Price" class="form-label">Giá <span class="text-danger">*</span></label>
                             <input asp-for="Price" class="form-control" placeholder="Nhập giá sản phẩm" required />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                     </div>
-                    <!-- Price -->
-                    <div class="col-md-12 mb-3">
+                    <!-- Stock -->
+                    <div class="col-md-6 mb-3">
                         <div class="form-group">
                             <label asp-for="Stock" class="form-label">Số lượng <span class="text-danger">*</span></label>
                             <input asp-for="Stock" class="form-control" placeholder="Nhập số lượng sản phẩm" required />
@@ -39,10 +39,24 @@
                         </div>
                     </div>
 
+                    <!-- Category -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label asp-for="CategoryId" class="form-label">Danh mục  <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-control" required>
+                                <option value="">Chọn thương hiệu</option>
+                                @foreach (var brand in (IEnumerable<SelectListItem>)ViewData["BrandId"])
+                                {
+                                    <option value="@brand.Value">@brand.Text</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
                     <!-- Brand -->
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label asp-for="BrandId" class="form-label">Thương Hiệu <span class="text-danger">*</span></label>
+                            <label asp-for="BrandId" class="form-label">Thương hiệu <span class="text-danger">*</span></label>
                             <select asp-for="BrandId" class="form-control" required>
                                 <option value="">Chọn thương hiệu</option>
                                 @foreach (var brand in (IEnumerable<SelectListItem>)ViewData["BrandId"])
@@ -87,10 +101,14 @@
 
 
                     <!-- File Upload -->
-                    <div class="col-md-12 mb-3">
-                        <label for="files" class="form-label">Thêm Ảnh Sản Phẩm <span class="text-danger">*</span></label>
-                        <input type="file" name="files" id="files" multiple class="form-control" required />
-                    </div>
+                      <div class="col-md-12 mb-3">
+                        <label for="files" class="form-label">Thêm Ảnh Sản Phẩm</label>
+                        <input type="button" id="files" class="btn btn-primary" value="Chọn Ảnh" />
+                      </div>
+
+                    <div id="selectedImages" class="row mt-3">
+                             <!-- Ảnh được chọn sẽ hiển thị tại đây -->
+                    </div> 
 
 
                     <!-- Description -->
@@ -114,66 +132,132 @@
     </div>
 </div>
 
+<!-- Modal Hiển Thị Ảnh -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Chọn Ảnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="imageGallery">
+                    <!-- Hình ảnh sẽ được load tại đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmImages">Xác nhận</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 @section Scripts {
     <script>
-        document.getElementById('productForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        document.getElementById('files').addEventListener('click', async function () {
+    const imageGallery = document.getElementById('imageGallery');
+    imageGallery.innerHTML = ''; // Clear gallery
 
-            let form = e.target;
-            let formData = new FormData(form);
-
-            // Kiểm tra xem có ảnh nào được chọn hay không
-            let imageFiles = document.getElementById('files').files;
-            if (imageFiles.length === 0) {
-                alert('Vui lòng chọn ít nhất một ảnh.');
-                return; // Dừng xử lý nếu không có ảnh
-            }
-
-            try {
-                // Tạo sản phẩm
-                let productResponse = await fetch('/Products/Create', {
-                    method: 'POST',
-                    body: formData,
+    try {
+        // Fetch images from the server
+        const response = await fetch('/Products/GetImages');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                data.images.forEach(image => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 mb-3';
+                    col.innerHTML = `
+                        <div class="card">
+                            <img src="${image.url}" class="card-img-top" alt="Image" data-image-id="${image.id}">
+                            <div class="card-body text-center">
+                                <input type="checkbox" class="form-check-input select-image" data-image-id="${image.id}">
+                            </div>
+                        </div>`;
+                    imageGallery.appendChild(col);
                 });
-
-                if (productResponse.ok) {
-                    let productData = await productResponse.json();
-                    if (productData.success) {
-                        alert('Tạo sản phẩm thành công!');
-
-                        let productId = productData.productId;
-
-                        // Tải ảnh
-                        for (let file of imageFiles) {
-                            let imageFormData = new FormData();
-                            imageFormData.append('imageFile', file);
-                            imageFormData.append('productId', productId);
-
-                            let uploadResponse = await fetch('/Products/Upload', {
-                                method: 'POST',
-                                body: imageFormData,
-                            });
-
-                            if (uploadResponse.ok) {
-                                let uploadData = await uploadResponse.json();
-                                if (!uploadData.success) {
-                                    alert(`Lỗi tải ảnh: ${uploadData.message}`);
-                                }
-                            } else {
-                                alert('Lỗi mạng khi tải ảnh.');
-                            }
-                        }
-                        window.location.reload(); // Tải lại trang hoặc điều hướng
-                    } else {
-                        alert(productData.message || 'Lỗi tạo sản phẩm.');
-                    }
-                } else {
-                    alert('Lỗi mạng khi tạo sản phẩm.');
-                }
-            } catch (error) {
-                console.error('Lỗi:', error);
-                alert('Đã xảy ra lỗi trong quá trình xử lý.');
+            } else {
+                alert('Không có ảnh nào để hiển thị.');
             }
+        } else {
+            alert('Lỗi khi tải ảnh.');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        alert('Đã xảy ra lỗi khi tải ảnh.');
+    }
+
+    // Hiển thị modal
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+});
+
+// Lưu ảnh đã chọn
+document.getElementById('confirmImages').addEventListener('click', function () {
+    const selectedImages = Array.from(document.querySelectorAll('.select-image:checked')).map(checkbox => checkbox.dataset.imageId);
+
+    if (selectedImages.length === 0) {
+        alert('Vui lòng chọn ít nhất một ảnh.');
+        return;
+    }
+
+    // Hiển thị ảnh đã chọn ở phía ngoài modal
+    const selectedImageContainer = document.getElementById('selectedImages');
+    selectedImageContainer.innerHTML = '';
+    selectedImages.forEach(imageId => {
+        const imgElement = document.querySelector(`img[data-image-id="${imageId}"]`);
+        if (imgElement) {
+            const imgCopy = imgElement.cloneNode();
+            imgCopy.classList.add('selected-image', 'col-md-3', 'mb-3');
+            selectedImageContainer.appendChild(imgCopy);
+        }
+    });
+
+    // Đóng modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('imageModal'));
+    modal.hide();
+});
+
+// Submit form xử lý sản phẩm và ảnh đã chọn
+document.getElementById('productForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const selectedImages = Array.from(document.querySelectorAll('.select-image:checked')).map(checkbox => checkbox.dataset.imageId);
+
+    if (selectedImages.length === 0) {
+        alert('Vui lòng chọn ít nhất một ảnh.');
+        return;
+    }
+
+    formData.append('selectedImages', JSON.stringify(selectedImages));
+
+    try {
+        const response = await fetch('/Products/Create', {
+            method: 'POST',
+            body: formData
         });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                alert('Sản phẩm đã được tạo thành công!');
+                window.location.reload();
+            } else {
+                alert(data.message || 'Đã xảy ra lỗi khi tạo sản phẩm.');
+            }
+        } else {
+            alert('Lỗi mạng khi tạo sản phẩm.');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        alert('Đã xảy ra lỗi.');
+    }
+});
+
     </script>
 }

@@ -102,6 +102,12 @@
                           </a>
                       </li>
                       <li class="sidebar-item">
+                          <a asp-controller="Category" asp-action="Index" class="sidebar-link">
+                              <i class="ti ti-tag"></i>
+                              <span class="hide-menu"> Danh mục </span>
+                          </a>
+                      </li>
+                      <li class="sidebar-item">
                           <a asp-controller="Materials" asp-action="Index" class="sidebar-link">
                               <i class="ti ti-paint"></i>
                               <span class="hide-menu"> Chất liệu </span>
@@ -176,7 +182,7 @@
                       </a>
                       <ul aria-expanded="false" class="collapse first-level">
                           <li class="sidebar-item">
-                                    <a asp-controller="Authencation" asp-action="ListEmployee" class="sidebar-link">
+                                    <a asp-controller="User" asp-action="Index" class="sidebar-link">
                                   <i class="ti ti-user"></i>
                                   <span class="hide-menu"> Nhân viên </span>
                               </a>

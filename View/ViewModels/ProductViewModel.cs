@@ -19,8 +19,12 @@ namespace View.ViewModels
         public Guid MaterialId { get; set; }
         public Guid? PromotionId { get; set; }
         public Guid SizeId { get; set; }
+        public Guid CategoryId { get; set; }
 
+
+        public Guid Id { get; set; }
         public IEnumerable<Image>? Images { get; set; }
+        public IEnumerable<string>? SelectedImageIds { get; set; }
 
         public List<ProductViewModel> ProductDetails { get; set; } = new List<ProductViewModel>();
     }

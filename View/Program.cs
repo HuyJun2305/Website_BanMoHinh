@@ -1,3 +1,7 @@
+﻿using Data.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using View.Handlers;
 using View.IServices;
 using View.Services;
@@ -29,6 +33,40 @@ builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
 builder.Services.AddHttpClient<ICartServices, CartServices>();
+builder.Services.AddHttpClient<ICategoryServices, CategoryServices>();
+
+
+
+
+
+var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
+builder.Services.AddAuthentication(options =>
+{
+	// Đặt cookie cho giao diện web
+	options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Mặc định cho MVC
+	options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+	options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+	options.LoginPath = "/Authentication/Login"; // Trang đăng nhập nếu người dùng chưa đăng nhập
+	options.LogoutPath = "/Authentication/Logout"; // Trang đăng xuất
+	options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Thời gian tồn tại của cookie
+})
+.AddJwtBearer(options =>
+{
+	options.SaveToken = true;
+	options.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+		ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+		ClockSkew = new TimeSpan(0, 0, 5)
+	};
+
+});
+
+
 
 //
 builder.Services.AddAuthorization();
@@ -64,6 +102,6 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{controller=HomeCustomer}/{action=ViewProducts}/{id?}");
+        pattern: "{controller=Authentication}/{action=Login}/{id?}");
 });
 app.Run();

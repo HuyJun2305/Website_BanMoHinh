@@ -39,6 +39,9 @@
                 Mô tả
             </th>
             <th>
+                Danh mục
+            </th>
+            <th>
                 Thương hiệu
             </th>
             <th>
@@ -83,6 +86,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Brand.Name)

@@ -50,6 +50,8 @@ namespace View.Controllers
         {
             var product = _productServer.GetProductById(id).Result;
             return View(product);
+
+
         }
         //
         public IActionResult Create()

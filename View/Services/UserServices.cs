@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using View.IServices;
 
-namespace View.Servicecs
+namespace View.Services
 {
     public class UserServices : IUserServices
     {

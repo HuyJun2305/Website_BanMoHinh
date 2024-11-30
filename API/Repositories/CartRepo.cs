@@ -19,12 +19,7 @@ namespace API.Repositories
             await _context.Carts.AddAsync(cart);
         }
 
-        public async Task Delete(Guid id)
-        {
-            var cart = await GetCartById(id);
-            if (cart == null) throw new KeyNotFoundException("Not found this brand!");
-            _context.Carts.Remove(cart);
-        }
+        
 
         public async Task<List<Cart>> GetAllCart()
         {
@@ -34,6 +29,11 @@ namespace API.Repositories
         public async Task<Cart> GetCartById(Guid id)
         {
             return await _context.Carts.Include(p => p.Account).FirstOrDefaultAsync();
+        }
+
+        public async Task<Cart> GetCartByUserId(Guid userId)
+        {
+            return await _context.Carts.Include(p => p.Account).Where(p => p.AccountId == userId).FirstAsync();
         }
 
         public async Task SaveChanges()

@@ -70,5 +70,7 @@ namespace API.Repositories
             _context.CartDetails.Update(updateItem);
             await _context.SaveChangesAsync();
         }
+
+        
     }
 }

@@ -17,10 +17,8 @@ namespace Data.Models
 
         public decimal TotalPrice { get; set; }
 
-        [JsonIgnore]
         public virtual ApplicationUser? Account  { get; set; }
-        [JsonIgnore]
-        public virtual ICollection<CartDetail> CartDetails { get; set; }
+        public virtual ICollection<CartDetail>? CartDetails { get; set; }
 
     }
 }

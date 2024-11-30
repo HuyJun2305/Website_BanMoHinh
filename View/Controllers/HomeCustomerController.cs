@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using View.IServices;
+using View.Services;
 using View.ViewModels;
 
 namespace View.Controllers
@@ -37,5 +39,28 @@ namespace View.Controllers
             };
             return View(productData);
         }
-    }
+
+		public async Task<IActionResult> ViewProductDetails(Guid id)
+		{
+			var products = _productServer.GetAllProduct().Result;
+			var selectedImage = _imageServices.GetAllImages().Result;
+			var selectedProduct = products.FirstOrDefault(p => p.Id == id);
+			if (selectedProduct == null)
+			{
+				return NotFound("Product not found!");
+			}
+
+			var relatedImages = selectedImage.Where(i => i.ProductId == id).ToList();
+			var relatedProductDetails = products.Where(d => d.Id == id).ToList();
+
+			var productDetailData = new ProductIndex
+			{
+				Products = new List<Product> { selectedProduct },
+				Images = relatedImages
+			};
+
+			return View(productDetailData);
+		}
+
+	}
 }

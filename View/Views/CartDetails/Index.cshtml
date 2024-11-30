@@ -40,36 +40,38 @@
 							{
 								<tr class="table_row">
 									<td class="column-1">
-										<div class="how-itemcart1">
-											<!-- Carousel for Images -->
-											<div id="carousel-@item.Id" class="carousel slide" data-bs-ride="carousel">
-												<div class="carousel-inner">
-													@foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
-													{
-														<div class="carousel-item @(image.index == 0 ? "active" : "")">
-															<img src="@Url.Content(image.value.URL)" style="width:320px; height:auto;" alt="Product Image">
-														</div>
-													}
-												</div>
-											</div>
-										</div>
-									</td>
+									<!-- Carousel for Images -->
+                                <div id="carousel-@item.Id" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        @foreach (var image in Model.Images.Where(i => i.ProductId == item.ProductId).Select((value, index) => new { value, index }))
+                                        {
+                                            <div class="carousel-item @(image.index == 0 ? "active" : "")">
+											<img src="@Url.Content(image.value.URL)" style="width:100px; height:auto;" alt="Product Image">
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+								</td>
 									<td class="column-2">@item.Product.Name</td>
-									<td class="column-3">@item.Quatity</td>
+									<td class="column-3">@item.Product.Price</td>
 									<td class="column-4">
-										<div class="wrap-num-product flex-w m-l-auto m-r-0">
-											<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-												<i class="fs-16 zmdi zmdi-minus"></i>
-											</div>
-
-											<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="1">
-
-											<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-												<i class="fs-16 zmdi zmdi-plus"></i>
-											</div>
-										</div>
+									    <div class="wrap-num-product flex-w m-l-auto m-r-0">
+									        <!-- Nút giảm số lượng -->
+									        <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="updateCartDetail()">
+									            <i class="fs-16 zmdi zmdi-minus"></i>
+									        </div>
+									
+									        <!-- Ô nhập số lượng -->
+									        <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="1" min="0" readonly>
+									
+									        <!-- Nút tăng số lượng -->
+									        <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="updateCartDetail()">
+									            <i class="fs-16 zmdi zmdi-plus"></i>
+									        </div>
+									    </div>
 									</td>
-									<td class="column-5">@item.Product.Price</td>
+
+									<td class="column-5">@item.TotalPrice</td>
 								</tr>
 							}
 							
@@ -180,3 +182,50 @@
 		</div>
 	</div>
 </form>
+
+@section Scripts{
+
+		<script>
+			function updateCartDetail(button, valueChange) {
+		// Lấy ô input số lượng trong cùng dòng
+		const inputField = button.parentElement.querySelector(".num-product");
+		let currentValue = parseInt(inputField.value);
+
+		// Thay đổi giá trị
+		currentValue += valueChange;
+
+		// Đảm bảo số lượng không nhỏ hơn 0
+		if (currentValue < 0) {
+			currentValue = 0;
+		}
+
+		// Cập nhật lại giá trị ô input
+		inputField.value = currentValue;
+
+		// Nếu số lượng bằng 0, xóa dòng sản phẩm
+		if (currentValue === 0) {
+			const row = button.closest("tr");
+			row.remove(); // Hoặc gọi API để cập nhật server
+		}
+
+		// TODO: Gửi AJAX cập nhật số lượng nếu cần
+	}
+
+
+		function removeCartDetail(cartDetailId) {
+			// Gửi yêu cầu xóa chi tiết giỏ hàng đến server
+			fetch(`/CartDetails/RemoveCartDetail/${cartDetailId}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+			.then(response => {
+				if (!response.ok) {
+					console.error('Failed to remove cart detail');
+				}
+			})
+			.catch(error => console.error('Error:', error));
+		}
+	</script>
+}

@@ -28,6 +28,7 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
+builder.Services.AddHttpClient<ICartServices, CartServices>();
 
 //
 builder.Services.AddAuthorization();
@@ -63,6 +64,6 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+        pattern: "{controller=HomeCustomer}/{action=ViewProducts}/{id?}");
 });
 app.Run();

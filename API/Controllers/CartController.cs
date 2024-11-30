@@ -29,7 +29,7 @@ namespace API.Controllers
             }
         }
         //
-        [HttpGet("{id}")]
+        [HttpGet("GetCartById")]
         public async Task<ActionResult<Cart>> GetByIdCart(Guid id)
         {
             try
@@ -41,6 +41,19 @@ namespace API.Controllers
                 return Problem(ex.Message);
             }
         }
+        [HttpGet("GetCartByUserId")]
+        public async Task<ActionResult<Cart>> GetCartByUserId(Guid userId)
+        {
+            try
+            {
+                return await _cartRepo.GetCartByUserId(userId);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
         //Add product
         [HttpPost]
         public async Task<ActionResult<Cart>> PostCart(Cart cart)

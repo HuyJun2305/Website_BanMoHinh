@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using View.IServices;
 using View.ViewModels;
@@ -33,74 +34,19 @@ namespace View.Controllers
             };
             return View(productData);
         }
+        
 
-        // GET: CartDetailsController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
 
-        // GET: CartDetailsController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
 
-        // POST: CartDetailsController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: CartDetailsController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: CartDetailsController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: CartDetailsController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: CartDetailsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-    }
+		public async Task<IActionResult> RemoveFromCart(Guid id)
+		{
+			var cartDetail = await _cartServices.GetCartDetailById(id);
+			if (cartDetail != null)
+			{
+				await _cartServices.Delete(cartDetail.Id);
+				return RedirectToAction("Index", new { cartId = cartDetail.Id });
+			}
+			return View("Error");
+		}
+	}
 }

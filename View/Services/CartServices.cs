@@ -15,7 +15,7 @@ namespace View.Services
 		}
 		public async Task CreateCart(Cart cart)
 		{
-			await _client.PostAsJsonAsync("https://localhost:7170/api/Cart/CreateCart", cart);
+			await _client.PostAsJsonAsync("https://localhost:7280/api/Cart", cart);
 		}
 		public async Task CreateCartDetails(CartDetail cartDetail)
 		{
@@ -35,30 +35,30 @@ namespace View.Services
 
 				cartDetailsItem.TotalPrice = cartDetail.Product.Price * cartDetailsItem.Quatity;
 				cartDetailsItem.Product = null;
-				await _client.PutAsJsonAsync($"https://localhost:7170/api/CartDetails/Update?id={cartDetailsItem.Id}", cartDetailsItem);
+				await _client.PutAsJsonAsync($"https://localhost:7280/api/CartDetail/Update?id={cartDetailsItem.Id}", cartDetailsItem);
 			}
 			else
 			{
 				cartDetail.Product = null;
-				await _client.PostAsJsonAsync($"https://localhost:7170/api/CartDetails/Create", cartDetail);
+				await _client.PostAsJsonAsync($"https://localhost:7280/api/CartDetail/Create", cartDetail);
 			}
 		}
 
 		public async Task Delete(Guid id)
 		{
-			await _client.DeleteAsync($"https://localhost:7170/api/CartDetails/Delete?id={id}");
+			await _client.DeleteAsync($"https://localhost:7280/api/CartDetail/Delete?id={id}");
 		}
 
 		public async Task<List<CartDetail>> GetAllCartDetails()
 		{
-			var response = await _client.GetStringAsync("https://localhost:7170/api/CartDetails/GetAllCartDetails");
+			var response = await _client.GetStringAsync("https://localhost:7280/api/CartDetail/GetAllCartDetails");
 			var result = JsonConvert.DeserializeObject<List<CartDetail>>(response);
 			return result;
 		}
 
 		public async Task<Cart> GetCartAsync(Guid id)
 		{
-			var respone = await _client.GetStringAsync($"https://localhost:7170/api/Cart/GetCartById?id={id}");
+			var respone = await _client.GetStringAsync($"https://localhost:7280/api/CartDetail/GetCartById?id={id}");
 			var result = JsonConvert.DeserializeObject<Cart>(respone);
 			return result;
 		}
@@ -67,7 +67,7 @@ namespace View.Services
 		{
 			try
 			{
-				var response = await _client.GetStringAsync($"https://localhost:7170/api/Cart/GetCartByUserId?userId={userId}");
+				var response = await _client.GetStringAsync($"https://localhost:7280/api/Cart/GetCartByUserId?userId={userId}");
 				var result = JsonConvert.DeserializeObject<Cart>(response);
 				return result;
 			}
@@ -85,7 +85,7 @@ namespace View.Services
 		{
 			try
 			{
-				var response = await _client.GetStringAsync($"https://localhost:7170/api/CartDetails/GetCartDetailsByCartId?cartId={cartId}");
+				var response = await _client.GetStringAsync($"https://localhost:7280/api/CartDetail/GetCartDetailsByCartId?cartId={cartId}");
 				var result = JsonConvert.DeserializeObject<List<CartDetail>>(response);
 
 				// Kiểm tra xem kết quả có null hay rỗng không
@@ -100,7 +100,7 @@ namespace View.Services
 
 		public async Task<Cart> GetCartDetailById(Guid id)
 		{
-			var response = await _client.GetStringAsync($"https://localhost:7170/api/CartDetails/GetCartDetailsById?id={id}");
+			var response = await _client.GetStringAsync($"https://localhost:7280/api/CartDetail/GetCartDetailsById?id={id}");
 			var result = JsonConvert.DeserializeObject<Cart>(response);
 			return result;
 		}
@@ -118,12 +118,12 @@ namespace View.Services
 			}
 			var cartUser = await GetCartAsync(id);
 			cartUser.TotalPrice = totalPrice;
-			await _client.PutAsJsonAsync($"https://localhost:7170/api/Cart/UpdateCart?id={id}", cart);
+			await _client.PutAsJsonAsync($"https://localhost:7280/api/Cart/{id}", cart);
 		}
 
 		public async Task UpdateCartDetails(CartDetail cartDetail, Guid id)
 		{
-			await _client.PutAsJsonAsync($"https://localhost:7170/api/CartDetails/Update?id={id}", cartDetail);
+			await _client.PutAsJsonAsync($"https://localhost:7280/api/CartDetail/Update?id={id}", cartDetail);
 		}
 	}
 }

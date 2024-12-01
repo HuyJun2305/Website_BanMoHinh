@@ -12,7 +12,7 @@ namespace View.IServices
         Task<List<Product>> GetFilteredProduct(string? searchQuery = null,
             Guid? sizeId = null,
                Guid? imageId = null,
-               Guid? brandId = null,
+               Guid? brandId = null,Guid? categoryId = null,
                Guid? materialId = null);
     }
 }

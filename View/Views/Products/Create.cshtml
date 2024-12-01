@@ -45,9 +45,9 @@
                             <label asp-for="CategoryId" class="form-label">Danh mục  <span class="text-danger">*</span></label>
                             <select asp-for="CategoryId" class="form-control" required>
                                 <option value="">Chọn thương hiệu</option>
-                                @foreach (var brand in (IEnumerable<SelectListItem>)ViewData["BrandId"])
+                                @foreach (var category in (IEnumerable<SelectListItem>)ViewData["CategoryId"])
                                 {
-                                    <option value="@brand.Value">@brand.Text</option>
+                                    <option value="@category.Value">@category.Text</option>
                                 }
                             </select>
                             <span asp-validation-for="CategoryId" class="text-danger"></span>
@@ -100,15 +100,17 @@
                     </div>
 
 
-                    <!-- File Upload -->
-                      <div class="col-md-12 mb-3">
-                        <label for="files" class="form-label">Thêm Ảnh Sản Phẩm</label>
-                        <input type="button" id="files" class="btn btn-primary" value="Chọn Ảnh" />
-                      </div>
+                    <!-- File upload -->
+                    <div class="form-group">
+                        <label for="files">Chọn ảnh sản phẩm (có thể chọn nhiều ảnh)</label>
+                        <input type="file" class="form-control" id="files" name="imageFiles" accept="image/*" multiple required />
+                    </div>
 
-                    <div id="selectedImages" class="row mt-3">
-                             <!-- Ảnh được chọn sẽ hiển thị tại đây -->
-                    </div> 
+                    <!-- Hiển thị các ảnh đã chọn -->
+                    <div id="previewImages" class="form-group">
+                        <label>Ảnh đã chọn:</label>
+                        <div id="imagePreviewContainer"></div>
+                    </div>
 
 
                     <!-- Description -->
@@ -132,132 +134,118 @@
     </div>
 </div>
 
-<!-- Modal Hiển Thị Ảnh -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imageModalLabel">Chọn Ảnh</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row" id="imageGallery">
-                    <!-- Hình ảnh sẽ được load tại đây -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="confirmImages">Xác nhận</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 
 
 @section Scripts {
+
     <script>
-        document.getElementById('files').addEventListener('click', async function () {
-    const imageGallery = document.getElementById('imageGallery');
-    imageGallery.innerHTML = ''; // Clear gallery
+    // JavaScript xử lý hiển thị ảnh đã chọn và xóa ảnh
+    document.getElementById('files').addEventListener('change', function(event) {
+        var files = event.target.files;
+        var previewContainer = document.getElementById('imagePreviewContainer');
+        previewContainer.innerHTML = ''; // Clear any previous previews
 
-    try {
-        // Fetch images from the server
-        const response = await fetch('/Products/GetImages');
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                data.images.forEach(image => {
-                    const col = document.createElement('div');
-                    col.className = 'col-md-3 mb-3';
-                    col.innerHTML = `
-                        <div class="card">
-                            <img src="${image.url}" class="card-img-top" alt="Image" data-image-id="${image.id}">
-                            <div class="card-body text-center">
-                                <input type="checkbox" class="form-check-input select-image" data-image-id="${image.id}">
-                            </div>
-                        </div>`;
-                    imageGallery.appendChild(col);
-                });
-            } else {
-                alert('Không có ảnh nào để hiển thị.');
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                var file = files[i];
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Tạo một thẻ <div> để chứa ảnh và nút xóa
+                    var imgContainer = document.createElement('div');
+                    imgContainer.classList.add('img-container');
+                    imgContainer.style.display = 'inline-block';
+                    imgContainer.style.marginRight = '10px';
+                    imgContainer.style.marginBottom = '10px';
+
+                    // Tạo thẻ <img> để hiển thị ảnh
+                    var imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.classList.add('img-thumbnail');
+                    imgElement.style.width = '100px'; // Thay đổi kích thước hiển thị nếu cần
+
+                    // Tạo nút xóa
+                    var removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Xóa';
+                    removeBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+                    removeBtn.style.marginTop = '5px';
+                    removeBtn.style.display = 'block';
+
+                    // Khi nhấn nút xóa, xóa ảnh khỏi preview container
+                    removeBtn.addEventListener('click', function() {
+                        imgContainer.remove(); // Xóa phần tử ảnh và nút
+                    });
+
+                    // Thêm ảnh và nút xóa vào container
+                    imgContainer.appendChild(imgElement);
+                    imgContainer.appendChild(removeBtn);
+
+                    // Thêm vào preview container
+                    previewContainer.appendChild(imgContainer);
+                };
+
+                reader.readAsDataURL(file);
             }
-        } else {
-            alert('Lỗi khi tải ảnh.');
-        }
-    } catch (error) {
-        console.error('Lỗi:', error);
-        alert('Đã xảy ra lỗi khi tải ảnh.');
-    }
-
-    // Hiển thị modal
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-    modal.show();
-});
-
-// Lưu ảnh đã chọn
-document.getElementById('confirmImages').addEventListener('click', function () {
-    const selectedImages = Array.from(document.querySelectorAll('.select-image:checked')).map(checkbox => checkbox.dataset.imageId);
-
-    if (selectedImages.length === 0) {
-        alert('Vui lòng chọn ít nhất một ảnh.');
-        return;
-    }
-
-    // Hiển thị ảnh đã chọn ở phía ngoài modal
-    const selectedImageContainer = document.getElementById('selectedImages');
-    selectedImageContainer.innerHTML = '';
-    selectedImages.forEach(imageId => {
-        const imgElement = document.querySelector(`img[data-image-id="${imageId}"]`);
-        if (imgElement) {
-            const imgCopy = imgElement.cloneNode();
-            imgCopy.classList.add('selected-image', 'col-md-3', 'mb-3');
-            selectedImageContainer.appendChild(imgCopy);
         }
     });
 
-    // Đóng modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('imageModal'));
-    modal.hide();
-});
+    // JavaScript xử lý submit form
+    document.getElementById('productForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-// Submit form xử lý sản phẩm và ảnh đã chọn
-document.getElementById('productForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
+        let form = e.target;
+        let formData = new FormData(form);
 
-    const formData = new FormData(e.target);
-    const selectedImages = Array.from(document.querySelectorAll('.select-image:checked')).map(checkbox => checkbox.dataset.imageId);
-
-    if (selectedImages.length === 0) {
-        alert('Vui lòng chọn ít nhất một ảnh.');
-        return;
-    }
-
-    formData.append('selectedImages', JSON.stringify(selectedImages));
-
-    try {
-        const response = await fetch('/Products/Create', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                alert('Sản phẩm đã được tạo thành công!');
-                window.location.reload();
-            } else {
-                alert(data.message || 'Đã xảy ra lỗi khi tạo sản phẩm.');
-            }
-        } else {
-            alert('Lỗi mạng khi tạo sản phẩm.');
+        // Kiểm tra xem có ảnh nào được chọn hay không
+        let imageFiles = document.getElementById('files').files;
+        if (imageFiles.length === 0) {
+            alert('Vui lòng chọn ít nhất một ảnh.');
+            return; // Dừng xử lý nếu không có ảnh
         }
-    } catch (error) {
-        console.error('Lỗi:', error);
-        alert('Đã xảy ra lỗi.');
-    }
-});
 
-    </script>
+        try {
+            // Tạo sản phẩm
+            let productResponse = await fetch('/Products/Create', {
+                method: 'POST',
+                body: formData,
+            });
+            if (productResponse.ok) {
+                let productData = await productResponse.json();
+                if (productData.success) {
+                    alert('Tạo sản phẩm thành công!');
+                    let productId = productData.productId;
+
+                    // Upload từng ảnh một cho sản phẩm
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        let imageFormData = new FormData();
+                        imageFormData.append('imageFile', imageFiles[i]);
+                        imageFormData.append('productId', productId);
+
+                        let uploadResponse = await fetch('/Products/Upload', {
+                            method: 'POST',
+                            body: imageFormData,
+                        });
+
+                        let uploadData = await uploadResponse.json();
+                        if (!uploadData.success) {
+                            alert(`Lỗi tải ảnh: ${uploadData.message}`);
+                        }
+                    }
+
+                        window.location.href = '/Products/Index';
+                    } else {
+                    alert(productData.message || 'Lỗi tạo sản phẩm.');
+                }
+            } else {
+                alert('Lỗi mạng khi tạo sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+            alert('Đã xảy ra lỗi trong quá trình xử lý.');
+        }
+    });
+</script>
+
 }
+

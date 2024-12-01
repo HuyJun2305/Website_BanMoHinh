@@ -16,9 +16,9 @@ namespace API.Controllers
         }
         //Tìm kiếm sản phẩm 
         [HttpGet("filterAndsearch")]
-        public async Task<ActionResult<List<Product>>>  FilterProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null,Guid? materialId = null)
+        public async Task<ActionResult<List<Product>>>  FilterProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null,Guid? materialId = null, Guid? categoryId = null)
             {
-                var product = await _productRepo.GetFilteredProduct(searchQuery, sizeId, brandId, materialId);
+                var product = await _productRepo.GetFilteredProduct(searchQuery, sizeId, brandId, materialId ,categoryId);
                 if(product == null || product.Count == 0)
                 {
                     return NotFound();
@@ -62,10 +62,12 @@ namespace API.Controllers
                     Id = product.Id,
                     Name = product.Name,
                     Price = product.Price,
+                    Stock = product.Stock,
                     Description = product.Description,
                     BrandId = product.BrandId,
                     MaterialId = product.MaterialId,
-                    SizeId = product.SizeId
+                    SizeId = product.SizeId,
+                    CategoryId = product.CategoryId
                     
                 };
                 await _productRepo.Create(sp);
@@ -88,10 +90,12 @@ namespace API.Controllers
                     Id = product.Id,
                     Name = product.Name,
                     Price = product.Price,
+                    Stock = product.Stock,
                     Description = product.Description,
                     BrandId = product.BrandId,
                     MaterialId = product.MaterialId,
-                    SizeId = product.SizeId
+                    SizeId = product.SizeId,
+                    CategoryId = product.CategoryId
                 };
                 await _productRepo.Update(product);
                 await _productRepo.SaveChanges();

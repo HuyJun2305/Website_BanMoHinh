@@ -66,14 +66,14 @@ namespace View.Controllers
             return View(dataImage);
         }
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Price, Name, Description, BrandId, SizeId, MaterialId, CategoryId")] Product product)
+        public async Task<IActionResult> Create([Bind("Price, Name, Description,Stock, BrandId, SizeId, MaterialId, CategoryId")] Product product)
         {
             if (ModelState.IsValid)
             {
                 product.Id = Guid.NewGuid();
                 await _productServer.Create(product);
 
-                return Json(new { success = true, productId = product.Id });
+                return Json( new { success = true, productId = product.Id });
             }
 
             return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
@@ -144,7 +144,6 @@ namespace View.Controllers
         }
 
 
-        [HttpPost]
         public async Task<IActionResult> Upload(IFormFile imageFile, Guid productId)
         {
             if (imageFile != null && imageFile.Length > 0)
@@ -156,15 +155,23 @@ namespace View.Controllers
                 {
                     return Json(new { success = false, message = "File không hợp lệ" });
                 }
+
+                var fileName = imageFile.FileName;
                 var guidForImg = Guid.NewGuid().ToString();
-                // Lưu ảnh vào thư mục hoặc xử lý ảnh
-                string dataPath = Path.Combine("/images/", guidForImg + "-" + imageFile.FileName);
-                string filePath = Path.Combine("wwwroot/images", guidForImg + "-" + imageFile.FileName);
+                var filePath = Path.Combine("wwwroot/images", guidForImg + "-" + fileName);
+                var dataPath = Path.Combine("/images/", guidForImg + "-" + fileName);
+
+                // Kiểm tra xem ảnh đã tồn tại chưa
+                if (System.IO.File.Exists(filePath))
+                {
+                    return Json(new { success = false, message = "Ảnh đã tồn tại trong hệ thống" });
+                }
+
                 var product = _productServer.GetAllProduct().Result;
 
                 if (product == null)
                 {
-                    return Json(new { success = false, message = "Màu không hợp lệ" });
+                    return Json(new { success = false, message = "Mã sản phẩm không hợp lệ" });
                 }
 
                 Image img = new Image()
@@ -173,6 +180,7 @@ namespace View.Controllers
                     ProductId = productId,
                     URL = dataPath,
                 };
+
                 try
                 {
                     using (var stream = new FileStream(filePath, FileMode.Create))
@@ -191,6 +199,21 @@ namespace View.Controllers
 
             return Json(new { success = false, message = "Không có ảnh được tải lên" });
         }
+
+
+        [HttpGet]
+        public IActionResult CheckImageExists(string imageName)
+        {
+            var filePath = Path.Combine("wwwroot/images", imageName);
+
+            if (System.IO.File.Exists(filePath))
+            {
+                return Json(new { exists = true });
+            }
+
+            return Json(new { exists = false });
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteImage(string id)

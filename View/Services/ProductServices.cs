@@ -28,7 +28,7 @@ namespace View.Services
             return products;
         }
 
-        public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? imageId = null, Guid? brandId = null, Guid? materialId = null)
+        public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? imageId = null, Guid? brandId = null,Guid? categoryId = null, Guid? materialId = null)
         {
             //Xây dựng URL cho request
             var url = $"https://localhost:7280/api/Products/filterAndsearch?";
@@ -48,6 +48,10 @@ namespace View.Services
             if (materialId.HasValue)
             {
                 url += $"materialId={materialId.Value}&";
+            }
+            if (materialId.HasValue)
+            {
+                url += $"categoryId={categoryId.Value}&";
             }
             //Xóa dấu & ở cuối cùng
             url = url.TrimEnd('&');

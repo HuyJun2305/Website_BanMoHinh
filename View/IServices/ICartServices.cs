@@ -10,9 +10,9 @@ namespace View.IServices
 		Task Update(Cart cart, Guid id);
 		Task<List<CartDetail>> GetAllCartDetails();
 		Task<List<CartDetail>> GetCartDetailByCartId(Guid cartId);
+		Task<CartDetail> GetCartDetailByProductId(Guid cartId, Guid productId);
 		Task<Cart> GetCartDetailById(Guid id);
-		Task CreateCartDetails(CartDetail cartDetail);
-		Task UpdateCartDetails(CartDetail cartDetail, Guid id);
+		Task<CartDetail> AddToCart(Guid cartId, Guid productId, int quantity);
 		Task Delete(Guid id);
 	}
 }

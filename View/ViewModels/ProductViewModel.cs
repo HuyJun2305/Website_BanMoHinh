@@ -8,6 +8,8 @@ namespace View.ViewModels
     {
         public IEnumerable<Product>? Products { get; set; }
         public IEnumerable<Image>? Images { get; set; }
+        public Guid CartId { get; set; }
+
     }
     public class ProductViewModel
     {

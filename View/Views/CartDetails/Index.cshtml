@@ -4,6 +4,17 @@
     ViewData["Title"] = "Danh Sách Sản Phẩm";
     Layout = "_LayoutCustomer";
 }
+@{
+    var message = ViewBag.Message as string;
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-warning">
+        @message
+    </div>
+}
+
 
 
 <!-- breadcrumb -->

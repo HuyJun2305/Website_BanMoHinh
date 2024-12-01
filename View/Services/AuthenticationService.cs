@@ -54,29 +54,32 @@ namespace View.Services
             
             return jwt.Claims.First(c => c.Type == ClaimTypes.Name).Value;
         }
-        
-        public async ValueTask<string> LoginAsync(LoginModel model)
-        {
-            //var response = await _factory.CreateClient("ServerApi").PostAsync("api/Authentication/Login", JsonContent.Create(model));
-            string requestURL = "https://localhost:7280/api/Authentication/Login";
 
-            // Gửi request tới API
-            var response = await _httpClient.PostAsJsonAsync(requestURL, model);
+		public async ValueTask<string> LoginAsync(LoginModel model)
+		{
+			string requestURL = "https://localhost:7280/api/Authentication/Login";
 
-            if (!response.IsSuccessStatusCode)
-                throw new UnauthorizedAccessException("Đăng nhập thất bại!");
+			// Gửi request tới API
+			var response = await _httpClient.PostAsJsonAsync(requestURL, model);
 
-            var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
+			if (!response.IsSuccessStatusCode)
+			{
+				// Log thêm chi tiết về lỗi
+				var errorContent = await response.Content.ReadAsStringAsync();
+				throw new UnauthorizedAccessException($"Đăng nhập thất bại! Lỗi: {errorContent}");
+			}
 
-            if (content == null) throw new InvalidDataException();
-            
-                _jwtCache = content.JwtToken;
-            Login = content;
+			var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
+			if (content == null) throw new InvalidDataException();
 
-            return Login.JwtToken;
-        }
-        public async Task<bool> RefreshAsync()
+			_jwtCache = content.JwtToken;
+			Login = content;
+
+			return Login.JwtToken;
+		}
+
+		public async Task<bool> RefreshAsync()
         {
             var model = new RefreshModel
             {

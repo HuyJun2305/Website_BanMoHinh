@@ -67,9 +67,6 @@ namespace View.Controllers
 					var products = _productServices.GetAllProduct().Result;
 					var selectedImage = _imageServices.GetAllImages().Result;
 
-					// Nếu không có sản phẩm trong giỏ hàng
-					ViewBag.Message = "Bạn chưa có sản phẩm nào trong giỏ hàng!";
-
 
 					// Nếu có sản phẩm, trả về view với dữ liệu giỏ hàng
 					var productData = new CartDetailsViewModel()
@@ -88,27 +85,27 @@ namespace View.Controllers
 		}
 
 
-		[HttpPost]
-		public async Task<ActionResult> AddToCart(Guid productId, int quantity)
-		{
-				// Lấy userId từ JWT trong session
-				var userId = GetUserIdFromJwtInSession();
+		//[HttpPost]
+		//public async Task<ActionResult> AddToCart(Guid productId, int quantity)
+		//{
+		//		// Lấy userId từ JWT trong session
+		//		var userId = GetUserIdFromJwtInSession();
 
-				// Lấy giỏ hàng của người dùng
-				var cart = await _cartServices.GetCartByUserId(userId);
+		//		// Lấy giỏ hàng của người dùng
+		//		var cart = await _cartServices.GetCartByUserId(userId);
 
-				if (cart == null)
-				{
-					return Json(new { success = false, message = "Không tìm thấy giỏ hàng của người dùng." });
-				}
+		//		if (cart == null)
+		//		{
+		//			return Json(new { success = false, message = "Không tìm thấy giỏ hàng của người dùng." });
+		//		}
 
-				// Gọi dịch vụ hoặc repository để thêm sản phẩm vào giỏ hàng
-				await _cartServices.AddToCart(cart.Id, productId, quantity);
+		//		// Gọi dịch vụ hoặc repository để thêm sản phẩm vào giỏ hàng
+		//		await _cartServices.AddToCart(cart.Id, productId, quantity);
 
-				// Trả về kết quả thành công
-				return Json(new { success = true, message = "Sản phẩm đã được thêm vào giỏ hàng!" });
+		//		// Trả về kết quả thành công
+		//		return Json(new { success = true, message = "Sản phẩm đã được thêm vào giỏ hàng!" });
 			
-		}
+		//}
 
 
 

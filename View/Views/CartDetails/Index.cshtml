@@ -64,7 +64,7 @@
                                 </div>
 								</td>
 									<td class="column-2">@item.Product.Name</td>
-									<td class="column-3">@item.Product.Price</td>
+									<td class="column-3">@item.Product.Price.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))</td>
 									<td class="column-4">
 									    <div class="wrap-num-product flex-w m-l-auto m-r-0">
 									        <!-- Nút giảm số lượng -->
@@ -73,7 +73,7 @@
 									        </div>
 									
 									        <!-- Ô nhập số lượng -->
-									        <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="1" min="0" readonly>
+									        <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="@item.Quatity" min="0" readonly>
 									
 									        <!-- Nút tăng số lượng -->
 									        <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="updateCartDetail()">
@@ -82,7 +82,7 @@
 									    </div>
 									</td>
 
-									<td class="column-5">@item.TotalPrice</td>
+									<td class="column-5">@item.TotalPrice.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))</td>
 								</tr>
 							}
 							

@@ -114,7 +114,7 @@
 								<!-- Nút Add to Cart -->
 								<button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
 										data-product-id="@Model.Products.FirstOrDefault()?.Id"
-										data-cart-id="@Model.CartId" >
+										data-cart-id="@Model.CartId" >	
 									Add to cart
 								</button>
 							</div>
@@ -443,22 +443,19 @@
 							},
 						})
 							.then(response => {
-								if (!response.ok) {
-									throw new Error('Request failed with status ' + response.status);
-								}
-								return response.json();
-							})
-							.then(data => {
-								if (data.success) {
+								if (response.ok) {
+									// Thành công, hiển thị thông báo
 									alert('Sản phẩm đã được thêm vào giỏ hàng!');
 								} else {
-									alert('Có lỗi xảy ra: ' + data.message);
+									// Lỗi HTTP khác ngoài 2xx
+									throw new Error(`Request failed with status ${response.status}`);
 								}
 							})
 							.catch(error => {
-								console.error('Error:', error);
-								alert('Không thể thêm sản phẩm vào giỏ hàng. ' + error.message);
+								console.error('Error:', error.message);
+								alert('Không thể thêm sản phẩm vào giỏ hàng. Error: ' + error.message);
 							});
+
 					} else {
 						alert('Thông tin không hợp lệ.');
 					}

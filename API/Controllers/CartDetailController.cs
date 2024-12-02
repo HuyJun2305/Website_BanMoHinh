@@ -81,7 +81,7 @@ namespace API.Controllers
 			try
 			{
 				await _cartRepo.AddToCart(cartId, productId, quantity);
-				return Ok(new { message = "Product added to cart successfully!" });
+				return Ok();
 			}
 			catch (Exception ex)
 			{

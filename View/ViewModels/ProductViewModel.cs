@@ -11,7 +11,15 @@ namespace View.ViewModels
         public Guid CartId { get; set; }
 
     }
-    public class ProductViewModel
+    public class ProductDetailViewModel
+    {
+		public IEnumerable<Product>? Products { get; set; }
+		public IEnumerable<Image>? Images { get; set; }
+        public IEnumerable<CartDetail>? CartDetails { get; set; }
+		public Guid CartId { get; set; }
+
+	}
+	public class ProductViewModel
     {
         public string Name { get; set; }
         public decimal Price { get; set; }

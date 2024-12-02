@@ -31,6 +31,7 @@ builder.Services.AddScoped<IMaterialRepo, MaterialRepo>();
 builder.Services.AddScoped<IImageRepo, ImageRepo>();
 builder.Services.AddScoped<IProductRepos, ProductRepos>();
 builder.Services.AddScoped<ICartRepo, CartRepo>();
+builder.Services.AddScoped<IAddresRepo, AddresRepo>();
 builder.Services.AddScoped<ICartDetailRepo, CartDetailRepo>();
 
 // Add services to the container.

@@ -29,6 +29,7 @@ builder.Services.AddAuthorizationCore();
 //
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient<IAddresServices, AddresServices>();
 builder.Services.AddHttpClient<IBrandServices, BrandServices>();
 builder.Services.AddHttpClient<ISizeServices, SizeServices>();
 builder.Services.AddHttpClient<IProductServices, ProductServices>();

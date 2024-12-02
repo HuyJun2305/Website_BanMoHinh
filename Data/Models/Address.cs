@@ -11,10 +11,11 @@ namespace Data.Models
     public class Address
     {
         public Guid Id { get; set; }
+        public string provinces { get; set; }
         public string District { get; set; }
-        public string Commune { get; set; }
-        public string AddressDetail { get; set; }
-        public string Description { get; set; }
+        public string wards { get; set; }
+        public string? AddressDetail { get; set; }
+        public string? Description { get; set; }
         [ForeignKey("Account")]
         public Guid AccountId { get; set; }
         [JsonIgnore]

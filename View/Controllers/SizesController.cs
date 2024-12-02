@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using View.IServices;
-using View.ViewModel;
+using View.ViewModels;
 
 namespace View.Controllers
 {
@@ -15,6 +15,7 @@ namespace View.Controllers
         {
             _sizeServices = sizeServices;
         }
+
         // GET: Sizes
         public async Task<IActionResult> Index(int currentPage = 1, int rowsPerPage = 10)
         {
@@ -37,6 +38,7 @@ namespace View.Controllers
 
             return View(viewModel);
         }
+
         // GET: Sizes/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
@@ -61,14 +63,16 @@ namespace View.Controllers
         }
 
         // POST: Sizes/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Guid id , Size size)
+        public async Task<IActionResult> Create(SizeViewModel sizeViewModel)
         {
-            if (size.Id != null)
+            if (ModelState.IsValid)
             {
-                size.Id = Guid.NewGuid();
-                await _sizeServices.Create(size);
+                sizeViewModel.NewSize.Id = Guid.NewGuid();
+                await _sizeServices.Create(sizeViewModel.NewSize);
                 return RedirectToAction(nameof(Index));
             }
             return RedirectToAction(nameof(Index));
@@ -91,24 +95,31 @@ namespace View.Controllers
         }
 
         // POST: Sizes/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Size size)
+        public async Task<IActionResult> Edit(Guid id, SizeViewModel sizeViewModel)
         {
-            if (id != size.Id)
+            if (ModelState.IsValid)
             {
-                return NotFound();
-            }
-            if (size.Id != null) 
-            { 
                 try
                 {
-                    await _sizeServices.Update(size);
+                    await _sizeServices.Update(sizeViewModel.NewSize);
                 }
-                catch (Exception ex)
+                catch (DbUpdateConcurrencyException)
                 {
-                    return Content(ex.Message);
+                    var existingMaterial = await _sizeServices.GetSizeById(sizeViewModel.NewSize.Id);
+                    if (existingMaterial == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
+                sizeViewModel.Sizes = await _sizeServices.GetAllSizes();
                 return RedirectToAction(nameof(Index));
             }
             return BadRequest("Lỗi không sửa được");
@@ -143,6 +154,22 @@ namespace View.Controllers
             await _sizeServices.Delete(id);
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(Guid id)
+        {
+            // Tìm kiếm vật liệu theo ID
+            var material = await _sizeServices.GetSizeById(id);
+            if (material == null)
+            {
+                return NotFound();
+            }
+
+            material.Status = !material.Status;
+            await _sizeServices.Update(material);
+
+            return RedirectToAction("Index");
         }
 
     }

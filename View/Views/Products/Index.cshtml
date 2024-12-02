@@ -1,17 +1,31 @@
-﻿@model IEnumerable<Data.Models.Product>
+﻿@model View.ViewModels.ProductIndex
 
 @{
     ViewData["Title"] = "Index";
+    Layout = "_LayoutAdmin";
 }
 
-<h1>Index</h1>
+<h1>Danh Sách Sản Phẩm</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Tạo Sản Phẩm Mới</a>
 </p>
+<!-- Search Form -->
+<form id="searchForm" style="margin-top: 20px;">
+    <div>
+        <label for="searchQuery">Search:</label>
+        <input type="text" id="searchQuery" name="searchQuery" class="form-select" placeholder="Enter product name" />
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
+            <th
+                >STT
+            </th>
+            <th>
+                Hình Ảnh
+            </th>
             <th>
                 Tên
             </th>
@@ -19,7 +33,13 @@
                 Giá
             </th>
             <th>
+                Số lượng
+            </th>
+            <th>
                 Mô tả
+            </th>
+            <th>
+                Danh mục
             </th>
             <th>
                 Thương hiệu
@@ -28,20 +48,33 @@
                 Chất liệu
             </th>
             <th>
-                Giảm giá
-            </th>
-            <th>
                 Kích cỡ
             </th>
             <th>
                 Chức năng
             </th>
-        </tr>
+        </tr>   
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Products)
         {
             <tr>
+                <td></td>
+                <td>
+                    <!-- Carousel Slide trong cột thứ hai (không có nút điều khiển) -->
+                    <div id="productCarousel" class="carousel slide" data-ride="carousel" data-interval="3000" style="width: 100px;">
+
+                        <!-- Slide ảnh -->
+                        <div class="carousel-inner">
+                            @foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
+                            {
+                                <div class="carousel-item @(image.index == 0 ? "active" : "")">
+                                    <img src="@Url.Content(image.value.URL)" alt="NotFound" style="width:100%; height:auto;">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
@@ -49,7 +82,13 @@
                     @Html.DisplayFor(modelItem => item.Price)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.Stock)
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Brand.Name)
@@ -58,16 +97,15 @@
                     @Html.DisplayFor(modelItem => item.Material.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Promotion.Name)
+                    @Html.DisplayFor(modelItem => item.Size.Value)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Size.Width)
-                </td>
-                <td>
-                    @Html.ActionLink("Edit", "Edit", new {  id=item.Id  }) |
-                    @Html.ActionLink("Details", "Details", new {  id=item.Id  }) |
-                    @Html.ActionLink("Delete", "Delete", new {  id=item.Id  })
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
                 </td>
             </tr>
         }
     </tbody>
+</table>
+

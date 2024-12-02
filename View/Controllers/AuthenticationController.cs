@@ -1,6 +1,7 @@
 ﻿using Data.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,35 +27,61 @@ namespace View.Controllers
         {
             return View();
         }
-        [HttpPost]
-        public async Task<IActionResult> Login(LoginModel model)
-        {
-            var jwt = await _authenticationService.LoginAsync(model);
-            if (jwt != null)
-            {
-                var principal = GetPrincipalFromToken(jwt);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,principal);
+		[HttpPost]
+		public async Task<IActionResult> Login(LoginModel model)
+		{
+			
+			var jwt = await _authenticationService.LoginAsync(model);
 
-                var role = GetRoleName(jwt);
+			// Kiểm tra nếu token không null
+			if (jwt != null)
+			{
+				HttpContext.Session.SetString("jwtToken", jwt);
+				// Lấy principal từ token (claims)
 
-                if (role == null) throw new UnauthorizedAccessException();
-                var username = model.Username;
-                HttpContext.Session.SetString("username", username);
-                if (role != "Customer")
-                {
-                    return RedirectToAction("Index", "Home");
-                }
+				var principal = GetPrincipalFromToken(jwt);
+				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+				// Lấy role từ token
+				var role = GetRoleName(jwt);
 
-                return RedirectToAction("Index", "HomeCustomer");
-            }
-            else
-            {
-                ViewData["LoginError"] = "Tên đăng nhập hoặc mật khẩu không đúng.";
-                return View(model);
-            }
+				if (role == null)
+				{
+					throw new UnauthorizedAccessException("Không có quyền truy cập.");
+				}
+				var username = model.Username;
 
-        }
-        private static string GetRoleName(string token)
+				// Lưu tên người dùng vào session
+				HttpContext.Session.SetString("username", username);
+				// Lưu role vào session
+				HttpContext.Session.SetString("role", role);
+
+				// Điều hướng đến trang chính tùy thuộc vào vai trò của người dùng
+				if (role == "Staff" || role == "Admin")
+				{
+					// Nếu là Staff hoặc Admin, chuyển đến trang Home
+					return RedirectToAction("Index", "Home");
+				}
+				else if (role == "Customer" || role == "Guest")
+				{
+					// Nếu là Customer hoặc Guest, chuyển đến trang HomeCustomer
+					return RedirectToAction("Index", "HomeCustomer");
+				}
+				else
+				{
+					// Nếu không phải là những role trên, có thể điều hướng về trang lỗi hoặc thông báo lỗi
+					return Unauthorized();
+				}
+			}
+			else
+			{
+				// Nếu token trả về null, hiển thị thông báo lỗi
+				ViewData["LoginError"] = "Tên đăng nhập hoặc mật khẩu không đúng.";
+				return View(model); // Trả về lại trang login với thông báo lỗi
+			}
+		}
+
+
+		private static string GetRoleName(string token)
         {
             var jwt = new JwtSecurityToken(token);
 
@@ -75,16 +102,22 @@ namespace View.Controllers
 
             return new JwtSecurityTokenHandler().ValidateToken(token, validation, out _);
         }
-        [HttpDelete]
-        public async Task<IActionResult> Logout()
-        {
-            ViewBag.Expiration = null;
-            await _authenticationService.LogoutAsync();
-            return RedirectToAction("Index", "Home");
-        }
+		// Action Logout
+		[HttpPost]
+		public async Task<IActionResult> Logout()
+		{
+			// Hủy đăng nhập của người dùng
+			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+			// Xóa thông tin session (nếu có)
+			HttpContext.Session.Clear();
+
+			// Chuyển hướng về trang đăng nhập
+			return RedirectToAction("Login", "Authentication");
+		}
 
 
 
 
-    }
+	}
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
-    public class CartRepo : ICartRepo
+    public class CartRepo :  ICartRepo
     {
         private readonly ApplicationDbContext _context;
 
@@ -15,16 +15,20 @@ namespace API.Repositories
         }
         public async Task Create(Cart cart)
         {
-            if (await GetCartById(cart.Id) != null) throw new DuplicateWaitObjectException($"Brand : {cart.Id} is existed!");
+            if (await GetCartById(cart.Id) != null) throw new DuplicateWaitObjectException($"Cart : {cart.Id} is existed!");
             await _context.Carts.AddAsync(cart);
+            await _context.SaveChangesAsync();
+            
         }
 
-        public async Task Delete(Guid id)
+        public async Task<Cart> CreateAsync(Cart cart)
         {
-            var cart = await GetCartById(id);
-            if (cart == null) throw new KeyNotFoundException("Not found this brand!");
-            _context.Carts.Remove(cart);
-        }
+			await _context.Carts.AddAsync(cart);
+			await _context.SaveChangesAsync();
+            return cart;
+
+		}
+        
 
         public async Task<List<Cart>> GetAllCart()
         {
@@ -36,7 +40,13 @@ namespace API.Repositories
             return await _context.Carts.Include(p => p.Account).FirstOrDefaultAsync();
         }
 
-        public async Task SaveChanges()
+        public async Task<Cart> GetCartByUserId(Guid userId)
+        {
+            return await _context.Carts.Include(p => p.Account).Where(p => p.AccountId == userId).FirstAsync();
+        }
+
+
+		public async Task SaveChanges()
         {
             await _context.SaveChangesAsync();
         }

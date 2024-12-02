@@ -14,6 +14,17 @@ namespace API.Controllers
         {
             _productRepo = productRepos;
         }
+        //Tìm kiếm sản phẩm 
+        [HttpGet("filterAndsearch")]
+        public async Task<ActionResult<List<Product>>>  FilterProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null,Guid? materialId = null, Guid? categoryId = null)
+            {
+                var product = await _productRepo.GetFilteredProduct(searchQuery, sizeId, brandId, materialId ,categoryId);
+                if(product == null || product.Count == 0)
+                {
+                    return NotFound();
+                }
+                return Ok(product);
+            }
         //Get all
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProduct()
@@ -51,11 +62,13 @@ namespace API.Controllers
                     Id = product.Id,
                     Name = product.Name,
                     Price = product.Price,
+                    Stock = product.Stock,
                     Description = product.Description,
-                    IdBrand = product.IdBrand,
-                    IdMaterial = product.IdMaterial,
+                    BrandId = product.BrandId,
+                    MaterialId = product.MaterialId,
+                    SizeId = product.SizeId,
+                    CategoryId = product.CategoryId
                     
-                    IdSize = product.IdSize,
                 };
                 await _productRepo.Create(sp);
                 await _productRepo.SaveChanges();
@@ -77,11 +90,12 @@ namespace API.Controllers
                     Id = product.Id,
                     Name = product.Name,
                     Price = product.Price,
+                    Stock = product.Stock,
                     Description = product.Description,
-                    IdBrand = product.IdBrand,
-                    IdMaterial = product.IdMaterial,
-                    IdPromotion = product.IdPromotion,
-                    IdSize = product.IdSize,
+                    BrandId = product.BrandId,
+                    MaterialId = product.MaterialId,
+                    SizeId = product.SizeId,
+                    CategoryId = product.CategoryId
                 };
                 await _productRepo.Update(product);
                 await _productRepo.SaveChanges();

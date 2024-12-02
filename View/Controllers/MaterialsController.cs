@@ -2,18 +2,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using View.IServices;
-using View.ViewModel;
+using View.ViewModels;
 
 namespace View.Controllers
 {
     public class MaterialsController : Controller
     {
         private readonly IMaterialServices _materialServices;
+
         public MaterialsController(IMaterialServices materialServices)
         {
             _materialServices = materialServices;
         }
-        // list 
+
+        // GET: Materials
         public async Task<IActionResult> Index(int currentPage = 1, int rowsPerPage = 10)
         {
             var materials = await _materialServices.GetAllMaterials();
@@ -35,7 +37,8 @@ namespace View.Controllers
 
             return View(viewModel);
         }
-        //chi tiet
+
+        // GET: Materials/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
             if (_materialServices.GetAllMaterials() == null)
@@ -51,24 +54,29 @@ namespace View.Controllers
 
             return View(material);
         }
-        //Them
+
+        // GET: Materials/Create
         public IActionResult Create()
         {
             return View();
         }
+
+        // POST: Materials/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Guid id, Material material)
+        public async Task<IActionResult> Create(MaterialViewModel materialViewModel)
         {
-            if (material.Id != null)
+            if (ModelState.IsValid)
             {
-                material.Id = Guid.NewGuid();
-                await _materialServices.Create(material);
+                materialViewModel.NewMaterial.Id = Guid.NewGuid();
+                await _materialServices.Create(materialViewModel.NewMaterial);
                 return RedirectToAction(nameof(Index));
             }
             return RedirectToAction(nameof(Index));
         }
-        //Sua
+
+        // GET: Materials/Edit/5
         public async Task<IActionResult> Edit(Guid id)
         {
             if (_materialServices.GetAllMaterials() == null)
@@ -81,30 +89,45 @@ namespace View.Controllers
             {
                 return NotFound();
             }
+            var model = new MaterialViewModel
+            {
+                NewMaterial = material
+            };
             return View(material);
         }
+
+        // POST: Materials/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Material material)
+        public async Task<IActionResult> Edit(Guid id, MaterialViewModel materialViewModel)
         {
-            if (id != material.Id)
+            if (ModelState.IsValid)
             {
-            }
-            if(material.Id != null)
-            { 
                 try
                 {
-                    await _materialServices.Update(material);
+                    await _materialServices.Update(materialViewModel.NewMaterial);
                 }
-                catch (Exception ex)
+                catch (DbUpdateConcurrencyException)
                 {
-                    return Content(ex.Message);
+                    var existingMaterial = await _materialServices.GetMaterialById(materialViewModel.NewMaterial.Id);
+                    if (existingMaterial == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
+                materialViewModel.Materials = await _materialServices.GetAllMaterials();
                 return RedirectToAction(nameof(Index));
             }
             return BadRequest("Lỗi không sửa được");
         }
-        //xoa
+
+        // GET: Materials/Delete/5
         public async Task<IActionResult> Delete(Guid id)
         {
             if (_materialServices.GetAllMaterials() == null)
@@ -120,7 +143,9 @@ namespace View.Controllers
 
             return View(material);
         }
-        [HttpPost, ActionName("Delete")]
+
+        // POST: Materials/Delete/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
@@ -132,6 +157,21 @@ namespace View.Controllers
             await _materialServices.Delete(id);
 
             return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(Guid id)
+        {
+            // Tìm kiếm vật liệu theo ID
+            var material = await _materialServices.GetMaterialById(id);
+            if (material == null)
+            {
+                return NotFound();
+            }
+
+            material.Status = !material.Status;
+            await _materialServices.Update(material);
+
+            return RedirectToAction("Index");
         }
     }
 }

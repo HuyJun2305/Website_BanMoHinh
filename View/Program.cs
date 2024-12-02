@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using View.Handlers;
 using View.IServices;
-using View.Servicecs;
+using View.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -37,8 +34,9 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
-builder.Services.AddHttpContextAccessor();
-//
+builder.Services.AddHttpClient<ICartServices, CartServices>();
+builder.Services.AddHttpClient<ICategoryServices, CategoryServices>();
+
 
 
 
@@ -46,30 +44,33 @@ builder.Services.AddHttpContextAccessor();
 var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
 builder.Services.AddAuthentication(options =>
 {
-    // Đặt cookie cho giao diện web
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Mặc định cho MVC
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+	// Đặt cookie cho giao diện web
+	options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Mặc định cho MVC
+	options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+	options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 {
-    options.LoginPath = "/Authentication/Login"; // Trang đăng nhập nếu người dùng chưa đăng nhập
-    options.LogoutPath = "/Authentication/Logout"; // Trang đăng xuất
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Thời gian tồn tại của cookie
+	options.LoginPath = "/Authentication/Login"; // Trang đăng nhập nếu người dùng chưa đăng nhập
+	options.LogoutPath = "/Authentication/Logout"; // Trang đăng xuất
+	options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Thời gian tồn tại của cookie
 })
 .AddJwtBearer(options =>
 {
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
-        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-        ClockSkew = new TimeSpan(0, 0, 5)
-    };
-    
+	options.SaveToken = true;
+	options.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+		ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+		ClockSkew = new TimeSpan(0, 0, 5)
+	};
+
 });
 
+
+
+//
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
@@ -99,8 +100,10 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
 app.UseAuthentication();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Authentication}/{action=Login}/{id?}");
+});
 app.Run();

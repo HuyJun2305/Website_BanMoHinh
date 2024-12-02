@@ -10,13 +10,11 @@ namespace Data.Models
     public class CartDetail
     {
         public Guid Id { get; set; }
-        public decimal Price { get; set; }
+        public decimal TotalPrice { get; set; }
         public int Quatity { get; set; }
         public Guid CartId { get; set; }
-        [JsonIgnore]
         public virtual Cart? Cart { get; set; }
         public Guid ProductId { get; set; }
-        [JsonIgnore]
         public virtual Product? Product { get; set; }
     }
 }

@@ -102,15 +102,9 @@
                           </a>
                       </li>
                       <li class="sidebar-item">
-                          <a asp-controller="Soles" asp-action="Index" class="sidebar-link">
-                              <i class="ti ti-circle"></i>
-                              <span class="hide-menu"> Đế giày </span>
-                          </a>
-                      </li>
-                      <li class="sidebar-item">
-                          <a asp-controller="Categories" asp-action="Index" class="sidebar-link">
-                              <i class="ti ti-shoe"></i>
-                              <span class="hide-menu"> Loại giày </span>
+                          <a asp-controller="Category" asp-action="Index" class="sidebar-link">
+                              <i class="ti ti-tag"></i>
+                              <span class="hide-menu"> Danh mục </span>
                           </a>
                       </li>
                       <li class="sidebar-item">
@@ -123,12 +117,6 @@
                           <a asp-controller="Brands" asp-action="Index" class="sidebar-link">
                               <i class="ti ti-star"></i>
                               <span class="hide-menu"> Thương hiệu </span>
-                          </a>
-                       </li>
-                       <li class="sidebar-item">
-                          <a asp-controller="Colors" asp-action="Index" class="sidebar-link">
-                              <i class="ti ti-palette"></i> <!-- Icon cho Màu sắc -->
-                              <span class="hide-menu"> Màu sắc </span>
                           </a>
                        </li>
                        <li class="sidebar-item">
@@ -165,13 +153,13 @@
                       </a>
                       <ul aria-expanded="false" class="collapse first-level">
                           <li class="sidebar-item">
-                              <a href="./coupons.html" class="sidebar-link">
-                                  <i class="ti ti-ticket"></i>
+                                    <a asp-controller="Voucher" asp-action="Index" class="sidebar-link">
+                                        <i class="ti ti-ticket"></i>
                                   <span class="hide-menu"> Phiếu giảm giá </span>
                               </a>
                           </li>
                           <li class="sidebar-item">
-                                    <a asp-controller="Promotions" asp-action="Index" class="sidebar-link">
+                                  <a asp-controller="Promotion" asp-action="Index" class="sidebar-link">
                                   <i class="ti ti-calendar"></i>
                                   <span class="hide-menu"> Đợt giảm giá </span>
                               </a>
@@ -194,13 +182,13 @@
                       </a>
                       <ul aria-expanded="false" class="collapse first-level">
                           <li class="sidebar-item">
-                                    <a asp-controller="Account" asp-action="ListEmployee" class="sidebar-link">
+                                    <a asp-controller="User" asp-action="Index" class="sidebar-link">
                                   <i class="ti ti-user"></i>
                                   <span class="hide-menu"> Nhân viên </span>
                               </a>
                           </li>
                           <li class="sidebar-item">
-                              <a asp-controller="Account" asp-action="ListCustomer" class="sidebar-link">
+                                    <a asp-controller="Authencation" asp-action="ListCustomer" class="sidebar-link">
                                   <i class="ti ti-id-badge"></i>
                                   <span class="hide-menu"> Khách hàng </span>
                               </a>
@@ -257,7 +245,7 @@
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">My Task</p>
                     </a>
-                        <form asp-controller="Account" asp-action="LogOut" method="post" style="display:inline;">
+                        <form asp-controller="Authentication" asp-action="Logout" method="post" style="display:inline;">
                             <button type="submit" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</button>
                         </form>
 

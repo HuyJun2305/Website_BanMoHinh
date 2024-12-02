@@ -1,0 +1,40 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using API.Data;
+using Data.Models;
+using API.IRepositories;
+
+namespace API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class OrdersController : ControllerBase
+    {
+        private readonly IOrderRepo _orderRepo;
+
+        public OrdersController(IOrderRepo orderRepo)
+        {
+            _orderRepo = orderRepo;
+
+		}
+		[HttpPost("create-by-staff")]
+		public async Task<IActionResult> CreateByStaff([FromQuery] Guid staffId, [FromQuery] Guid? customerId = null , [FromQuery] Guid? voucherId = null)
+		{
+			try
+			{
+				var newOrder = await _orderRepo.CreateByStaff(staffId, customerId, voucherId);
+				return Ok(newOrder);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { message = ex.Message });
+			}
+		}
+
+	}
+}

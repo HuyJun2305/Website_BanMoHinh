@@ -24,6 +24,7 @@ namespace Data.Models
         [JsonIgnore]
         public virtual Voucher? Voucher { get; set; }
         public virtual ApplicationUser? Account { get; set; }
+		public virtual ICollection<OrderDetail>? OrderDetails { get; set; } 
     }
 
 	public enum PaymentMethod

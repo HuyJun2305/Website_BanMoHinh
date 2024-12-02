@@ -95,13 +95,18 @@ namespace API.Repositories
 
 
 		public async Task Delete(Guid id)
-        {
-            var order = await GetOrderById(id);
-            if (order == null) throw new KeyNotFoundException("Not found this brand!");
-            _context.Orders.Remove(order);
-        }
+		{
+			var order = await _context.Orders.FindAsync(id);
+			if (order == null)
+			{
+				throw new KeyNotFoundException($"Order with ID {id} not found.");
+			}
 
-        public async Task<List<Order>> GetAllOrder()
+			_context.Orders.Remove(order);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task<List<Order>> GetAllOrder()
         {
             return await _context.Orders.Include(p => p.Account).ToListAsync();
         }
@@ -117,8 +122,17 @@ namespace API.Repositories
 
         public async Task Update(Order order)
         {
-            if (await GetOrderById(order.Id) == null) throw new KeyNotFoundException("Not found this Id!");
-            _context.Entry(order).State = EntityState.Modified;
-        }
+			var existingOrder = await GetOrderById(order.Id);
+			if (existingOrder == null) throw new KeyNotFoundException("Not found this Id!");
+
+			// Chỉ cập nhật các trường cần thiết
+			existingOrder.Price = order.Price;
+			existingOrder.PaymentMethods = order.PaymentMethods;
+			existingOrder.Status = order.Status;
+			existingOrder.CustomerName = order.CustomerName;
+
+			// Đánh dấu thực thể đã được thay đổi
+			_context.Entry(existingOrder).State = EntityState.Modified;
+		}
     }
 }

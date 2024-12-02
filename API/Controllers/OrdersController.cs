@@ -36,5 +36,52 @@ namespace API.Controllers
 			}
 		}
 
+		[HttpGet("GetAllOrder")]
+		public async Task<ActionResult<List<Order>>> GetAllOrder()
+		{
+			try
+			{
+				return await _orderRepo.GetAllOrder();
+
+			}
+			catch (Exception ex)
+			{
+				return Problem(ex.Message);
+			}
+		}
+
+		[HttpGet("GetOrderById")]
+		public async Task<ActionResult> GetOrderById(Guid id)
+		{
+			try
+			{
+				var order = await _orderRepo.GetOrderById(id);
+				return Ok(order);
+			}
+			catch (Exception ex)
+			{
+
+				return Problem(ex.Message);
+			}
+		}
+		[HttpDelete("DeleteOrderById")]
+		public async Task<ActionResult> DeleteOrder(Guid id)
+		{
+			try
+			{
+				await _orderRepo.Delete(id);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+
+				return Problem(ex.Message);
+
+			}
+		}
+
+		
+
+
 	}
 }

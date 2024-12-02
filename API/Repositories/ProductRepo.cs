@@ -42,9 +42,24 @@ namespace API.Repositories
 
         public async Task Update(Product product)
         {
-            if (await GetProductById(product.Id) == null) throw new KeyNotFoundException("Not found this Id!");
-            _context.Entry(product).State = EntityState.Modified;
-        }
+			var existingProduct = await _context.Products
+				.FirstOrDefaultAsync(p => p.Id == product.Id);
+
+			if (existingProduct == null)
+			{
+				throw new KeyNotFoundException("Không tìm thấy sản phẩm với Id này!");
+			}
+
+			existingProduct.Name = product.Name;
+			existingProduct.Description = product.Description;
+			existingProduct.Price = product.Price;
+			existingProduct.Stock = product.Stock;
+			existingProduct.CategoryId = product.CategoryId;
+
+			_context.Products.Update(existingProduct);
+
+			await _context.SaveChangesAsync();
+		}
         public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
         {
             var query = _context.Products

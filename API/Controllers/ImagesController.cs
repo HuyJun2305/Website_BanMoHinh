@@ -39,7 +39,7 @@ namespace API.Controllers
                     ProductId = image.ProductId,
                 };
                 await _imageRepo.Create(data);
-                await _imageRepo.SaveChanges();
+                return Ok();
 
             }
             catch (Exception ex)

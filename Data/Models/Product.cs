@@ -30,7 +30,7 @@ namespace Data.Models
         public Guid? PromotionId { get; set; }
         public virtual Promotion? Promotion { get; set; }
 
-        public ICollection<Image>? Images { get; set; }
+        public virtual ICollection<Image>? Images { get; set; }
 
 
     }

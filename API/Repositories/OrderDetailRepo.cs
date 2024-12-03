@@ -16,7 +16,7 @@ namespace API.Repositories
 		public async Task<List<OrderDetail>?> GetOrderDetailsByOrderIdAsync(Guid orderId)
 		{
 			return await _context.OrderDetails
-				.Include(p => p.Product).ThenInclude(p => p.Images)
+				.Include(p => p.Product)
 					.Where(od => od.OrderId == orderId)
 					.ToListAsync();
 		}
@@ -55,7 +55,7 @@ namespace API.Repositories
 				throw new KeyNotFoundException($"No OrderDetail found with ID: {id}");
 
 			_context.OrderDetails.Remove(orderDetail);
-		}
+		}	  
 
 		public async Task SaveChangesAsync()
 		{

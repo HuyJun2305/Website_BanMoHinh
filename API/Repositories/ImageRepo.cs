@@ -14,8 +14,9 @@ namespace API.Repositories
         }
         public async Task Create(Image image)
         {
-            //if (await GetImageById(image.Id) != null) throw new DuplicateWaitObjectException($"Image : {image.Id} is existed!");
+            if (await GetImageById(image.Id) != null) throw new DuplicateWaitObjectException($"Image : {image.Id} is existed!");
             await _context.Images.AddAsync(image);
+            await _context.SaveChangesAsync();
         }
 
         public async Task Delete(Guid id)
@@ -23,6 +24,8 @@ namespace API.Repositories
             var Image = await GetImageById(id);
             if (Image == null) throw new KeyNotFoundException("Not found this Image!");
             _context.Images.Remove(Image);
+            await _context.SaveChangesAsync();
+
         }
 
         public async Task<List<Image>> GetAllImage()
@@ -32,7 +35,7 @@ namespace API.Repositories
 
         public async Task<Image> GetImageById(Guid id)
         {
-            return await _context.Images.Include(p => p.Product).Where(p => p.Id == id).FirstOrDefaultAsync();
+            return await _context.Images.Include(p => p.Product).Where(p => p.ProductId == id).FirstOrDefaultAsync();
         }
 
         public async Task SaveChanges()
@@ -44,6 +47,7 @@ namespace API.Repositories
         {
             if (await GetImageById(image.Id) == null) throw new KeyNotFoundException("Not found this Image!");
             _context.Entry(image).State = EntityState.Modified;
+
         }
     }
 }

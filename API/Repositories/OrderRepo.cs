@@ -112,8 +112,11 @@ namespace API.Repositories
         }
         public async Task<Order> GetOrderById(Guid id)
         {
-            return await _context.Orders.Include(p => p.Account).FirstOrDefaultAsync();
+            return await _context.Orders
+                                 .Include(p => p.Account)  // Bao gồm thông tin liên quan đến Account
+                                 .FirstOrDefaultAsync(o => o.Id == id);  // Lọc theo ID đơn hàng
         }
+
 
         public async Task SaveChanges()
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using View.IServices;
@@ -48,33 +49,83 @@ namespace View.Controllers
 			return Guid.Empty; // Nếu không lấy được userId, trả về Guid.Empty
 		}
 
-		public ActionResult Index()
-		{
+        //public async Task<IActionResult> Index()
+        //{
+        //    var userId = GetUserIdFromJwtInSession(); 
 
-			var userId = GetUserIdFromJwtInSession(); // Lấy userId từ JWT trong session
-			var orderId = _orderServices.GetOrderById(userId).Result;	
+        //    var order = await _orderServices.GetOrderById(userId); 
 
-			if (userId != Guid.Empty)
-			{
-				var orders =  _orderServices.GetAllOrder().Result;
-				var orderDetails = _orderDetailServices.GetOrderDetailsByOrderIdAsync(orderId.Id).Result;
-				var products = _productServices.GetAllProduct().Result;
+        //    if (order == null)
+        //    {
+        //        return View(); 
+        //    }
 
-				var counterSaleDate = new CounterSalesViewModel
-				{
-					orders = orders,
-					products = products,
-					orderDetails = orderDetails
+        //    // Lấy chi tiết đơn hàng nếu có
+        //    var orderDetails = await _orderDetailServices.GetOrderDetailsByOrderIdAsync(order.Id); 
+        //    var products = await _productServices.GetAllProduct(); 
 
-				};
+        //    var counterSaleDate = new CounterSalesViewModel
+        //    {
+        //        orders = await _orderServices.GetAllOrder(), 
+        //        products = products,
+        //        orderDetails = orderDetails
+        //    };
 
-				return View(counterSaleDate);
-			}
+        //    return View(counterSaleDate); 
+        //}
+        public async Task<IActionResult> Index()
+        {
+            // Lấy tất cả đơn hàng từ cơ sở dữ liệu
+            var orders = await _orderServices.GetAllOrder();
 
-			// Nếu không tìm thấy userId hoặc giỏ hàng, chuyển đến trang đăng nhập
-			return RedirectToAction("Login", "Authentication");
-		}
+            Order order;
+
+            // Kiểm tra nếu danh sách đơn hàng trống
+            if (orders == null || !orders.Any())
+            {
+                // Nếu không có đơn hàng, tạo một đơn hàng mới
+                order = new Order
+                {
+                    Id = Guid.NewGuid(),
+                    AccountId = GetUserIdFromJwtInSession(), // Gán userId cho đơn hàng
+                    DayCreate = DateTime.UtcNow,
+                    CreateBy = GetUserIdFromJwtInSession(), // Gán userId cho đơn hàng
+                    Status = OrderStatus.TaoDonHang // Hoặc trạng thái mặc định khác
+                };
+
+                // Lưu đơn hàng mới vào cơ sở dữ liệu
+                await _orderServices.Create(order);
+            }
+            else
+            {
+                // Nếu có ít nhất một đơn hàng, lấy đơn hàng đầu tiên
+                order = orders.FirstOrDefault();
+            }
+
+            // Lấy chi tiết đơn hàng
+            var orderDetails = await _orderDetailServices.GetOrderDetailsByOrderIdAsync(order.Id);
+
+            // Lấy tất cả sản phẩm để hiển thị
+            var products = await _productServices.GetAllProduct();
+
+            // Tạo và trả về view model cho view
+            var counterSaleDate = new CounterSalesViewModel
+            {
+                OrderId = order.Id,
+                //orders = order,
+                products = products,
+                orderDetails = orderDetails
+            };
+
+            return View(counterSaleDate);
+        }
 
 
-	}
+
+
+
+
+
+
+    }
 }

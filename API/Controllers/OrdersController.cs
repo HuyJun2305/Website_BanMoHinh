@@ -22,6 +22,16 @@ namespace API.Controllers
             _orderRepo = orderRepo;
 
 		}
+
+
+		[HttpPost]
+		public async Task<IActionResult> Create(Order order)
+		{
+			await _orderRepo.Create(order);
+			return Ok();
+
+		}
+
 		[HttpPost("create-by-staff")]
 		public async Task<IActionResult> CreateByStaff([FromQuery] Guid staffId, [FromQuery] Guid? customerId = null , [FromQuery] Guid? voucherId = null)
 		{

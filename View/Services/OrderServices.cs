@@ -1,5 +1,6 @@
 ﻿using Data.Models;
 using Newtonsoft.Json;
+using System.Net.Http;
 using View.IServices;
 
 namespace View.Services
@@ -13,12 +14,12 @@ namespace View.Services
 			_client = client;
 		}
 
-		public Task Create(Order order)
+		public async Task Create(Order order)
 		{
-			throw new NotImplementedException();
-		}
+            await _client.PostAsJsonAsync("https://localhost:7280/api/Orders", order);
+        }
 
-		public async Task<Order> CreateByStaff(Guid staffId, Guid? customerId = null, Guid? voucherid = null)
+        public async Task<Order> CreateByStaff(Guid staffId, Guid? customerId = null, Guid? voucherid = null)
 		{
 			var response = await _client.GetStringAsync($"https://localhost:7280/api/Orders/create-by-staff?=staffId={staffId}=customerId={customerId}&voucherId={voucherid}");
 			var result = JsonConvert.DeserializeObject<Order>(response);
@@ -28,7 +29,7 @@ namespace View.Services
 
 		public async Task Delete(Guid id)
 		{
-			 await _client.GetStringAsync($"https://localhost:7280/api/Orders/DeleteOrderById?={id}");
+			 await _client.GetStringAsync($"https://localhost:7280/api/Orders/DeleteOrderById?=id={id}");
 
 		}
 

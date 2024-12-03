@@ -41,7 +41,7 @@ namespace API.Repositories
 		public async Task<List<CartDetail>> GetAllCartDetail()
 		{
 			var lstCartDetails = await _context.CartDetails
-								.Include(pd => pd.Product).ThenInclude(pd => pd.Images)
+								.Include(pd => pd.Product)
 							.ToListAsync();
 			return lstCartDetails;
 		}

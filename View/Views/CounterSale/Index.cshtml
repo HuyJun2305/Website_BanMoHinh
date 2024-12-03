@@ -1,0 +1,227 @@
+﻿@model View.ViewModels.CounterSalesViewModel
+
+@{
+    ViewBag.Title = "Counter Sales";
+    Layout = "_LayoutAdmin";
+}
+
+<h1 class="mb-4 text-center">Counter Sales</h1>
+
+<div>
+    <div class="row mb-8 align-items-center">
+        <div class="col-md-8 text-start">
+            <h3 id="orderHeader" class="text-muted">
+                Order: @Model.orders.FirstOrDefault()?.Id ?? "N/A"
+            </h3>
+        </div>
+        <div class="col-md-4 text-end">
+            <div id="addProductSection" class="d-inline-block">
+                <button id="addProductBtn" class="btn btn-lg btn-primary">Add Product For This Order</button>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-pills" id="orderTabs" role="tablist">
+                @if (Model.orders != null && Model.orders.Any())
+                {
+                    int stt = 1;
+                    foreach (var order in Model.orders)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link @(stt == 1 ? "active" : "")" id="tab-@order.Id" data-bs-toggle="pill" data-order-id="@order.Id" type="button" role="tab">
+                                Order - @stt
+                            </button>
+                        </li>
+                        stt++;
+                    }
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <p class="text-muted">No orders found.</p>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="tab-content" id="orderTabsContent">
+                <div id="orderDetailsContent" class="tab-pane fade show active">
+                    <h3 class="text-center text-muted">Select an order to view details.</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tabs = document.querySelectorAll("#orderTabs .nav-link");
+            const orderHeader = document.querySelector("h3#orderHeader");
+            tabs.forEach(tab => {
+                tab.addEventListener("click", function () {
+                    const orderId = this.getAttribute("data-order-id");
+                    const url = `https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId=${orderId}`;
+
+                    // Cập nhật Order ID hiển thị
+                    if (orderHeader) {
+                        orderHeader.textContent = `Order: ${orderId}`;
+                    }
+
+                    fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const contentDiv = document.getElementById("orderDetailsContent");
+                            contentDiv.innerHTML = "";
+
+                            if (data.length > 0) {
+                                const table = `
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Image</th>
+                                                        <th>Product Name</th>
+                                                        <th>Category</th>
+                                                        <th>Brand</th>
+                                                        <th>Size</th>
+                                                        <th>Price</th>
+                                                        <th>Quatity</th>
+                                                        <th>TotalPrice</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${data.map(item => `
+                                                        <tr>
+                                                            <td>
+                                                                <img src="${item.product?.images?.[0]?.url ?? '/path/404.png'}"
+                                                                     alt="${item.product?.name ?? 'No Name'}"
+                                                                     class="img-thumbnail" style="width: 120px; height: auto;" />
+                                                            </td>
+                                                            <td>${item.product?.name ?? 'Unknown Product'}</td>
+                                                            <td>${item.product?.categoryId ?? 'N/A'}</td>
+                                                            <td>${item.product?.brandId ?? 'N/A'}</td>
+                                                            <td>${item.product?.sizeId ?? 'N/A'}</td>
+                                                            <td>${item.product.price ?? 'N/A'}</td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <button class="btn btn-outline-secondary decrease-quantity mx-1" data-id="${item.id}" type="button">-</button>
+                                                                    <input type="number" class="form-control quantity-input text-center" data-id="${item.id}" value="${item.quatity ?? 1}" min="1" style="width: 60px;" />
+                                                                    <button class="btn btn-outline-secondary increase-quantity mx-1" data-id="${item.id}" type="button">+</button>
+                                                                </div>
+                                                            </td>
+                                                            <td>${item.totalPrice ?? 'N/A'}</td>
+                                                            <td>
+                                                                <button class="btn btn-danger btn-sm remove-product" data-id="${item.id}">Remove</button>
+                                                            </td>
+                                                        </tr>`).join('')}
+                                                </tbody>
+                                            </table>
+                                        `;
+                                console.log(table);
+                                contentDiv.innerHTML = table;
+                                // Bind events to dynamic elements
+                                bindCartEvents();
+
+                            } else {
+                                contentDiv.innerHTML = "<p>No products found for this order.</p>";
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error fetching order details:", error);
+                            const contentDiv = document.getElementById("orderDetailsContent");
+                            contentDiv.innerHTML = "<p>Error loading order details. Please try again later.</p>";
+                        });
+                });
+            });
+
+            // Auto-load first tab
+            const firstTab = tabs[0];
+            if (firstTab) {
+                firstTab.click();
+            }
+        });
+
+        // Bind events for quantity changes and removal
+        function bindCartEvents() {
+            document.querySelectorAll(".increase-quantity").forEach(button => {
+                button.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+                    const input = document.querySelector(`.quantity-input[data-id="${id}"]`);
+                    if (input) {
+                        input.value = parseInt(input.value) + 1;
+                        updateQuantity(id, input.value);
+                    }
+                });
+            });
+
+            document.querySelectorAll(".decrease-quantity").forEach(button => {
+                button.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+                    const input = document.querySelector(`.quantity-input[data-id="${id}"]`);
+                    if (input && input.value > 1) {
+                        input.value = parseInt(input.value) - 1;
+                        updateQuantity(id, input.value);
+                    }
+                });
+            });
+
+            document.querySelectorAll(".remove-product").forEach(button => {
+                button.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+                    removeProduct(id);
+                });
+            });
+        }
+
+        // API calls for updating quantity and removing products
+        function updateQuantity(id, quantity) {
+            fetch(`https://localhost:7280/api/OrderDetails/UpdateQuantity`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id, quantity })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Quantity updated:", data);
+                })
+                .catch(error => console.error("Error updating quantity:", error));
+        }
+
+        function removeProduct(id) {
+            fetch(`https://localhost:7280/api/OrderDetails/RemoveProduct`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Product removed:", data);
+                    document.querySelector(`.remove-product[data-id="${id}"]`).closest("tr").remove();
+                })
+                .catch(error => console.error("Error removing product:", error));
+        }
+    </script>
+
+}
+
+

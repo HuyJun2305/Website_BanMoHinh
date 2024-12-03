@@ -1,7 +1,4 @@
-﻿using Data.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using View.IServices;
@@ -10,21 +7,22 @@ using View.ViewModels;
 
 namespace View.Controllers
 {
-    public class CartDetailsController : Controller
-    {
-        private readonly IProductServices _productServices;
-        private readonly IImageServices _imageServices; 
-        private readonly ICartServices _cartServices;
+	public class CounterSaleController : Controller
+	{
+		private readonly IOrderServices _orderServices;
+		private readonly IOrderDetailServices _orderDetailServices;
+		private readonly IProductServices _productServices;
+		private readonly IImageServices	_imageServices;
 
-        public CartDetailsController(ICartServices cartServices, IProductServices productServices, IImageServices imageServices)
+        public CounterSaleController(IOrderServices orderServices, IOrderDetailServices orderDetailServices, IProductServices productServices, IImageServices imageServices)
         {
-            _cartServices = cartServices;
+            _orderServices = orderServices;
+            _orderDetailServices = orderDetailServices;
             _productServices = productServices;
             _imageServices = imageServices;
         }
 
-
-		private Guid GetUserIdFromJwtInSession()
+        private Guid GetUserIdFromJwtInSession()
 		{
 			var jwtToken = HttpContext.Session.GetString("jwtToken"); // Lấy JWT từ session
 
@@ -50,34 +48,27 @@ namespace View.Controllers
 			return Guid.Empty; // Nếu không lấy được userId, trả về Guid.Empty
 		}
 
-
-
 		public ActionResult Index()
 		{
+
 			var userId = GetUserIdFromJwtInSession(); // Lấy userId từ JWT trong session
+			var orderId = _orderServices.GetOrderById(userId).Result;	
 
 			if (userId != Guid.Empty)
 			{
-				// Lấy thông tin giỏ hàng của userId
-				var cart = _cartServices.GetCartByUserId(userId).Result;
+				var orders =  _orderServices.GetAllOrder().Result;
+				var orderDetails = _orderDetailServices.GetOrderDetailsByOrderIdAsync(orderId.Id).Result;
+				var products = _productServices.GetAllProduct().Result;
 
-				if (cart != null)
+				var counterSaleDate = new CounterSalesViewModel
 				{
-					var cartDetails = _cartServices.GetCartDetailByCartId(cart.Id).Result;
-					var products = _productServices.GetAllProduct().Result;
-					var selectedImage = _imageServices.GetAllImages().Result;
+					orders = orders,
+					products = products,
+					orderDetails = orderDetails
 
+				};
 
-					// Nếu có sản phẩm, trả về view với dữ liệu giỏ hàng
-					var productData = new CartDetailsViewModel()
-					{
-						Products = products,
-						Images = selectedImage,
-						CartDetails = cartDetails
-					};
-
-					return View(productData);
-				}
+				return View(counterSaleDate);
 			}
 
 			// Nếu không tìm thấy userId hoặc giỏ hàng, chuyển đến trang đăng nhập
@@ -85,7 +76,5 @@ namespace View.Controllers
 		}
 
 
-
-		
 	}
 }

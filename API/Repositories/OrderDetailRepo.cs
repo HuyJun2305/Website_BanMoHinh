@@ -16,6 +16,7 @@ namespace API.Repositories
 		public async Task<List<OrderDetail>?> GetOrderDetailsByOrderIdAsync(Guid orderId)
 		{
 			return await _context.OrderDetails
+				.Include(p => p.Product).ThenInclude(p => p.Images)
 					.Where(od => od.OrderId == orderId)
 					.ToListAsync();
 		}

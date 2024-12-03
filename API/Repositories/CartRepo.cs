@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.IRepositories;
 using Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
@@ -8,10 +9,12 @@ namespace API.Repositories
     public class CartRepo :  ICartRepo
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CartRepo(ApplicationDbContext context)
+        public CartRepo(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         public async Task Create(Cart cart)
         {
@@ -40,10 +43,24 @@ namespace API.Repositories
             return await _context.Carts.Include(p => p.Account).FirstOrDefaultAsync();
         }
 
-        public async Task<Cart> GetCartByUserId(Guid userId)
+        public async Task<Cart?> GetCartByUserId(Guid userId)
         {
-            return await _context.Carts.Include(p => p.Account).Where(p => p.AccountId == userId).FirstAsync();
+            // Lấy thông tin người dùng
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return null;
+
+            // Kiểm tra vai trò người dùng
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Contains("Customer")) return null;
+
+            // Nếu là "Customer", lấy giỏ hàng
+            return await _context.Carts
+                .Include(c => c.Account)
+                .Where(c => c.AccountId == userId)
+                .FirstOrDefaultAsync();
         }
+
+
 
 
 		public async Task SaveChanges()

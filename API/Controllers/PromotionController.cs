@@ -39,7 +39,10 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPromotion(Promotion promotion)
         {
-
+            if (promotion.PriceReduced != null && promotion.PercentReduced != null || promotion.PriceReduced == null && promotion.PercentReduced == null)
+            {
+                return BadRequest(new { message = "can't exist PriceReduced and PercentReduced at same time. One of them at least have value" });
+            }
             try
             {
                 var promotionupdate = await _promotionRepos.GetPromotionById(promotion.Id);
@@ -70,6 +73,10 @@ namespace API.Controllers
         {
             try
             {
+                if (promotion.PriceReduced != null && promotion.PercentReduced != null || promotion.PriceReduced == null && promotion.PercentReduced == null)
+                {
+                    return BadRequest(new { message = "can't exist PriceReduced and PercentReduced at same time. One of them at least have value" });
+                }
                 await _promotionRepos.Create(promotion);
                 await _promotionRepos.SaveChanges();
                 return Ok(promotion);
@@ -80,7 +87,29 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpPut("ApplyToProduct/{id}")]
+        public async Task<IActionResult> ApplyToProduct(List<Guid> productIds, Guid id)
+        {
+            try
+            {
+                if (productIds == null)
+                {
+                    return BadRequest(new { message = "don't have product in list apply promotion" });
+                }
 
+                if (id == null)
+                {
+                    return BadRequest(new { message = "Not found this Id" });
+                }
+                await _promotionRepos.applyToProduct(productIds, id);
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         // DELETE: api/Promotions/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePromotion(Guid id)

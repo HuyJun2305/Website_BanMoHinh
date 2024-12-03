@@ -10,6 +10,9 @@ namespace Data.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public decimal? PriceReduced { get; set; }
+
+        public int? PercentReduced { get; set; }
         public string Description { get; set; }
         public DateTime DayStart { get; set; }
         public DateTime DayEnd { get; set; }

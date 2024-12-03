@@ -41,6 +41,11 @@ namespace API.Controllers
             if (voucher == null)
                 return BadRequest(new { Message = "Invalid voucher data." });
 
+            if (voucher.PriceReduced != null && voucher.PercentReduced != null || voucher.PriceReduced == null && voucher.PercentReduced == null)
+            {
+                return BadRequest(new { message = "can't exist PriceReduced and PercentReduced at same time. One of them at least have value" });
+            }
+
             await _voucherRepos.create(voucher);
             return CreatedAtAction(nameof(GetVoucherById), new { id = voucher.Id }, voucher);
         }
@@ -56,6 +61,11 @@ namespace API.Controllers
             if (existingVoucher == null)
             {
                 return NotFound(new { Message = "Voucher not found." });
+            }
+
+            if (voucher.PriceReduced != null && voucher.PercentReduced != null || voucher.PriceReduced == null && voucher.PercentReduced == null)
+            {
+                return BadRequest(new { message = "can't exist PriceReduced and PercentReduced at same time. One of them at least have value" });
             }
 
             await _voucherRepos.update(voucher);
@@ -82,7 +92,7 @@ namespace API.Controllers
         {
             var vouchers = await _voucherRepos.GetAll();
             var applicableVouchers = vouchers.Where(v => v.Status && v.DayStart <= DateTime.Now && v.DayEnd >= DateTime.Now && v.Stock > 0)
-                .OrderByDescending(v =>  v.Percent)
+                .OrderByDescending(v =>  v.PercentReduced)
                 .ToList();
             return Ok(applicableVouchers);
         }

@@ -8,6 +8,8 @@ namespace API.IRepositories
         Task<Promotion> GetPromotionById(Guid id);
         Task Create(Promotion promotion);
         Task Update(Promotion promotion);
+
+        Task applyToProduct(List<Guid> pros, Guid promId);
         Task Delete(Guid id);
         Task SaveChanges();
     }

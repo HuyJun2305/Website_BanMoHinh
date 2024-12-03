@@ -25,15 +25,30 @@ builder.Services.AddAuthorizationCore();
 //
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+//Brand
 builder.Services.AddHttpClient<IBrandServices, BrandServices>();
+//Size
 builder.Services.AddHttpClient<ISizeServices, SizeServices>();
+//Product
 builder.Services.AddHttpClient<IProductServices, ProductServices>();
+//User
 builder.Services.AddScoped<IUserServices, UserServices>();
+//Authentication
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
+//Image
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
+//Material
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
+//Cart
 builder.Services.AddHttpClient<ICartServices, CartServices>();
+//Category
 builder.Services.AddHttpClient<ICategoryServices, CategoryServices>();
+//Order
+builder.Services.AddHttpClient<IOrderServices, OrderServices>();
+//OrderDetails
+builder.Services.AddHttpClient<IOrderDetailServices, OrderDetailServices>();
+//
+
 
 
 

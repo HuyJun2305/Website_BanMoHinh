@@ -22,30 +22,18 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.User.AllowedUserNameCharacters += " ")
     .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddTokenProvider("MyApp", typeof(DataProtectorTokenProvider<ApplicationUser>));
-//Promotion
+
 builder.Services.AddScoped<IPromotionRepos, PromotionRepos>();
-//Voucher
 builder.Services.AddScoped<IVoucherRepos, VoucherRepos>();
-//Size
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
-//Brand
 builder.Services.AddScoped<IBrandRepo, BrandRepo>();
-//Material
 builder.Services.AddScoped<IMaterialRepo, MaterialRepo>();
-//Image
 builder.Services.AddScoped<IImageRepo, ImageRepo>();
-//Product
 builder.Services.AddScoped<IProductRepos, ProductRepos>();
-//Cart
 builder.Services.AddScoped<ICartRepo, CartRepo>();
-//CartDetail
+builder.Services.AddScoped<IAddresRepo, AddresRepo>();
 builder.Services.AddScoped<ICartDetailRepo, CartDetailRepo>();
-//Category
-builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
-//Order
-builder.Services.AddScoped<IOrderRepo, OrderRepo>();
-//OrderDetail
-builder.Services.AddScoped<IOrderDetailRepo, OrderDetailRepo>();
+builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();  
 
 // Add services to the container.
 

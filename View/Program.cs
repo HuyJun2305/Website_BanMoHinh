@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using View.Handlers;
 using View.IServices;
+using View.Servicecs;
 using View.Services;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,34 +22,21 @@ builder.Services.AddTransient<AuthenticationHandler>();
 builder.Services.AddHttpClient("ServerApi")
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7280" ?? ""))
                 .AddHttpMessageHandler<AuthenticationHandler>();
+
 builder.Services.AddAuthorizationCore();
 //
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
-//Brand
+builder.Services.AddHttpClient<IAddresServices, AddresServices>();
 builder.Services.AddHttpClient<IBrandServices, BrandServices>();
-//Size
 builder.Services.AddHttpClient<ISizeServices, SizeServices>();
-//Product
 builder.Services.AddHttpClient<IProductServices, ProductServices>();
-//User
 builder.Services.AddScoped<IUserServices, UserServices>();
-//Authentication
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
-//Image
 builder.Services.AddHttpClient<IImageServices, ImageServices>();
-//Material
 builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
-//Cart
 builder.Services.AddHttpClient<ICartServices, CartServices>();
-//Category
 builder.Services.AddHttpClient<ICategoryServices, CategoryServices>();
-//Order
-builder.Services.AddHttpClient<IOrderServices, OrderServices>();
-//OrderDetails
-builder.Services.AddHttpClient<IOrderDetailServices, OrderDetailServices>();
-//
-
 
 
 

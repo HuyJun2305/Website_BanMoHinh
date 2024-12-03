@@ -45,6 +45,8 @@ namespace XuongTT_API.Controllers
 				UserName = model.Username,
 				Addresses = new List<Address>(),
 				Email = model.Email,
+				Name = model.FullName,
+				PhoneNumber = model.PhoneNumber,
 				SecurityStamp = Guid.NewGuid().ToString()
 
 			};

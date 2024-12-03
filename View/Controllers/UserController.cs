@@ -14,14 +14,20 @@ namespace View.Controllers
         // GET: UserController
 
         private readonly IUserServices _userServices;
+        private readonly List<string> roles = new List<string>() { "Admin", "Staff", "Customer" };
         public UserController(IUserServices userServices)
         {
             _userServices = userServices;
         }
-        public async Task<IActionResult> Index(int currentPage = 1, int rowsPerPage = 10)
+        public async Task<IActionResult> Index()
         {
             var username = HttpContext.Session.GetString("username");
-            ViewData["RolesName"] = new SelectList(await _userServices.GetAllRoles(username),"roleName");
+            ViewData["RolesName"] = new SelectList(roles);
+
+            if (User.Identity.IsAuthenticated == false)
+            {
+                RedirectToAction("Login", "Authentication");
+            }
 
             var all = await _userServices.GetAllUser();
             //
@@ -83,7 +89,7 @@ namespace View.Controllers
         public  async Task<ActionResult> Create()
         {
             var username = HttpContext.Session.GetString("username");
-            ViewData["RolesName"] = new SelectList(await _userServices.GetAllRoles(username), "roleName");
+            ViewData["RolesName"] = new SelectList(roles);
             return  View();
         }
 
@@ -129,7 +135,7 @@ namespace View.Controllers
 
 
             var username = HttpContext.Session.GetString("username");
-            ViewData["RolesName"] = new SelectList(await _userServices.GetAllRoles(username), "roleName");
+            ViewData["RolesName"] = new SelectList(roles);
 
             return View(data);
         }

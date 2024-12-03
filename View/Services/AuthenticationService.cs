@@ -78,8 +78,20 @@ namespace View.Services
 
 			return Login.JwtToken;
 		}
+        public async Task<bool> Register(DangKyModel model)
+        {
+            string requestURL = "https://localhost:7280/api/Authentication/Register";
 
-		public async Task<bool> RefreshAsync()
+            // Gửi request tới API
+            var response = await _httpClient.PostAsJsonAsync(requestURL, model);
+            if (!response.IsSuccessStatusCode)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public async Task<bool> RefreshAsync()
         {
             var model = new RefreshModel
             {

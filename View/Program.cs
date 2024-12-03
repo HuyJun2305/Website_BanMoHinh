@@ -38,6 +38,10 @@ builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
 builder.Services.AddHttpClient<ICartServices, CartServices>();
 builder.Services.AddHttpClient<ICategoryServices, CategoryServices>();
 
+//order
+builder.Services.AddHttpClient<IOrderServices, OrderServices>();
+//orderDetail
+builder.Services.AddHttpClient<IOrderDetailServices, OrderDetailServices>();
 
 
 

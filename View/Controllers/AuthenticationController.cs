@@ -80,6 +80,25 @@ namespace View.Controllers
 			}
 		}
 
+		public async Task<IActionResult> Register()
+        {
+            return View();
+        }
+		[HttpPost]
+		public async Task<IActionResult> Register(DangKyModel model)
+		{
+			
+			var regis = await _authenticationService.Register(model);
+
+            // Kiểm tra nếu token không null
+            if (!regis)
+            {
+				ViewData["RegisterError"] = "chưa đăng kí thành công";
+				return View(model);
+            }
+			return RedirectToAction("Login","Authentication");
+        }
+
 
 		private static string GetRoleName(string token)
         {

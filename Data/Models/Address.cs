@@ -19,7 +19,7 @@ namespace Data.Models
         [ForeignKey("Account")]
         public Guid AccountId { get; set; }
         [JsonIgnore]
-        public virtual ApplicationUser Account { get; set; }    
+        public virtual ApplicationUser? Account { get; set; }    
 
     } 
 }

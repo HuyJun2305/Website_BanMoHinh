@@ -9,6 +9,7 @@ namespace View.IServices
 
         ValueTask<string> GetJwtAsync();
         ValueTask<string> LoginAsync(LoginModel model);
+        Task<bool> Register(DangKyModel model);
         Task LogoutAsync();
         Task<bool> RefreshAsync();
     }

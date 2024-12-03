@@ -47,31 +47,21 @@ namespace View.Controllers
             if (address.Id != null)
             {
                 address.Id = Guid.NewGuid();
-                var jwtToken = HttpContext.Session.GetString("jwtToken"); // Lấy JWT từ session
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value; // Lấy JWT từ session
 
-                if (!string.IsNullOrEmpty(jwtToken))
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    var tokenHandler = new JwtSecurityTokenHandler();
-
-                    // Kiểm tra xem token có hợp lệ không
-                    if (tokenHandler.CanReadToken(jwtToken))
-                    {
-                        var jwt = tokenHandler.ReadJwtToken(jwtToken);
-
-                        // Lấy claim chứa userId từ token
-                        var userIdClaim = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-                        if (Guid.TryParse(userIdClaim, out Guid userId))
-                        {
-                            address.AccountId = userId;
+                   
+                            address.AccountId = Guid.Parse(userId);
 
                             await _services.Create(address);
-                        }
-                        return View(address);
-                    }
+                            return RedirectToAction(nameof(Index));
+
+                        
                 }
                 
-                return RedirectToAction(nameof(Index));
+
+                return View(address);
             }
             return RedirectToAction(nameof(Index));
         }

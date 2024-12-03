@@ -24,6 +24,11 @@ namespace View.Controllers
             var username = HttpContext.Session.GetString("username");
             ViewData["RolesName"] = new SelectList(roles);
 
+            if (User.Identity.IsAuthenticated == false)
+            {
+                RedirectToAction("Login", "Authentication");
+            }
+
             var all = await _userServices.GetAllUser();
             //
             if (all == null || !all.Any())

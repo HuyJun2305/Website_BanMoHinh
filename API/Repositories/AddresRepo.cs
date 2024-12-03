@@ -23,7 +23,6 @@ namespace API.Repositories
         {
             var data = await GetAddresById(id);
             if (data == null) throw new KeyNotFoundException("Not found this brand!");
-            if (_context.Products.Where(p => p.IdBrand == data.Id).Any()) throw new Exception("This brand has used for some product!");
             _context.Addresses.Remove(data);
         }
         //

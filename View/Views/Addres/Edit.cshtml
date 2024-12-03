@@ -88,11 +88,11 @@
     var renderData = (array, select) => {
         let row = ' <option disable value="">Chọn</option>';
         array.forEach(element => {
-            row += `<option data-id="${element.code}" value="${element.name}">${element.name}</option>`
+            row += `<option data-id="${element.code}" value="${element.code}">${element.name}</option>`
         });
         document.querySelector("#" + select).innerHTML = row
     }
-
+    
     $("#city").change(() => {
         callApiDistrict(host + "p/" + $("#city").find(':selected').data('id') + "?depth=2");
         printResult();

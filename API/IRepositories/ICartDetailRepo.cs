@@ -15,6 +15,7 @@ namespace API.IRepositories
 
         Task AddToCart(Guid cartId, Guid productId, int quantity);
 
+        Task CheckOut(Guid cartid);
 	}
 }
 

@@ -16,6 +16,7 @@ namespace Data.Models
         public DateTime DayStart { get; set; }
         public DateTime DayEnd { get; set; }
         public bool Status { get; set; }
+        public Guid AccountId { get; set; }
         public virtual  ApplicationUser Account { get; set; }
     }
 }

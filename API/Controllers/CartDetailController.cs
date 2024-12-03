@@ -90,5 +90,20 @@ namespace API.Controllers
 
 		}
 
+        [HttpPost("CheckOut")] 
+        public async Task<IActionResult> CheckOut(Guid cartId)
+        {
+            try
+            {
+                await _cartRepo.CheckOut(cartId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+
+				return StatusCode(500, new { message = "An error from checkout.", details = ex.InnerException?.Message });
+			}
+		}
+
 	}
 }

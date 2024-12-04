@@ -73,51 +73,17 @@ namespace View.Controllers
 
         //    return View(counterSaleDate); 
         //}
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index2()
         {
-            // Lấy tất cả đơn hàng từ cơ sở dữ liệu
-            var orders = await _orderServices.GetAllOrder();
-
-            Order order;
-
-            // Kiểm tra nếu danh sách đơn hàng trống
-            if (orders == null || !orders.Any())
-            {
-                // Nếu không có đơn hàng, tạo một đơn hàng mới
-                order = new Order
-                {
-                    Id = Guid.NewGuid(),
-                    AccountId = GetUserIdFromJwtInSession(), // Gán userId cho đơn hàng
-                    DayCreate = DateTime.UtcNow,
-                    CreateBy = GetUserIdFromJwtInSession(), // Gán userId cho đơn hàng
-                    Status = OrderStatus.TaoDonHang // Hoặc trạng thái mặc định khác
-                };
-
-                // Lưu đơn hàng mới vào cơ sở dữ liệu
-                await _orderServices.Create(order);
-            }
-            else
-            {
-                // Nếu có ít nhất một đơn hàng, lấy đơn hàng đầu tiên
-                order = orders.FirstOrDefault();
-            }
-
-            // Lấy chi tiết đơn hàng
-            var orderDetails = await _orderDetailServices.GetOrderDetailsByOrderIdAsync(order.Id);
-
-            // Lấy tất cả sản phẩm để hiển thị
             var products = await _productServices.GetAllProduct();
 
-            // Tạo và trả về view model cho view
-            var counterSaleDate = new CounterSalesViewModel
+            // Trả về view với dữ liệu ban đầu
+            var model = new CounterSalesViewModel
             {
-                OrderId = order.Id,
-                //orders = order,
-                products = products,
-                orderDetails = orderDetails
+                products = products // Hiển thị danh sách sản phẩm ban đầu
             };
 
-            return View(counterSaleDate);
+            return View(model);
         }
 
 

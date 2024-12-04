@@ -36,7 +36,7 @@ namespace View.ViewModels
         public IEnumerable<Image>? Images { get; set; }
         public IEnumerable<string>? SelectedImageIds { get; set; }
 
-        public List<ProductViewModel> ProductDetails { get; set; } = new List<ProductViewModel>();
+        public IEnumerable<ProductViewModel> Products { get; set; } = new List<ProductViewModel>();
     }
     public class ImageSP
     {

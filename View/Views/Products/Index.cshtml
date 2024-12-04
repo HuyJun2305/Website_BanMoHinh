@@ -20,51 +20,26 @@
 <table class="table">
     <thead>
         <tr>
-            <th
-                >STT
-            </th>
-            <th>
-                Hình Ảnh
-            </th>
-            <th>
-                Tên
-            </th>
-            <th>
-                Giá
-            </th>
-            <th>
-                Số lượng
-            </th>
-            <th>
-                Mô tả
-            </th>
-            <th>
-                Danh mục
-            </th>
-            <th>
-                Thương hiệu
-            </th>
-            <th>
-                Chất liệu
-            </th>
-            <th>
-                Kích cỡ
-            </th>
-            <th>
-                Chức năng
-            </th>
-        </tr>   
+            <th>STT</th>
+            <th>Hình Ảnh</th>
+            <th>Tên</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Mô tả</th>
+            <th>Danh mục</th>
+            <th>Thương hiệu</th>
+            <th>Chất liệu</th>
+            <th>Chức năng</th>
+        </tr>
     </thead>
     <tbody>
         @foreach (var item in Model.Products)
         {
-            <tr>
+            <tr id="product-row-@item.Id">
                 <td></td>
                 <td>
-                    <!-- Carousel Slide trong cột thứ hai (không có nút điều khiển) -->
+                    <!-- Slide ảnh -->
                     <div id="productCarousel" class="carousel slide" data-ride="carousel" data-interval="3000" style="width: 100px;">
-
-                        <!-- Slide ảnh -->
                         <div class="carousel-inner">
                             @foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
                             {
@@ -75,37 +50,145 @@
                         </div>
                     </div>
                 </td>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                <td>@Html.DisplayFor(modelItem => item.Stock)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@Html.DisplayFor(modelItem => item.Category.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Brand.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Material.Name)</td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Stock)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Category.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Brand.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Material.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Size.Value)
-                </td>
-                <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                    <button class="btn btn-warning btn-sm" onclick="openEditModal('@item.Id')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('@item.Id', '@item.Name')">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<!-- Modal Edit -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Chỉnh Sửa Sản Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editProductId" name="Id" />
+                    <div class="mb-3">
+                        <label for="editProductName" class="form-label">Tên Sản Phẩm</label>
+                        <input type="text" class="form-control" id="editProductName" name="Name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductPrice" class="form-label">Giá</label>
+                        <input type="number" class="form-control" id="editProductPrice" name="Price" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductStock" class="form-label">Số Lượng</label>
+                        <input type="number" class="form-control" id="editProductStock" name="Stock" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label">Mô Tả</label>
+                        <textarea class="form-control" id="editProductDescription" name="Description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductImage" class="form-label">Hình Ảnh</label>
+                        <input type="file" class="form-control" id="editProductImage" name="Image" />
+                        <div id="currentImage" class="mt-2">
+                            <img id="editProductPreviewImage" src="" alt="Product Image" style="width: 150px;" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        // Hàm xử lý xóa sản phẩm
+        function deleteProduct(productId, productName) {
+            if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}" không?`)) {
+                $.ajax({
+                    url: `/Products/Delete/${productId}`, // Đường dẫn API xóa
+                    type: 'DELETE',
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Sản phẩm đã được xóa thành công!');
+                            // Tải lại trang sau khi xóa
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                        }
+                    },
+                    error: function () {
+                        alert('Không thể xóa sản phẩm. Vui lòng kiểm tra lại.');
+                    }
+                });
+            }
+        }
+    </script>
+
+    <script>
+        // Mở modal và tải thông tin sản phẩm
+        function openEditModal(productId) {
+            // Gọi API để lấy thông tin sản phẩm
+            $.ajax({
+                url: `/Products/GetProductById/${productId}`, // Đường dẫn API lấy sản phẩm
+                type: 'GET',
+                success: function (product) {
+                    // Gán dữ liệu vào form
+                    $('#Name').val(product.name);
+                    $('#Price').val(product.price);
+                    $('#Stock').val(product.stock);
+                    $('#CategoryId').val(product.categoryId);
+                    $('#BrandId').val(product.brandId);
+                    $('#MaterialId').val(product.materialId);
+                    $('#Description').val(product.description);
+
+                    // Hiển thị modal
+                    $('#editProductModal').modal('show');
+                },
+                error: function () {
+                    alert('Lỗi khi tải thông tin sản phẩm.');
+                }
+            });
+        }
+
+
+        // Xử lý submit form chỉnh sửa sản phẩm
+        $('#editProductForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/Products/Edit', // API chỉnh sửa sản phẩm
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        alert('Sản phẩm đã được cập nhật!');
+                        location.reload(); // Tải lại trang sau khi chỉnh sửa
+                    } else {
+                        alert('Cập nhật thất bại. Vui lòng thử lại.');
+                    }
+                },
+                error: function () {
+                    alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+                }
+            });
+        });
+    </script>
+
+}
+
+
+
 

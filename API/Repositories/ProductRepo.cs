@@ -42,24 +42,25 @@ namespace API.Repositories
 
         public async Task Update(Product product)
         {
-			var existingProduct = await _context.Products
-				.FirstOrDefaultAsync(p => p.Id == product.Id);
+            var existingProduct = await _context.Products.FindAsync(product.Id);
+            if (existingProduct == null)
+            {
+                throw new Exception("Sản phẩm không tồn tại.");
+            }
 
-			if (existingProduct == null)
-			{
-				throw new KeyNotFoundException("Không tìm thấy sản phẩm với Id này!");
-			}
+            // Cập nhật các trường cần thiết
+            existingProduct.Name = product.Name;
+            existingProduct.Price = product.Price;
+            existingProduct.Description = product.Description;
+            existingProduct.BrandId = product.BrandId;
+            existingProduct.SizeId = product.SizeId;
+            existingProduct.MaterialId = product.MaterialId;
+            existingProduct.CategoryId = product.CategoryId;
 
-			existingProduct.Name = product.Name;
-			existingProduct.Description = product.Description;
-			existingProduct.Price = product.Price;
-			existingProduct.Stock = product.Stock;
-			existingProduct.CategoryId = product.CategoryId;
+            _context.Products.Update(existingProduct);
+            await _context.SaveChangesAsync();
+        }
 
-			_context.Products.Update(existingProduct);
-
-			await _context.SaveChangesAsync();
-		}
         public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
         {
             var query = _context.Products

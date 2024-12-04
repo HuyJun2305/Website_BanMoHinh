@@ -9,7 +9,7 @@ namespace View.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly IProductServices _productServer;
+        private readonly IProductServices productServives;
         private readonly ISizeServices _sizeServices;
         private readonly IBrandServices _brandServices;
         private readonly IMaterialServices _materialServices;
@@ -19,7 +19,7 @@ namespace View.Controllers
             IBrandServices brandServices, IMaterialServices materialServices,
             IImageServices imageServices, ICategoryServices categoryServices)
         {
-            _productServer = productServices;
+            productServives = productServices;
             _sizeServices = sizeServices;
             _brandServices = brandServices;
             _materialServices = materialServices;
@@ -29,13 +29,12 @@ namespace View.Controllers
         //Tìm kiếm theo tên 
         public async Task<IActionResult> FilterProducts(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null)
         {
-            var product = await _productServer.GetFilteredProduct(searchQuery, sizeId, brandId, materialId);
+            var product = await productServives.GetFilteredProduct(searchQuery, sizeId, brandId, materialId);
             return Json(product);
         }
-        //Get danh sách
         public async Task<IActionResult> Index()
         {
-                var products = _productServer.GetAllProduct().Result;
+                var products = productServives.GetAllProduct().Result;
                 var selectedImage = _imageServices.GetAllImages().Result;
                 var productData = new ProductIndex()
                 {
@@ -44,15 +43,19 @@ namespace View.Controllers
                 };
                 return View(productData);
         }
-        //
+
+        public async Task<IActionResult> GetProductById(Guid id)
+        {
+            var product = await productServives.GetProductById(id);
+            return Json(product);
+        }
         public async Task<IActionResult> Details(Guid id)
         {
-            var product = _productServer.GetProductById(id).Result;
+            var product = productServives.GetProductById(id).Result;
             return View(product);
 
 
         }
-        //
         public IActionResult Create()
         {
             ViewData["SizeId"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Value");
@@ -71,77 +74,57 @@ namespace View.Controllers
             if (ModelState.IsValid)
             {
                 product.Id = Guid.NewGuid();
-                await _productServer.Create(product);
+                await productServives.Create(product);
 
                 return Json( new { success = true, productId = product.Id });
             }
 
             return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
         }
-            //
-            public async Task<IActionResult> Edit(Guid id)
-        {
-            if (_productServer.GetAllProduct() == null)
-            {
-                return NotFound();
-            }
 
-            var product = await _productServer.GetProductById(id);
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var product = await productServives.GetProductById(id);
+
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Không tìm thấy sản phẩm.");
             }
             return View(product);
         }
+
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Price, Name, Description, BrandId, SizeId, MaterialId, CategoryId")] Product product)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Price,Name,Description,BrandId,SizeId,MaterialId,CategoryId")] Product product)
         {
-            if(id != product.Id)
+            if (id != product.Id)
             {
-                return NotFound();
+                return NotFound("ID không khớp với sản phẩm cần chỉnh sửa.");
             }
-            if(product.Id != null)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    await _productServer.Update(product);
-                }
-                catch (Exception ex)
-                {
-                    return Content(ex.Message);
-                }
-                return RedirectToAction(nameof(Index));
+                return View(product); 
             }
-            return View(product);
+            try
+            {
+                // Gọi service để cập nhật sản phẩm
+                await productServives.Update(product);
+                TempData["SuccessMessage"] = "Cập nhật sản phẩm thành công.";
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi cập nhật sản phẩm: " + ex.Message);
+                return View(product);
+            }
+            return RedirectToAction(nameof(Index));
         }
-        //
+
         public async Task<IActionResult> Delete(Guid id)
         {
-            if (_productServer.GetAllProduct() == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _productServer.GetProductById(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
+            await productServives.Delete(id);
+            return Json(new { success = true });
         }
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteCom(Guid id)
-        {
-            if(_productServer.GetAllProduct() == null)
-            {
-                return Problem("Entity set 'ProductDetail'  is null.");
-            }
-            await _productServer.Delete(id);
-            return RedirectToAction(nameof(Delete));
-        }
+
 
 
         public async Task<IActionResult> Upload(IFormFile imageFile, Guid productId)
@@ -167,7 +150,7 @@ namespace View.Controllers
                     return Json(new { success = false, message = "Ảnh đã tồn tại trong hệ thống" });
                 }
 
-                var product = _productServer.GetAllProduct().Result;
+                var product = productServives.GetAllProduct().Result;
 
                 if (product == null)
                 {

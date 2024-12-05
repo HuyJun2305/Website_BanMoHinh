@@ -13,19 +13,41 @@ namespace API.Repositories
 			_context = context;
 		}
 
-		public async Task<List<OrderDetail>?> GetOrderDetailsByOrderIdAsync(Guid orderId)
+		public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(Guid? orderId)
 		{
 			return await _context.OrderDetails
-				.Include(p => p.Product)
-					.Where(od => od.OrderId == orderId)
-					.ToListAsync();
+		.Include(od => od.Product)
+			.ThenInclude(p => p.Brand)
+		.Include(od => od.Product)
+			.ThenInclude(p => p.Category)
+		.Include(od => od.Product)
+			.ThenInclude(p => p.Material)
+		.Include(od => od.Product)
+			.ThenInclude(p => p.Images)
+		.Include(od => od.Product)
+			.ThenInclude(p => p.Promotion)
+		.Include(od => od.Product)
+			.ThenInclude(p => p.Size)
+		.Where(od => od.OrderId == orderId)
+		.ToListAsync();
 		}
 
-		public async Task<OrderDetail?> GetOrderDetailByIdAsync(Guid id)
+		public async Task<OrderDetail> GetOrderDetailByIdAsync(Guid id)
 		{
 			return await _context.OrderDetails
-				.Include(od => od.Product)
-				.FirstOrDefaultAsync(od => od.Id == id);
+                .Include(od => od.Product)
+            .ThenInclude(p => p.Brand)
+        .Include(od => od.Product)
+            .ThenInclude(p => p.Category)
+        .Include(od => od.Product)
+            .ThenInclude(p => p.Material)
+        .Include(od => od.Product)
+            .ThenInclude(p => p.Images)
+        .Include(od => od.Product)
+            .ThenInclude(p => p.Promotion)
+        .Include(od => od.Product)
+            .ThenInclude(p => p.Size)
+                .FirstOrDefaultAsync(od => od.Id == id);
 		}
 
 		public async Task CreateAsync(OrderDetail orderDetail)
@@ -55,7 +77,7 @@ namespace API.Repositories
 				throw new KeyNotFoundException($"No OrderDetail found with ID: {id}");
 
 			_context.OrderDetails.Remove(orderDetail);
-		}	  
+		}
 
 		public async Task SaveChangesAsync()
 		{
@@ -203,6 +225,58 @@ namespace API.Repositories
 			// Trả về true nếu thao tác thành công
 			return true;
 		}
-	}
+
+        public async Task<OrderDetail> UpdateOrderDetail(Guid orderId, Guid productId, int quantity)
+        {
+            // Kiểm tra Order tồn tại
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(od => od.Id == orderId);
+            if (order == null)
+            {
+                throw new KeyNotFoundException($"Order with ID {orderId} not found.");
+            }
+
+            // Kiểm tra Product tồn tại
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+            {
+                throw new KeyNotFoundException($"Product with ID {productId} not found.");
+            }
+
+            // Kiểm tra OrderDetail đã tồn tại
+            var existingOrderDetail = await _context.OrderDetails
+                .FirstOrDefaultAsync(od => od.OrderId == orderId && od.ProductId == productId);
+
+            if (existingOrderDetail != null)
+            {
+                // Cập nhật OrderDetail đã tồn tại
+                existingOrderDetail.Quatity = quantity;
+                existingOrderDetail.TotalPrice = quantity * product.Price;
+
+                order.Price = await _context.OrderDetails
+					.Where(od => od.OrderId == orderId)
+					.SumAsync(od => od.TotalPrice);
+
+                // Cập nhật Order trong cơ sở dữ liệu
+                _context.Entry(order).State = EntityState.Modified;
+
+
+                // Cập nhật OrderDetail trong cơ sở dữ liệu
+                _context.Entry(existingOrderDetail).State = EntityState.Modified;
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                await _context.SaveChangesAsync();
+
+                return existingOrderDetail; // Trả về OrderDetail đã cập nhật
+            }
+            else
+            {
+                throw new KeyNotFoundException($"OrderDetail with OrderId {orderId} and ProductId {productId} not found.");
+            }
+        }
+
+    }
 
 }
+
+

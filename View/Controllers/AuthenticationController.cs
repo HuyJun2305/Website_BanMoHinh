@@ -50,6 +50,10 @@ namespace View.Controllers
 				}
 				var username = model.Username;
 
+				var userId = GetUserId(jwt);
+
+				// Lưu tên người dùng vào session
+				HttpContext.Session.SetString("userId", userId);
 				// Lưu tên người dùng vào session
 				HttpContext.Session.SetString("username", username);
 				// Lưu role vào session
@@ -99,7 +103,11 @@ namespace View.Controllers
 			return RedirectToAction("Login","Authentication");
         }
 
-
+		private static string GetUserId(string token)
+		{
+			var jwt = new JwtSecurityToken(token);
+			return jwt.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+        }
 		private static string GetRoleName(string token)
         {
             var jwt = new JwtSecurityToken(token);

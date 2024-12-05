@@ -14,13 +14,16 @@ namespace View.Controllers
 		private readonly IOrderDetailServices _orderDetailServices;
 		private readonly IProductServices _productServices;
 		private readonly IImageServices	_imageServices;
+		private readonly IUserServices _accountServices;
 
-        public CounterSaleController(IOrderServices orderServices, IOrderDetailServices orderDetailServices, IProductServices productServices, IImageServices imageServices)
+        public CounterSaleController(IOrderServices orderServices, IOrderDetailServices orderDetailServices,
+			IProductServices productServices, IImageServices imageServices, IUserServices accountServices)
         {
             _orderServices = orderServices;
             _orderDetailServices = orderDetailServices;
             _productServices = productServices;
             _imageServices = imageServices;
+            _accountServices = accountServices;
         }
 
         private Guid GetUserIdFromJwtInSession()
@@ -37,7 +40,7 @@ namespace View.Controllers
 					var jwt = tokenHandler.ReadJwtToken(jwtToken);
 
 					// Lấy claim chứa userId từ token
-					var userIdClaim = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+					var userIdClaim = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
 					if (Guid.TryParse(userIdClaim, out Guid userId))
 					{
@@ -49,42 +52,62 @@ namespace View.Controllers
 			return Guid.Empty; // Nếu không lấy được userId, trả về Guid.Empty
 		}
 
-        //public async Task<IActionResult> Index()
-        //{
-        //    var userId = GetUserIdFromJwtInSession(); 
 
-        //    var order = await _orderServices.GetOrderById(userId); 
-
-        //    if (order == null)
-        //    {
-        //        return View(); 
-        //    }
-
-        //    // Lấy chi tiết đơn hàng nếu có
-        //    var orderDetails = await _orderDetailServices.GetOrderDetailsByOrderIdAsync(order.Id); 
-        //    var products = await _productServices.GetAllProduct(); 
-
-        //    var counterSaleDate = new CounterSalesViewModel
-        //    {
-        //        orders = await _orderServices.GetAllOrder(), 
-        //        products = products,
-        //        orderDetails = orderDetails
-        //    };
-
-        //    return View(counterSaleDate); 
-        //}
         public async Task<IActionResult> Index2()
         {
+            // Lấy staffId từ session
+            var staffIdString = HttpContext.Session.GetString("userId");
             var products = await _productServices.GetAllProduct();
+            var orders = await _orderServices.GetAllOrder();
 
-            // Trả về view với dữ liệu ban đầu
-            var model = new CounterSalesViewModel
+            var orderId = orders.FirstOrDefault()?.Id ?? null; // Nếu có đơn hàng thì lấy orderId, nếu không có sẽ là null
+
+            var createBy = await _accountServices.GetUserById(staffIdString);
+            // Chuyển đổi staffId từ chuỗi sang Guid
+            if (!Guid.TryParse(staffIdString, out var staffId))
             {
-                products = products // Hiển thị danh sách sản phẩm ban đầu
-            };
+                return BadRequest("Invalid staffId in session.");
+            }
+            // Nếu không có orderId thì trả về trang không có orderDetails
+            if (orderId == null)
+            {
+                // Trả về view không có orderDetail
+                var modelWithoutOrderDetail = new CounterSalesViewModel
+                {
+                    products = products,
+                    orders = orders,
+                    CreateBy = createBy.UserName,
+                    StaffId = createBy.Id,
+                    OrderId = orderId,
+                    orderDetails = null, // Không có orderDetail
+                    OrderDetailsId = null
+                };
 
-            return View(model);
+                return View(modelWithoutOrderDetail);
+            }
+            else
+            {
+                // Nếu có orderId thì lấy orderDetails, nếu không có thì trả về null
+                var orderDetail = await _orderDetailServices.GetOrderDetailsByOrderIdAsync(orderId);
+
+                var orderDetailId = orderDetail?.FirstOrDefault()?.Id;
+
+                // Trả về view có orderDetail nếu có orderId
+                var modelWithOrderDetail = new CounterSalesViewModel
+                {
+                    products = products,
+                    orders = orders,
+                    CreateBy = createBy.UserName,
+                    StaffId = createBy.Id,
+                    OrderId = orderId,
+                    orderDetails = orderDetail,
+                    OrderDetailsId = orderDetailId
+                };
+
+                return View(modelWithOrderDetail); // Trả về view có orderDetail
+            }
         }
+
 
 
 

@@ -4,40 +4,57 @@
     Layout = "_LayoutAdmin";
 }
 
-<h1 class="mb-4 text-center">Counter Sales</h1>
-<hr />
-
-<div>
-    <div id="" class="d-inline-block">
-        <button id="" class="btn btn-md btn-success">Create New Order</button>
-    </div>
-
-</div>
-<hr />
-<div>
-    <div class="row mb-8 align-items-center">
-        <div class="col-md-8 text-start">
-             @if (Model.OrderId != null)
-            {
-                <h3 id="orderHeader" class="text-muted">
-                    Order: @Model.OrderId 
-                </h3>
-            }
-        </div>
-
-        <div class="col-md-4 text-end">
-            <!-- Kiểm tra nếu orderId tồn tại thì hiển thị nút Add Product -->
-            @if (Model.OrderId != null)
-            {
-                <div id="addProductSection" class="d-inline-block">
-                    <button id="addProductBtn" class="btn btn-md btn-primary">Add Product For This Order</button>
+@{
+    int stt = 1;
+}
+<div class="container-fluid">
+    <div class="card shadow-sm rounded">
+        <div class="card-body">
+            <div id="orderForm" class="d-inline-block">
+                <!-- Lưu staffId vào input ẩn để sử dụng trong script -->
+                <input type="hidden" id="staffId" value="@Model.StaffId" />
+                <button id="createOrderBtn" class="btn btn-md btn-success">Create New Order</button>
+            </div>
+            <hr />
+            <div>
+            <div class="row mb-8 align-items-center">
+                <div class="col-md-8 text-start">
+                     @if (Model.OrderId != null)
+                    {
+                        <h3 class="text-muted">
+                            Order Information: 
+                        </h3>
+                        <h5 class="text-muted">Order Id : <span id="orderHeader"> @Model.OrderId</span>  </h5>
+                        <h5 class="text-muted">Staff : <span>@Model.CreateBy</span> </h5>
+                    }
+                    else{
+                        <h3 id="orderHeader" class="text-muted">
+                            #N/A
+                        </h3>
+                    }
                 </div>
-            }
-        </div>
-    </div>
-</div>
 
-<div class="container">
+                <div class="col-md-4 text-end">
+                    <!-- Kiểm tra nếu orderId tồn tại thì hiển thị nút Add Product -->
+                    @if (Model.OrderId != null)
+                    {
+                        <div id="addProductSection" class="d-inline-block">
+                            <button id="addProductBtn" class="btn btn-md btn-primary">Add Product For This Order</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Nút để hiển thị Modal -->
+                        <div id="addProductSection" class="d-inline-block">
+                            <button id="addProductBtn"
+                                class="btn btn-md btn-primary" hidden> Add Product For This Order </button>
+                        </div>
+                    }
+                </div>
+            </div>
+            </div>
+            <hr />
+            <div class="container">
     <div class="row">
         <div class="col-12">
             @if (Model == null || (Model.orders == null || !Model.orders.Any()))
@@ -54,6 +71,7 @@
                 <ul class="nav nav-pills" id="orderTabs" role="tablist">
                     @foreach (var order in Model.orders)
                     {
+                        
                         <li class="nav-item" role="presentation">
                             <button class="nav-link d-flex justify-content-between align-items-center"
                                     id="tab-@order.Id"
@@ -61,19 +79,35 @@
                                     data-order-id="@order.Id"
                                     type="button"
                                     role="tab">
-                                <span>Order - @order.Id</span>
+                                <span>Order - @stt</span>
                                 <span class="btn-close delete-order-btn" aria-label="Close" data-order-id="@order.Id"></span>
                             </button>
                         </li>
+                        stt++;
                     }
                 </ul>
             }
         </div>
     </div>
-</div>
 
-<hr />
-<div class="container">
+    <hr />
+
+     <div class="row mt-4">
+        <div class="col-12">
+            <div class="tab-content" id="orderTabsContent">
+                <div id="orderDetailsContent" class="tab-pane fade show active">
+                    <h3 class="text-center text-muted">Select an order to view details.</h3>
+                </div>
+                <div id="totalPriceContent" class="mt-3 text-end fw-bold fs-5">
+                    Total Price: @Model.orders.FirstOrDefault()?.Price
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+            <hr />
+            <div class="container">
     <div class="row">
         <!-- Khu vực nhập địa chỉ và số điện thoại (Chiếm 6 cột) -->
         <div class="col-md-6">
@@ -184,9 +218,9 @@
                         <!-- Phương thức thanh toán -->
                         <label for="paymentMethod" class="form-label">Payment Method</label>
                         <div class="payment-method-icons">
-                            <img src="path/VNPay_Logo.png" alt="VNPay" class="payment-logo" />
-                            <img src="path/MoMo_Logo.png" alt="MoMo" class="payment-logo" />
-                            <img src="path/ZaloPay_Logo.png" alt="ZaloPay" class="payment-logo" />
+                            <img src="/path/VNPay_Logo.png" style="width : auto; height : 25px" alt="VNPay" class="payment-logo" />
+                            <img src="/path/MoMo_Logo.png" style="width : auto; height: 25px" alt="MoMo" class="payment-logo" />
+                            <img src="/path/ZaloPay_Logo.png" style="width : auto; height: 25px" alt="ZaloPay" class="payment-logo" />
                         </div>
 
                         <select class="form-select" id="paymentMethod" required>
@@ -207,7 +241,52 @@
         </div>
     </div>
 </div>
+        </div>
+    </div>
+</div>
 
+
+
+<!-- Modal thêm sản phẩm -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> <!-- Thay đổi kích thước modal thành modal-lg -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Add Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Thanh tìm kiếm sản phẩm -->
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="searchProduct" placeholder="Search for products..." onkeyup="filterProducts()" />
+                </div>
+
+                <!-- Bảng hiển thị thông tin sản phẩm -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Image</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Các dòng dữ liệu sản phẩm sẽ được thêm vào ở đây -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                    class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @section Styles {
@@ -285,14 +364,85 @@
 }
 
 @section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<!---------------------------------------->
+
+    <!--  Phần script để tạo ra tab-order -->
+<script>
+        document.addEventListener("DOMContentLoaded", () => {
+    // Hàm tạo đơn hàng mới bởi nhân viên
+    function createOrderByStaff() {
+        // Lấy staffId từ input ẩn
+        const staffId = document.getElementById("staffId").value;
+
+        if (!staffId) {
+            alert("Staff ID is missing. Please log in again.");
+            return;
+        }
+
+        const customerId = document.querySelector("#customerId")?.value || null;
+        const voucherId = document.querySelector("#voucherId")?.value || null;
+
+        const orderData = {
+            orderItems: [...document.querySelectorAll(".order-item")].map(item => ({
+                productId: item.getAttribute("data-product-id"),
+                quantity: item.querySelector(".quantity-input").value
+            })),
+            totalPrice: document.querySelector("#totalPrice").value,
+            status: 0 // Trạng thái đơn hàng
+        };
+
+        // Xây dựng URL với query parameters
+        let url = `https://localhost:7280/api/Orders/create-by-staff?staffId=${staffId}`;
+        if (customerId) url += `&customerId=${customerId}`;
+        if (voucherId) url += `&voucherId=${voucherId}`;
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderData),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to create the order");
+                }
+                return response.json();
+            })
+            .then(data => {
+                location.reload(); 
+            })
+            .catch(error => {
+                console.error("Error creating order:", error);
+                alert("Failed to create the order. Please try again.");
+            });
+    }
+
+    // Gắn sự kiện vào nút Create Order
+    const createOrderBtn = document.getElementById("createOrderBtn");
+    if (createOrderBtn) {
+        createOrderBtn.addEventListener("click", createOrderByStaff);
+    }
+});
+
+    </script>
+
+
+    <!-- Phần script để tạo ra Hiển thị ra order và xóa order -->
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
     const tabs = document.querySelectorAll("#orderTabs .nav-link");
     const orderHeader = document.querySelector("h3#orderHeader");
+
+    let hasReloaded = false;
+
+    
 
     tabs.forEach(tab => {
         tab.addEventListener("click", function () {
             const orderId = this.getAttribute("data-order-id");
+
             const deleteButton = this.parentElement.querySelector(".delete-order-btn");
 
             // Hiển thị nút xóa của tab được chọn, ẩn nút xóa của các tab khác
@@ -309,24 +459,22 @@
         });
     });
 
-    // Xóa Order khi click nút Delete
+// Gắn sự kiện cho nút xóa
     document.querySelectorAll(".delete-order-btn").forEach(button => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function (event) {
+            event.stopPropagation(); // Ngăn không cho sự kiện click tab được kích hoạt
             const orderId = this.getAttribute("data-order-id");
             deleteOrder(orderId);
         });
     });
 
-    // Auto-load first tab
+    // Auto-load first tab  
     const firstTab = tabs[0];
     if (firstTab) {
         firstTab.click();
     }
 
-    // Gọi API tạo đơn hàng
-    document.querySelector("#createOrderButton").addEventListener("click", function () {
-        createOrderByStaff();
-    });
+    
 });
 
 // Hàm xóa Order
@@ -343,7 +491,6 @@ function deleteOrder(orderId) {
         if (!response.ok) {
             throw new Error("Failed to delete the order");
         }
-        alert("Order deleted successfully!");
         location.reload(); // Reload lại trang sau khi xóa
     })
     .catch(error => {
@@ -355,6 +502,7 @@ function deleteOrder(orderId) {
 // Hàm tải chi tiết đơn hàng
 function loadOrderDetails(orderId) {
     const url = `https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId=${orderId}`;
+    
     fetch(url, {
         method: 'GET',
         headers: {
@@ -363,19 +511,21 @@ function loadOrderDetails(orderId) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error("Network response was not ok");
+            throw new Error(`Network response was not ok: ${response.statusText}`);
         }
         return response.json();
     })
     .then(data => {
         const contentDiv = document.getElementById("orderDetailsContent");
-        contentDiv.innerHTML = "";
+        contentDiv.innerHTML = "";  // Clear previous content
 
-        if (data.length > 0) {
+        if (data && data.length > 0) {
+            // Xây dựng bảng chi tiết đơn hàng
             const table = `
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th>#</th> <!-- Số thứ tự -->
                             <th>Image</th>
                             <th>Product Name</th>
                             <th>Category</th>
@@ -388,37 +538,67 @@ function loadOrderDetails(orderId) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${data.map(item => `
-                            <tr>
+                        ${data.map((item, index) => `
+                            <tr data-id="${item.id}">
+                                <td>${index + 1}</td> <!-- Số thứ tự -->
                                 <td>
-                                    <img src="${item.product?.images?.[0]?.url ?? '/path/404.png'}"
-                                         alt="${item.product?.name ?? 'No Name'}"
+                                    <img src="${item.product?.images?.[0]?.url ?? '/path/404.png'}" 
+                                         alt="${item.product?.name ?? 'No Name'}" 
                                          class="img-thumbnail" style="width: 120px; height: auto;" />
                                 </td>
                                 <td>${item.product?.name ?? 'Unknown Product'}</td>
-                                <td>${item.product?.categoryId ?? 'N/A'}</td>
-                                <td>${item.product?.brandId ?? 'N/A'}</td>
-                                <td>${item.product?.sizeId ?? 'N/A'}</td>
-                                <td>${item.product.price ?? 'N/A'}</td>
+                                <td>${item.product?.category?.name ?? 'N/A'}</td>
+                                <td>${item.product?.brand?.name ?? 'N/A'}</td>
+                                <td>${item.product?.size?.value ?? 'N/A'}</td>
+                                <td>${item.product?.price ?? '0.00'}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <button class="btn btn-outline-secondary decrease-quantity mx-1" data-id="${item.id}" type="button">-</button>
-                                        <input type="number" class="form-control quantity-input text-center" data-id="${item.id}" value="${item.quatity ?? 1}" min="1" style="width: 60px;" />
-                                        <button class="btn btn-outline-secondary increase-quantity mx-1" data-id="${item.id}" type="button">+</button>
+                                        <button class="btn btn-outline-secondary decrease-quantity mx-1" data-id="${item.productId}" data-price="${item.product?.price ?? 0}" type="button">-</button>
+                                        <input type="number" class="form-control quantity-input text-center" data-id="${item.productId}" value="${item.quatity ?? 1}" min="1" style="width: 60px;" />
+                                        <button class="btn btn-outline-secondary increase-quantity mx-1" data-id="${item.productId}" data-price="${item.product?.price ?? 0}" type="button">+</button>
                                     </div>
                                 </td>
-                                <td>${item.totalPrice ?? 'N/A'}</td>
+                                <td class="total-price">${(item.totalPrice ?? (item.quantity ?? 1) * (item.product?.price ?? 0)).toFixed(2)}</td>
                                 <td>
                                     <button class="btn btn-danger btn-sm remove-product" data-id="${item.id}">Remove</button>
                                 </td>
-                            </tr>`).join('')}
+                            </tr>
+                        `).join('')}
                     </tbody>
                 </table>
             `;
             contentDiv.innerHTML = table;
-            bindCartEvents();
+            bindCartEvents(orderId);  // Gắn sự kiện cho các nút tăng giảm và xóa sản phẩm
         } else {
-            contentDiv.innerHTML = "<p>No products found for this order.</p>";
+            // Hiển thị thông báo không có sản phẩm
+            const emptyTable = `
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th> <!-- Số thứ tự -->
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Size</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>TotalPrice</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="10" class="text-center">
+                                <img src="/path/no-product-found.png" 
+                                     alt="No Products Found" 
+                                     style="width: auto; height: 350px;" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            contentDiv.innerHTML = emptyTable;
         }
     })
     .catch(error => {
@@ -428,59 +608,123 @@ function loadOrderDetails(orderId) {
     });
 }
 
-// Hàm bind lại các sự kiện cho giỏ hàng
-function bindCartEvents() {
-    document.querySelectorAll(".decrease-quantity").forEach(button => {
-        button.addEventListener("click", function () {
-            const id = this.getAttribute("data-id");
-            console.log(`Decrease quantity for item: ${id}`);
-            // Logic giảm số lượng
-            updateQuantity(id, 'decrease');
+
+
+// Hàm gắn sự kiện cho các nút tăng, giảm số lượng và xóa sản phẩm
+function bindCartEvents(orderId) {
+    // Gắn sự kiện giảm số lượng sản phẩm
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = button.getAttribute('data-id');  // Lấy productId từ data-id của nút
+            const price = parseFloat(button.getAttribute('data-price')); // Lấy giá sản phẩm
+            const quantityInput = document.querySelector(`input[data-id="${productId}"]`);  // Tìm input theo productId
+
+            if (quantityInput) { // Kiểm tra xem input có tồn tại không
+                let currentQuantity = parseInt(quantityInput.value, 10);
+
+                // Kiểm tra số lượng hiện tại và đảm bảo không giảm quá thấp
+                if (currentQuantity > 1) {
+                    quantityInput.value = currentQuantity - 1;
+                    updateOrderDetail(orderId, productId, quantityInput.value)
+                        .then(() => updateTotalPriceInTable(productId, quantityInput.value, price)); // Cập nhật tổng tiền
+                }
+            } else {
+                console.error(`Quantity input for product ID ${productId} not found.`);
+            }
         });
     });
 
-    document.querySelectorAll(".increase-quantity").forEach(button => {
-        button.addEventListener("click", function () {
-            const id = this.getAttribute("data-id");
-            console.log(`Increase quantity for item: ${id}`);
-            // Logic tăng số lượng
-            updateQuantity(id, 'increase');
+    // Gắn sự kiện tăng số lượng sản phẩm
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = button.getAttribute('data-id');  // Lấy productId từ data-id của nút
+            const price = parseFloat(button.getAttribute('data-price')); // Lấy giá sản phẩm
+            const quantityInput = document.querySelector(`input[data-id="${productId}"]`);  // Tìm input theo productId
+
+            if (quantityInput) { // Kiểm tra xem input có tồn tại không
+                let currentQuantity = parseInt(quantityInput.value, 10);
+
+                // Tăng số lượng lên 1 và cập nhật thông tin
+                quantityInput.value = currentQuantity + 1;
+                updateOrderDetail(orderId, productId, quantityInput.value)
+                    .then(() => updateTotalPriceInTable(productId, quantityInput.value, price)); // Cập nhật tổng tiền
+            } else {
+                console.error(`Quantity input for product ID ${productId} not found.`);
+            }
         });
     });
 
-    document.querySelectorAll(".remove-product").forEach(button => {
-        button.addEventListener("click", function () {
-            const id = this.getAttribute("data-id");
-            console.log(`Remove product: ${id}`);
-            // Logic xóa sản phẩm
-            removeProduct(id);
+    // Gắn sự kiện xóa sản phẩm
+    document.querySelectorAll('.remove-product').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = button.getAttribute('data-id');
+            removeProductFromOrder(orderId, productId);
+        });
+    });
+
+    // Gắn sự kiện nhập trực tiếp vào ô input
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('input', function() {
+            const productId = input.getAttribute('data-id'); // Lấy productId từ data-id của input
+            const price = parseFloat(input.getAttribute('data-price')); // Lấy giá sản phẩm
+            let currentQuantity = parseInt(input.value, 10);
+
+            // Kiểm tra xem giá trị nhập vào có hợp lệ không (phải là số nguyên và lớn hơn 0)
+            if (isNaN(currentQuantity) || currentQuantity <= 0) {
+                input.value = 1; // Nếu không hợp lệ, gán lại giá trị mặc định là 1
+                currentQuantity = 1;
+            }
+
+            // Cập nhật chi tiết đơn hàng
+            updateOrderDetail(orderId, productId, currentQuantity)
+                .then(() => updateTotalPriceInTable(productId, currentQuantity, price)); // Cập nhật tổng tiền
         });
     });
 }
 
-// Hàm cập nhật số lượng sản phẩm
-function updateQuantity(itemId, action) {
-    const quantityInput = document.querySelector(`.quantity-input[data-id='${itemId}']`);
-    let quantity = parseInt(quantityInput.value);
+// Cập nhật chi tiết đơn hàng sau khi thay đổi số lượng
+function updateOrderDetail(orderId, productId, quantity) {
+    const url = `https://localhost:7280/api/OrderDetails/UpdateOrderDetail?orderId=${orderId}&productId=${productId}&quantity=${quantity}`;
+    
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quantity: quantity })
+    })
+    .then(response => {
+        // Kiểm tra mã trạng thái HTTP (200-299 là thành công)
+        if (response.ok) {
+            return response.json(); // Trả về dữ liệu nếu thành công
+        } else {
+            throw new Error(`Error updating order detail: ${response.statusText}`);
+        }
+    })
+    .then(data => {
+        console.log("Order detail updated successfully:", data);
+        return data;
+    })
+    .catch(error => {
+        console.error("Error updating order detail:", error);
+    });
+}
 
-    if (action === 'increase') {
-        quantity++;
-    } else if (action === 'decrease' && quantity > 1) {
-        quantity--;
+
+// Cập nhật tổng tiền trong bảng sau khi thay đổi số lượng
+function updateTotalPriceInTable(productId, quantity, price) {
+    const totalPriceElement = document.querySelector(`tr[data-id="${productId}"] .total-price`);
+    if (totalPriceElement) {
+        totalPriceElement.textContent = (quantity * price).toFixed(2); // Tính tổng tiền mới
     }
-
-    quantityInput.value = quantity;
-
-    // Có thể gọi API để cập nhật số lượng
-    console.log(`Updated quantity for item ${itemId}: ${quantity}`);
 }
 
-// Hàm xóa sản phẩm khỏi giỏ hàng
-function removeProduct(itemId) {
-    console.log(`Product ${itemId} removed`);
 
-    // Gọi API để xóa sản phẩm
-    fetch(`https://localhost:7280/api/OrderDetails/RemoveProductFromOrder?itemId=${itemId}`, {
+// Hàm xóa sản phẩm khỏi đơn hàng
+function removeProductFromOrder(orderId, productId) {
+    const url = `https://localhost:7280/api/OrderDetails/RemoveProductFromOrder?orderId=${orderId}&productId=${productId}`;
+    
+    fetch(url, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -488,56 +732,28 @@ function removeProduct(itemId) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error("Failed to remove the product");
-        }
-        alert("Product removed successfully!");
-        location.reload(); // Reload lại trang sau khi xóa
-    })
-    .catch(error => {
-        console.error("Error removing product:", error);
-        alert("Failed to remove the product. Please try again.");
-    });
-}
-
-// Hàm tạo đơn hàng mới bởi nhân viên
-function createOrderByStaff() {
-    const orderData = {
-        customerId: document.querySelector("#customerId").value,
-        orderItems: [...document.querySelectorAll(".order-item")].map(item => ({
-            productId: item.getAttribute("data-product-id"),
-            quantity: item.querySelector(".quantity-input").value
-        })),
-        totalPrice: document.querySelector("#totalPrice").value,
-        status: "Pending", // Trạng thái đơn hàng
-    };
-
-    fetch('https://localhost:7280/api/Orders/create-by-staff', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Failed to create the order");
+            throw new Error(`Error removing product: ${response.statusText}`);
         }
         return response.json();
     })
-    .then(data => {
-        alert("Order created successfully!");
-        location.reload(); // Reload lại trang sau khi tạo đơn hàng
+    .then(() => {
+        // Xóa sản phẩm khỏi bảng sau khi xóa thành công
+        const row = document.querySelector(`tr[data-id="${productId}"]`);
+        if (row) {
+            row.remove();
+        }
     })
     .catch(error => {
-        console.error("Error creating order:", error);
-        alert("Failed to create the order. Please try again.");
+        console.error("Error removing product:", error);
     });
 }
 
-
-
     </script>
-    <script>
+
+
+    <!-- Phần script để tạo ra liên quan đến giao hàng -->
+
+<script>
         document.addEventListener("DOMContentLoaded", function () {
             // Lấy phần tử nút giao hàng và không giao hàng
             const deliverButton = document.getElementById("deliverOrderButton");
@@ -585,6 +801,103 @@ function createOrderByStaff() {
 
     </script>
 
+<script>
+    document.getElementById("addProductBtn").addEventListener("click", function() {
+    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    productModal.show();
+
+    // Lấy danh sách sản phẩm và hiển thị trong bảng
+    fetch('https://localhost:7280/api/Products')
+        .then(response => response.json())
+        .then(products => {
+            const tableBody = document.getElementById("productTableBody");
+            tableBody.innerHTML = ""; // Clear the table before adding new data
+
+            // Duyệt qua danh sách sản phẩm và thêm vào bảng
+            try {
+    products.forEach(product => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td><img src="${product.images?.[0]?.url || '/path/404.png'}" class="img-thumbnail" style="width: 100px; height: auto;"></td>
+            <td>${product.price}</td>
+            <td>${product.category.name}</td>
+            <td>${product.brand.name}</td>
+            <td>${product.size.value}</td>
+            <td>
+                <input type="number" class="form-control quantity-input" id="quantity-${product.id}" value="1" min="1" style="width: 60px;">
+            </td>
+            <td>
+                <button class="btn btn-success" id="addProductBtn-${product.id}">+</button>
+            </td>
+        `;
+
+        tableBody.appendChild(row);
+
+        document.getElementById(`addProductBtn-${product.id}`).addEventListener("click", function() {
+            addOrUpdateOrderDetail(product.id);
+        });
+    });
+} catch (error) {
+    console.error("Error processing products:", error);
+}
+        })
+        .catch(error => {
+            console.error("Error fetching products:", error);
+            alert("Error loading products. Please try again later.");
+        });
+});
+
+// Chức năng thêm hoặc cập nhật chi tiết đơn hàng
+function addOrUpdateOrderDetail(productId) {
+    // Lấy orderId từ phần tử HTML (ví dụ: nút hoặc một phần tử có data-order-id)
+    const orderElement = document.querySelector('.nav-link.active'); // Hoặc thay bằng selector tương ứng
+    if (!orderElement) {
+        alert("Order ID not found.");
+        return;
+    }
+
+    const orderId = orderElement.getAttribute('data-order-id'); // Lấy orderId từ data-order-id
+    const quantityElement = document.getElementById(`quantity-${productId}`);
+
+    if (!quantityElement) {
+        alert("Quantity input not found.");
+        return;
+    }
+
+    const quantity = parseInt(quantityElement.value);
+
+    if (quantity <= 0) {
+        alert("Quantity must be greater than zero.");
+        return; // Dừng nếu quantity không hợp lệ
+    }
+
+    // Định dạng URL theo yêu cầu của API (thêm query parameters)
+    const url = `https://localhost:7280/api/OrderDetails/AddOrUpdateOrderDetail?orderId=${orderId}&productId=${productId}&quantity=${quantity}`;
+
+    // Gửi request tới API
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("Order detail updated successfully");
+        location.reload(); // Reload lại trang nếu thành công
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Error updating order detail. Please try again.");
+    });
+}
+
+
+</script>
+
+<!---------------------------------------->
 
 }
 

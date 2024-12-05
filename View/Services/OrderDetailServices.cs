@@ -13,7 +13,7 @@ namespace View.Services
             _client = client;
         }
 
-        public Task<OrderDetail?> AddOrUpdateOrderDetail(Guid orderId, Guid productId, int quantity)
+        public Task<OrderDetail> AddOrUpdateOrderDetail(Guid orderId, Guid productId, int quantity)
         {
             throw new NotImplementedException();
         }
@@ -33,7 +33,7 @@ namespace View.Services
             throw new NotImplementedException();
         }
 
-        public async Task<List<OrderDetail>?> GetOrderDetailsByOrderIdAsync(Guid orderId)
+        public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(Guid? orderId)
         {
             var respone = await _client.GetStringAsync($"https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId={orderId}");
             var result = JsonConvert.DeserializeObject<List<OrderDetail>>(respone);

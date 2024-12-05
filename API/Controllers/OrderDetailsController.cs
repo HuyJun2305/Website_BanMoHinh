@@ -24,7 +24,7 @@ namespace API.Controllers
 		}
 
 		[HttpGet("GetOrderDetailByOrderId")]
-		public async Task<ActionResult<List<OrderDetail>>> GetOrderDetailByOrderId(Guid orderId)
+		public async Task<ActionResult<List<OrderDetail>>> GetOrderDetailByOrderId(Guid? orderId)
 		{
 			try
 			{
@@ -46,8 +46,8 @@ namespace API.Controllers
 		{
 			try
 			{
-				await _orderDetailRepo.AddOrUpdateOrderDetail(orderId, productId, quantity);
-				return Ok("Order detail updated successfully.");
+                var orderDetail =  await _orderDetailRepo.AddOrUpdateOrderDetail(orderId, productId, quantity);
+				return Ok(orderDetail);
 			}
 			catch (KeyNotFoundException ex)
 			{
@@ -58,6 +58,24 @@ namespace API.Controllers
 				return Problem(ex.Message);
 			}
 		}
+		[HttpPut("UpdateOrderDetail")]
+		public async Task<IActionResult> UpdateOrderDetail(Guid orderId, Guid productId, int quantity)
+		{
+            // Cập nhật order detail logic
+            var orderDetail = await _orderDetailRepo.UpdateOrderDetail(orderId, productId, quantity);
+
+            if (orderDetail != null)
+            {
+                return Ok(orderDetail); // Trả về JSON
+            }
+            else
+            {
+                return NoContent(); // Trả về 204 nếu không có nội dung
+            }
+        }
+
+
+
 
 		[HttpPost("RemoveOrderDetail")]
 		public async Task<ActionResult> RemoveOrderDetail(Guid orderId, Guid productId, int quantity)

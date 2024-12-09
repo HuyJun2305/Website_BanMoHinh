@@ -63,10 +63,10 @@ namespace API.Controllers
             return Ok();
         }
         [HttpPut("Update")]
-        public async Task<IActionResult> Update(CartDetail cartDetails, Guid id)
-        {
-            await _cartRepo.Update(cartDetails, id);
-            return Ok();
+        public async Task<IActionResult> Update( Guid cartId, Guid productId, int quantity)
+		{
+            await _cartRepo.Update(cartId, productId, quantity);
+			return Ok();
         }
         [HttpDelete("Delete")]
         public async Task<IActionResult> Delete(Guid id)
@@ -76,11 +76,11 @@ namespace API.Controllers
         }
 
 		[HttpPost("AddToCart")]
-		public async Task<IActionResult> AddToCart(Guid cartId, Guid productId, int quantity)
+		public async Task<IActionResult> AddToCart(Guid cartId, Guid productId, int quantity, Guid sizeId)
 		{
 			try
 			{
-				await _cartRepo.AddToCart(cartId, productId, quantity);
+				await _cartRepo.AddToCart(cartId, productId, sizeId, quantity );
 				return Ok();
 			}
 			catch (Exception ex)

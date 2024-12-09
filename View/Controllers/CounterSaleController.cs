@@ -58,7 +58,7 @@ namespace View.Controllers
             // Lấy staffId từ session
             var staffIdString = HttpContext.Session.GetString("userId");
             var products = await _productServices.GetAllProduct();
-            var orders = await _orderServices.GetAllOrder();
+            var orders = await _orderServices.GetAllOrderStatus0();
 
             var orderId = orders.FirstOrDefault()?.Id ?? null; // Nếu có đơn hàng thì lấy orderId, nếu không có sẽ là null
 
@@ -79,6 +79,7 @@ namespace View.Controllers
                     CreateBy = createBy.UserName,
                     StaffId = createBy.Id,
                     OrderId = orderId,
+                    DayCreate = null,
                     orderDetails = null, // Không có orderDetail
                     OrderDetailsId = null
                 };
@@ -100,6 +101,8 @@ namespace View.Controllers
                     CreateBy = createBy.UserName,
                     StaffId = createBy.Id,
                     OrderId = orderId,
+                    DayCreate = orders.FirstOrDefault().DayCreate,
+                    PaymentMethods = orders.FirstOrDefault()?.PaymentMethods ?? PaymentMethod.Cash,
                     orderDetails = orderDetail,
                     OrderDetailsId = orderDetailId
                 };

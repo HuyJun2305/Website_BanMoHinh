@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using View.IServices;
+using View.ViewModels;
 using IAuthenticationService = View.IServices.IAuthenticationService;
 
 namespace View.Controllers
@@ -28,7 +29,7 @@ namespace View.Controllers
             return View();
         }
 		[HttpPost]
-		public async Task<IActionResult> Login(LoginModel model)
+		public async Task<IActionResult> Login(ViewModels.Sign_In_Up_ViewModel model)
 		{
 			
 			var jwt = await _authenticationService.LoginAsync(model);
@@ -89,7 +90,7 @@ namespace View.Controllers
             return View();
         }
 		[HttpPost]
-		public async Task<IActionResult> Register(DangKyModel model)
+		public async Task<IActionResult> Register(ViewModels.Sign_In_Up_ViewModel model)
 		{
 			
 			var regis = await _authenticationService.Register(model);

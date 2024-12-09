@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using XuongTT_API.Model;
 
 namespace API.Data
@@ -28,15 +29,22 @@ namespace API.Data
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
 
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            builder.Seed();
-            base.OnModelCreating(builder);
+            modelBuilder.Seed();
+
+            base.OnModelCreating(modelBuilder);
+            // Cấu hình quan hệ nhiều-nhiều (nếu muốn thêm các ràng buộc)
+            modelBuilder.Entity<Product>()
+                        .HasMany(p => p.Sizes)
+                        .WithMany(s => s.Products)
+                        .UsingEntity(j => j.ToTable("ProductSizes"));
         }
     }
 }

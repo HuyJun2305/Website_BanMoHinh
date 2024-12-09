@@ -26,6 +26,7 @@
             <th>Giá</th>
             <th>Số lượng</th>
             <th>Mô tả</th>
+            <th>Kích thước hiện có</th>
             <th>Danh mục</th>
             <th>Thương hiệu</th>
             <th>Chất liệu</th>
@@ -35,7 +36,7 @@
     <tbody>
         @foreach (var item in Model.Products)
         {
-            <tr id="product-row-@item.Id">
+            <tr id="@item.Id">
                 <td></td>
                 <td>
                     <!-- Slide ảnh -->
@@ -54,19 +55,33 @@
                 <td>@Html.DisplayFor(modelItem => item.Price)</td>
                 <td>@Html.DisplayFor(modelItem => item.Stock)</td>
                 <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>
+                    @if (Model.Sizes != null && Model.Sizes.Any())
+                    {
+                        @foreach (var size in Model.Sizes)
+                        {
+                            <span>@size.Value</span>
+                            <hr />  
+                        }
+                    }
+                    else
+                    {
+                        <span>No sizes available</span> 
+                    }
+                </td>
                 <td>@Html.DisplayFor(modelItem => item.Category.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Brand.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Material.Name)</td>
                 <td>
-                <td>
                     <button class="btn btn-warning btn-sm" onclick="openEditModal('@item.Id')">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('@item.Id', '@item.Name')">Delete</button>
+                    <button class="btn btn-danger btn-sm" data-id="@item.Id" onclick="deleteProduct(this)">
+                        Delete
+                    </button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
 <!-- Modal Edit -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -76,31 +91,86 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editProductForm" enctype="multipart/form-data">
+                <form asp-action="Edit" method="post" id="editProductForm" enctype="multipart/form-data">
                     <input type="hidden" id="editProductId" name="Id" />
+
+                    <!-- Tên Sản Phẩm -->
                     <div class="mb-3">
                         <label for="editProductName" class="form-label">Tên Sản Phẩm</label>
                         <input type="text" class="form-control" id="editProductName" name="Name" required />
                     </div>
+
+                    <!-- Giá -->
                     <div class="mb-3">
                         <label for="editProductPrice" class="form-label">Giá</label>
                         <input type="number" class="form-control" id="editProductPrice" name="Price" required />
                     </div>
+
+                    <!-- Số Lượng -->
                     <div class="mb-3">
                         <label for="editProductStock" class="form-label">Số Lượng</label>
                         <input type="number" class="form-control" id="editProductStock" name="Stock" required />
                     </div>
+
+                    <!-- Danh Mục -->
+                    <div class="mb-3">
+                        <label for="editProductCategory" class="form-label">Danh Mục</label>
+                        <select class="form-control" id="editProductCategory" name="CategoryId" required>
+                            <option value="">Chọn danh mục</option>
+                            @foreach (var category in (IEnumerable<SelectListItem>)ViewData["CategoryId"])
+                            {
+                                <option value="@category.Value">@category.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Thương Hiệu -->
+                    <div class="mb-3">
+                        <label for="editProductBrand" class="form-label">Thương Hiệu</label>
+                        <select class="form-control" id="editProductBrand" name="BrandId" required>
+                            <option value="">Chọn thương hiệu</option>
+                            @foreach (var brand in (IEnumerable<SelectListItem>)ViewData["BrandId"])
+                            {
+                                <option value="@brand.Value">@brand.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Chất Liệu -->
+                    <div class="mb-3">
+                        <label for="editProductMaterial" class="form-label">Chất Liệu</label>
+                        <select class="form-control" id="editProductMaterial" name="MaterialId" required>
+                            <option value="">Chọn chất liệu</option>
+                            @foreach (var material in (IEnumerable<SelectListItem>)ViewData["MaterialId"])
+                            {
+                                <option value="@material.Value">@material.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Kích Thước -->
+                    <div class="mb-4">
+                        <label for="editProductSize" class="form-label">Kích thước</label>
+                        <div id="editProductSizes" class="form-check">
+                            <!-- Các checkbox sẽ được nạp từ API hoặc server -->
+                        </div>
+                    </div>
+
+                    <!-- Mô Tả -->
                     <div class="mb-3">
                         <label for="editProductDescription" class="form-label">Mô Tả</label>
                         <textarea class="form-control" id="editProductDescription" name="Description" rows="3"></textarea>
                     </div>
+
+                    <!-- Hình Ảnh -->
                     <div class="mb-3">
                         <label for="editProductImage" class="form-label">Hình Ảnh</label>
-                        <input type="file" class="form-control" id="editProductImage" name="Image" />
-                        <div id="currentImage" class="mt-2">
-                            <img id="editProductPreviewImage" src="" alt="Product Image" style="width: 150px;" />
+                        <input type="file" class="form-control" id="editProductImage" name="Image" accept="image/*" multiple />
+                        <div id="currentImages" class="mt-2">
+                            <!-- Các ảnh hiện tại sẽ được hiển thị ở đây -->
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
                 </form>
             </div>
@@ -111,80 +181,240 @@
 
 @section Scripts{
     <script>
-        // Hàm xử lý xóa sản phẩm
-        function deleteProduct(productId, productName) {
-            if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}" không?`)) {
+
+        function deleteProduct(button) {
+            var productId = $(button).data('id');
+            console.log("Product ID to delete:", productId);
+
+            // Kiểm tra ID trong URL và xác nhận
+            if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
                 $.ajax({
-                    url: `/Products/Delete/${productId}`, // Đường dẫn API xóa
+                    url: `/Products/Delete/${productId}`, // Đảm bảo URL có chứa ID đúng
                     type: 'DELETE',
                     success: function (response) {
                         if (response.success) {
-                            alert('Sản phẩm đã được xóa thành công!');
-                            // Tải lại trang sau khi xóa
-                            location.reload();
+                            toastr.success('Sản phẩm đã được xóa thành công!');
+                            location.reload(); // Tải lại trang sau khi xóa
                         } else {
-                            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                            toastr.error('Có lỗi xảy ra. Vui lòng thử lại.');
                         }
                     },
                     error: function () {
-                        alert('Không thể xóa sản phẩm. Vui lòng kiểm tra lại.');
+                        toastr.error('Không thể xóa sản phẩm. Vui lòng kiểm tra lại.');
                     }
                 });
             }
         }
-    </script>
 
+
+
+    </script>
     <script>
-        // Mở modal và tải thông tin sản phẩm
         function openEditModal(productId) {
-            // Gọi API để lấy thông tin sản phẩm
             $.ajax({
-                url: `/Products/GetProductById/${productId}`, // Đường dẫn API lấy sản phẩm
+                url: `/Products/GetProductById/${productId}`,
                 type: 'GET',
                 success: function (product) {
                     // Gán dữ liệu vào form
-                    $('#Name').val(product.name);
-                    $('#Price').val(product.price);
-                    $('#Stock').val(product.stock);
-                    $('#CategoryId').val(product.categoryId);
-                    $('#BrandId').val(product.brandId);
-                    $('#MaterialId').val(product.materialId);
-                    $('#Description').val(product.description);
+                    $('#editProductId').val(product.id);
+                    $('#editProductName').val(product.name);
+                    $('#editProductPrice').val(product.price);
+                    $('#editProductStock').val(product.stock);
+                    $('#editProductDescription').val(product.description);
+
+                    console.log(product);
+                    // Hiển thị các ảnh hiện tại
+                    var imagePreviews = '';
+                    if (product.images && product.images.length > 0) {
+                        product.images.forEach(function (image) {
+                            imagePreviews += `
+                                <div class="image-preview" data-image-id="${image.id}">
+                                    <img src="${image.url}" alt="Product Image" style="width: 100px; height: auto; margin-right: 5px;" />
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeImage('${image.id}')">Xóa</button>
+                                </div>
+                            `;
+                        });
+                        $('#currentImages').html(imagePreviews);
+                    } else {
+                        $('#currentImages').html('<p>Chưa có ảnh nào.</p>');
+                    }
+
+                    // Hiển thị các lựa chọn category, brand và material
+                    $.ajax({
+                        url: 'https://localhost:7280/api/Category',
+                        type: 'GET',
+                        success: function (categories) {
+                            var categoryOptions = '';
+                            categories.forEach(function (category) {
+                                var selected = product.categoryId === category.id ? 'selected' : '';
+                                categoryOptions += `<option value="${category.id}" ${selected}>${category.name}</option>`;
+                            });
+                            $('#editProductCategory').html(categoryOptions);
+                        },
+                        error: function () {
+                            toastr.error('Lỗi khi tải danh sách thể loại.');
+                        }
+                    });
+
+                    $.ajax({
+                        url: 'https://localhost:7280/api/Brands',
+                        type: 'GET',
+                        success: function (brands) {
+                            var brandOptions = '';
+                            brands.forEach(function (brand) {
+                                var selected = product.brandId === brand.id ? 'selected' : '';
+                                brandOptions += `<option value="${brand.id}" ${selected}>${brand.name}</option>`;
+                            });
+                            $('#editProductBrand').html(brandOptions);
+                        },
+                        error: function () {
+                            toastr.error('Lỗi khi tải danh sách thương hiệu.');
+                        }
+                    });
+
+                    $.ajax({
+                        url: 'https://localhost:7280/api/Materials',
+                        type: 'GET',
+                        success: function (materials) {
+                            var materialOptions = '';
+                            materials.forEach(function (material) {
+                                var selected = product.materialId === material.id ? 'selected' : '';
+                                materialOptions += `<option value="${material.id}" ${selected}>${material.name}</option>`;
+                            });
+                            $('#editProductMaterial').html(materialOptions);
+                        },
+                        error: function () {
+                            toastr.error('Lỗi khi tải danh sách chất liệu.');
+                        }
+                    });
+
+                    // Hiển thị các kích thước có sẵn
+                    $.ajax({
+                        url: `https://localhost:7280/api/Sizes/${productId}/GetSize`,
+                        type: 'GET',
+                        success: function (sizes) {
+                            var sizeOptions = '';
+                            sizes.forEach(function (size) {
+                                sizeOptions += `
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="${size.id}" id="size_${size.id}">
+                                        <label class="form-check-label" for="size_${size.id}">
+                                            ${size.value}
+                                        </label>
+                                    </div>
+                                `;
+                            });
+                            $('#editProductSizes').html(sizeOptions); // Cập nhật size vào checkbox
+
+                            // Đánh dấu các checkbox đã chọn từ thông tin sản phẩm
+                            if (product.sizes && product.sizes.length > 0) {
+                                product.sizes.forEach(function (size) {
+                                    $(`#editProductSizes input[value="${size.id}"]`).prop('checked', true);
+                                });
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Lỗi khi tải danh sách kích thước.');
+                        }
+                    });
 
                     // Hiển thị modal
                     $('#editProductModal').modal('show');
                 },
                 error: function () {
-                    alert('Lỗi khi tải thông tin sản phẩm.');
+                    toastr.error('Lỗi khi tải thông tin sản phẩm.');
                 }
             });
         }
 
 
-        // Xử lý submit form chỉnh sửa sản phẩm
-        $('#editProductForm').on('submit', function (e) {
-            e.preventDefault();
+        // Xử lý xóa ảnh
+        function removeImage(productId, imageId) {
+            console.log(productId, imageId);
+            if (!imageId || !productId) {
+                toastr.error('ID ảnh hoặc ID sản phẩm không hợp lệ.');
+                return;
+            }
 
-            var formData = new FormData(this);
+            // Hiển thị thông báo xác nhận trước khi xóa
+            if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                return;
+            }
+
+            // Gửi yêu cầu xóa ảnh từ server
             $.ajax({
-                url: '/Products/Edit', // API chỉnh sửa sản phẩm
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                url: `https://localhost:7280/api/Images/DeleteImageInProduct/${productId}/${imageId}`,
+                type: 'DELETE',
                 success: function (response) {
                     if (response.success) {
-                        alert('Sản phẩm đã được cập nhật!');
-                        location.reload(); // Tải lại trang sau khi chỉnh sửa
+                        // Xóa phần tử giao diện liên quan đến ảnh
+                        $(`.image-preview[data-image-id='${imageId}']`).remove();
+                        toastr.success(response.message || 'Ảnh đã được xóa thành công.');
                     } else {
-                        alert('Cập nhật thất bại. Vui lòng thử lại.');
+                        toastr.error(response.message || 'Lỗi khi xóa ảnh.');
                     }
                 },
+                error: function (xhr) {
+                    const errorMessage = xhr.responseJSON?.message || 'Đã xảy ra lỗi khi xóa ảnh.';
+                    toastr.error(errorMessage);
+                }
+            });
+        }
+
+
+
+
+        // Cập nhật ảnh preview khi người dùng chọn ảnh mới
+        $('#editProductImage').on('change', function (e) {
+            var files = e.target.files;
+            var previewContainer = $('#currentImages');
+            previewContainer.html('');  // Xóa các ảnh cũ
+
+            // Hiển thị ảnh mới đã chọn
+            Array.from(files).forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    previewContainer.append(`
+                        <div class="image-preview">
+                            <img src="${event.target.result}" alt="New Image" style="width: 100px; height: auto; margin-right: 5px;" />
+                        </div>
+                    `);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+
+        $('#editProductForm').on('submit', function (e) {
+            e.preventDefault(); // Ngừng hành động submit mặc định của form
+
+            var selectedSizes = [];
+            $('#editProductSizes input:checked').each(function () {
+                selectedSizes.push($(this).val());
+            });
+
+            // Lưu các kích thước đã chọn vào ẩn để gửi
+            $('#editProductSize').val(selectedSizes.join(','));
+
+            // Gửi yêu cầu PUT (hoặc POST nếu muốn)
+            $.ajax({
+                url: '/Products/Edit', // Cập nhật API PUT
+                type: 'PUT',
+                data: new FormData(this),
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    toastr.success('Sản phẩm đã được cập nhật.');
+                    $('#editProductModal').modal('hide');  // Đóng modal sau khi thành công
+                    // Có thể làm mới trang hoặc redirect về trang danh sách
+                    window.location.href = '/Products/Index'; // Hoặc reload trang
+                },
                 error: function () {
-                    alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+                    toastr.error('Có lỗi xảy ra khi cập nhật sản phẩm.');
                 }
             });
         });
+
     </script>
 
 }

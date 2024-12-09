@@ -17,14 +17,20 @@ namespace Data.Models
 		public OrderStatus Status { get; set; } = OrderStatus.TaoDonHang;
 
 		public Guid CreateBy { get; set; }
-		public string CustomerName { get; set; }
+        public DateTime? DayPayment { get; set; }
+        public string CustomerName { get; set; }
+
+        public decimal? AmountPaid { get; set; }             
+        public decimal? Change { get; set; }
 
         public Guid? AccountId { get; set; }
         public Guid? VoucherId { get; set; }
         [JsonIgnore]
         public virtual Voucher? Voucher { get; set; }
         public virtual ApplicationUser? Account { get; set; }
-		public virtual ICollection<OrderDetail>? OrderDetails { get; set; } 
+		public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
+
+
     }
 
 	public enum PaymentMethod
@@ -34,7 +40,10 @@ namespace Data.Models
 		[Display(Name = "MoMo")]
 		MoMo = 1,
 		[Display(Name = "VNPay")]
-		VNPay = 2
+		VNPay = 2,
+		[Display(Name = "ZaloPay")]
+		Zalo = 3
+		
 
 	}
 
@@ -42,7 +51,7 @@ namespace Data.Models
 	{
 		[Display(Name = "Tạo đơn hàng")]
 		TaoDonHang = 0,
-		[Display(Name = "Chờ xác nhận")]
+		[Display(Name = "Chờ xác nhận")]	
 		ChoXacNhan = 1,
 		[Display(Name = "Chuẩn bị đơn hàng")]
 		ChuanBiDonHang = 2,

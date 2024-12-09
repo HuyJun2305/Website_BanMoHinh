@@ -67,22 +67,7 @@ namespace API.Repositories
 
 
 
-		public async Task Update(CartDetail cartDetails, Guid id)
-		{
-			var updateItem = await _context.CartDetails.FindAsync(id);
-			if (cartDetails != null)
-			{
-				updateItem.Quatity = cartDetails.Quatity;
-				updateItem.TotalPrice = cartDetails.TotalPrice;
-			}
-			_context.CartDetails.Update(updateItem);
-			await _context.SaveChangesAsync();
-		}
-
-
-
-
-		public async Task AddToCart(Guid cartId, Guid productId, int quantity)
+		public async Task Update(Guid cartId, Guid productId, int quantity)
 		{
 			// Tìm Cart
 			var cart = await _context.Carts.FindAsync(cartId);
@@ -97,6 +82,68 @@ namespace API.Repositories
 			{
 				throw new KeyNotFoundException("Product not found.");
 			}
+
+			// Kiểm tra CartDetail đã tồn tại hay chưa
+			var cartDetail = await _context.CartDetails
+				.FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.ProductId == productId);
+
+			if (cartDetail != null)
+			{
+				// Nếu CartDetail đã có, cập nhật số lượng và tổng giá
+				cartDetail.Quatity += quantity;  // Cộng thêm số lượng
+				cartDetail.TotalPrice = cartDetail.Quatity * product.Price;  // Tính lại tổng giá
+
+				_context.CartDetails.Update(cartDetail);
+			}
+			else
+			{
+				// Nếu CartDetail chưa có, tạo mới CartDetail
+				var newCartDetail = new CartDetail
+				{
+					Id = Guid.NewGuid(),
+					CartId = cartId,
+					ProductId = productId,
+					Quatity = quantity,
+					TotalPrice = quantity * product.Price  // Tính tổng giá ngay khi thêm
+				};
+
+				await _context.CartDetails.AddAsync(newCartDetail);
+			}
+
+			// Cập nhật tổng giá trị giỏ hàng
+			cart.TotalPrice = await _context.CartDetails
+				.Where(cd => cd.CartId == cartId)
+				.SumAsync(cd => cd.TotalPrice);
+
+			// Cập nhật giỏ hàng
+			_context.Carts.Update(cart);
+
+			// Lưu thay đổi vào cơ sở dữ liệu
+			await _context.SaveChangesAsync();
+		}
+
+
+		public async Task AddToCart(Guid cartId, Guid productId, Guid sizeId, int quantity)
+		{
+			// Tìm Cart
+			var cart = await _context.Carts.FindAsync(cartId);
+			if (cart == null)
+			{
+				throw new KeyNotFoundException("Cart not found.");
+			}
+
+			// Tìm Product
+			var product = await _context.Products.FindAsync(productId);
+			if (product == null)
+			{
+				throw new KeyNotFoundException("Product not found.");
+			}
+			var size = await _context.Sizes.FindAsync(sizeId);
+			if (size == null)
+			{
+				throw new KeyNotFoundException("Size not found");
+			}
+
 
 			// Kiểm tra CartDetail đã tồn tại hay chưa
 			var cartDetail = await _context.CartDetails

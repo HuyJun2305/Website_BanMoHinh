@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Data.Authentication
 {
-    public class DangKyModel
+    public class Sign_In_Up_ViewModel
     {
         [Required]
         public  string Username { get; set; }

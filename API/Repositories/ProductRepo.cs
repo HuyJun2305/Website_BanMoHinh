@@ -14,26 +14,53 @@ namespace API.Repositories
         }
         public async Task Create(Product product)
         {
-            //if (await GetProductById(product.Id) != null) throw new DuplicateWaitObjectException($"Product : {product.Id} is existed!");
-            await _context.Products.AddAsync(product);
+
+            var sp = new Product()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                Description = product.Description,
+                BrandId = product.BrandId,
+                MaterialId = product.MaterialId,
+                CategoryId = product.CategoryId,
+                Promotions = product.Promotions,
+
+            };
+            await _context.Products.AddAsync(sp);
+            await _context.SaveChangesAsync();
         }
 
         public async Task Delete(Guid id)
         {
-            var product = await GetProductById(id);
+            var product = _context.Products.Find(id);
             if (product == null) throw new KeyNotFoundException("Not found this Id!");
             _context.Products.Remove(product);
+            _context.SaveChanges();
         }
 
         public async Task<List<Product>> GetAllProduct()
         {
-            var result = await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).Include(p => p.Category).Include(p => p.Images).ToListAsync();
+            var result = await _context.Products.Include(p => p.Brand)
+                .Include(p => p.Material)
+                .Include(p => p.Sizes)
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .ToListAsync();
             return result;
         }
         public async Task<Product> GetProductById(Guid id)
         {
-            return await _context.Products.Include(p => p.Brand).Include(p => p.Material).Include(p => p.Size).Include(p => p.Category).FirstOrDefaultAsync();
+            return await _context.Products
+                .Include(p => p.Brand)    
+                .Include(p => p.Material)
+                .Include(p => p.Sizes)
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id); 
         }
+
 
         public async Task SaveChanges()
         {
@@ -51,28 +78,26 @@ namespace API.Repositories
             // Cập nhật các trường cần thiết
             existingProduct.Name = product.Name;
             existingProduct.Price = product.Price;
+            existingProduct.Stock = product.Stock;
             existingProduct.Description = product.Description;
             existingProduct.BrandId = product.BrandId;
-            existingProduct.SizeId = product.SizeId;
             existingProduct.MaterialId = product.MaterialId;
             existingProduct.CategoryId = product.CategoryId;
+            existingProduct.Promotions = product.Promotions;
+            existingProduct.Images = product.Images;
+            existingProduct.Sizes = product.Sizes;
 
             _context.Products.Update(existingProduct);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
+        public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null,  Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
         {
             var query = _context.Products
-                .Include(p => p.Size)
                 .Include(p => p.Brand)
                 .Include(p => p.Material).Include(p => p.Category)
                 .AsQueryable();
-            //lọc theo Size
-            if (sizeId.HasValue)
-            {
-                query = query.Where(p=> p.Size.Id == sizeId.Value);
-            }
+
             //Lọc thương hiệu 
             if (brandId.HasValue)
             {

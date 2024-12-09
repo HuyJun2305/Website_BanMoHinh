@@ -1,4 +1,5 @@
-﻿@model View.ViewModels.CounterSalesViewModel
+﻿@using View.Utilities.Extensions
+@model View.ViewModels.CounterSalesViewModel
 
 @{
     Layout = "_LayoutAdmin";
@@ -99,8 +100,10 @@
                     <h3 class="text-center text-muted">Select an order to view details.</h3>
                 </div>
                 <div id="totalPriceContent" class="mt-3 text-end fw-bold fs-5">
-                    Total Price: @Model.orders.FirstOrDefault()?.Price
-                </div>
+                    <div class="order-summary mt-4">
+                    <h4>Total Order Price: $<span id="orderTotal">0.00</span></h4>
+                </div>                
+            </div>
             </div>
         </div>
     </div>
@@ -175,70 +178,96 @@
         </div>
 
         <!-- Khu vực thông tin đơn hàng (Chiếm 6 cột) -->
-        <div class="col-md-6">
-            <div id="orderInfo" class="mt-4 border p-3">
-                <h4>Order Information</h4>
+                    <div class="col-md-6">
+                        <div id="orderInfo" class="mt-4 border p-3">
+                            <h4>Order Information</h4>
 
-                <!-- Dòng chứa các thông tin giao hàng và lựa chọn vận chuyển -->
-                <div class="row">
-                    <!-- Delivery Option -->
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="deliveryOption" />
-                            <label class="form-check-label" for="deliveryOption">Choose Delivery</label>
+                            <!-- Dòng chứa các thông tin giao hàng và lựa chọn vận chuyển -->
+                            <div class="row">
+                                <!-- Delivery Option -->
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="deliveryOption" />
+                                        <label class="form-check-label" for="deliveryOption">Choose Delivery</label>
+                                    </div>
+                                </div>
+                                <!-- Hiển thị thông tin đơn hàng -->
+                                <div class="col-md-6 mb-3">
+                                    <div id="orderDetailsText">Order summary will be shown here.</div>
+                                </div>
+                            </div>
+
+                            <!-- Dòng chứa thông tin voucher -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <!-- Voucher Input -->
+                                    <label for="voucherCode" class="form-label">Voucher Code</label>
+                                    <input type="text" class="form-control" id="voucherCode" placeholder="Enter your voucher code" />
+                                    <button type="button" class="btn btn-primary mt-2" id="applyVoucherButton">Apply Voucher</button>
+                                </div>
+
+                                <!-- Hiển thị tổng tiền -->
+                                <div class="col-md-6 mb-3">
+                                    <p><strong>Total Price:</strong> <span id="totalPrice">0</span></p>
+                                    <p><strong>Shipping Fee:</strong> <span id="shippingFee">10</span></p>
+                                    <p><strong>Discount (Voucher):</strong> <span id="discount">0</span></p>
+                                    <p><strong>Final Price:</strong> <span id="finalPrice">0</span></p>
+                                </div>
+                            </div>
+
+                            <!-- Dòng chứa phương thức thanh toán và check out -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <!-- Phương thức thanh toán -->
+                                    <label for="paymentMethod" class="form-label">Payment Method</label>
+                                    <div class="payment-method-icons row g-1">
+                                        <!-- Sử dụng g-1 để giảm khoảng cách giữa các cột -->
+                                        <!-- Thêm class g-1 để có khoảng cách nhỏ giữa các cột -->
+                                        <div class="col-md-3">
+                                            <label class="payment-icon-container d-block text-center">
+                                                <input type="radio" name="paymentMethod" value="2" class="payment-icon" />
+                                                <img src="/path/Icon VNPAY-QR.png" style="width: auto; height: 30px" alt="VNPay" class="payment-logo" />
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="payment-icon-container d-block text-center">
+                                                <input type="radio" name="paymentMethod" value="1" class="payment-icon" />
+                                                <img src="/path/MoMo_Logo.png" style="width: auto; height: 30px" alt="MoMo" class="payment-logo" />
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="payment-icon-container d-block text-center">
+                                                <input type="radio" name="paymentMethod" value="3" class="payment-icon" />
+                                                <img src="/path/ZaloPay_Logo.jpg" style="width: auto; height: 30px" alt="ZaloPay" class="payment-logo" />
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="payment-icon-container d-block text-center">
+                                                <input type="radio" name="paymentMethod" value="0" class="payment-icon" />
+                                                <img src="/path/Cash_Logo.png" style="width: auto; height: 30px" alt="Cash" class="payment-logo" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nút Check Out -->
+                                <div class="col-md-6 mb-3">                                  
+                                    <div class="mb-3">
+                                        <input type="number" id="amountGivenInput" class="form-control" placeholder="Enter amount given" />
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-success w-100" id="checkOutButton">Check Out</button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
                         </div>
                     </div>
-                    <!-- Hiển thị thông tin đơn hàng -->
-                    <div class="col-md-6 mb-3">
-                        <div id="orderDetailsText">Order summary will be shown here.</div>
-                    </div>
-                </div>
 
-                <!-- Dòng chứa thông tin voucher -->
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <!-- Voucher Input -->
-                        <label for="voucherCode" class="form-label">Voucher Code</label>
-                        <input type="text" class="form-control" id="voucherCode" placeholder="Enter your voucher code" />
-                        <button type="button" class="btn btn-primary mt-2" id="applyVoucherButton">Apply Voucher</button>
-                    </div>
 
-                    <!-- Hiển thị tổng tiền -->
-                    <div class="col-md-6 mb-3">
-                        <p><strong>Total Price:</strong> <span id="totalPrice">0</span></p>
-                        <p><strong>Shipping Fee:</strong> <span id="shippingFee">10</span></p>
-                        <p><strong>Discount (Voucher):</strong> <span id="discount">0</span></p>
-                        <p><strong>Final Price:</strong> <span id="finalPrice">0</span></p>
-                    </div>
 
-                </div>
-                <!-- Dòng chứa phương thức thanh toán và check out -->
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <!-- Phương thức thanh toán -->
-                        <label for="paymentMethod" class="form-label">Payment Method</label>
-                        <div class="payment-method-icons">
-                            <img src="/path/VNPay_Logo.png" style="width : auto; height : 25px" alt="VNPay" class="payment-logo" />
-                            <img src="/path/MoMo_Logo.png" style="width : auto; height: 25px" alt="MoMo" class="payment-logo" />
-                            <img src="/path/ZaloPay_Logo.png" style="width : auto; height: 25px" alt="ZaloPay" class="payment-logo" />
-                        </div>
-
-                        <select class="form-select" id="paymentMethod" required>
-                            <option value="">Select Payment Method</option>
-                            <option value="CreditCard">Credit Card</option>
-                            <option value="PayPal">PayPal</option>
-                            <option value="CashOnDelivery">Cash on Delivery</option>
-                        </select>
-                    </div>
-
-                    <!-- Nút Check Out -->
-                    <div class="col-md-6 mb-3 d-flex align-items-end">
-                        <button type="button" class="btn btn-success w-100" id="checkOutButton">Check Out</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
     </div>
 </div>
         </div>
@@ -351,7 +380,6 @@
         .payment-method-icons {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
             margin-top: 10px;
         }
 
@@ -360,6 +388,44 @@
             height: auto;
         }
 
+    </style>
+    <style>
+        .payment-method-icons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .payment-icon-container {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+            .payment-icon-container input {
+                position: absolute;
+                opacity: 0; /* Ẩn radio button, chỉ sử dụng ảnh */
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                cursor: pointer;
+            }
+
+                .payment-icon-container input:checked + img {
+                    border: 2px solid #007bff; /* Màu outline khi chọn */
+                    border-radius: 5px; /* Đường viền bo góc */
+                }
+
+        .payment-logo {
+            width: auto;
+            height: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .payment-icon-container input:hover + img {
+            opacity: 0.8; /* Hiệu ứng hover cho ảnh */
+        }
+    
     </style>
 }
 
@@ -550,7 +616,7 @@ function loadOrderDetails(orderId) {
                                 <td>${item.product?.category?.name ?? 'N/A'}</td>
                                 <td>${item.product?.brand?.name ?? 'N/A'}</td>
                                 <td>${item.product?.size?.value ?? 'N/A'}</td>
-                                <td>${item.product?.price ?? '0.00'}</td>
+                                <td>${item.product?.price ?? '0'}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <button class="btn btn-outline-secondary decrease-quantity mx-1" data-id="${item.productId}" data-price="${item.product?.price ?? 0}" type="button">-</button>
@@ -558,7 +624,7 @@ function loadOrderDetails(orderId) {
                                         <button class="btn btn-outline-secondary increase-quantity mx-1" data-id="${item.productId}" data-price="${item.product?.price ?? 0}" type="button">+</button>
                                     </div>
                                 </td>
-                                <td class="total-price">${(item.totalPrice ?? (item.quantity ?? 1) * (item.product?.price ?? 0)).toFixed(2)}</td>
+                                <td class="total-price" data-id="${item.productId}">${(item.totalPrice ?? (item.quantity ?? 1) * (item.product?.price ?? 0)).toFixed(2)}</td>
                                 <td>
                                     <button class="btn btn-danger btn-sm remove-product" data-id="${item.id}">Remove</button>
                                 </td>
@@ -609,7 +675,6 @@ function loadOrderDetails(orderId) {
 }
 
 
-
 // Hàm gắn sự kiện cho các nút tăng, giảm số lượng và xóa sản phẩm
 function bindCartEvents(orderId) {
     // Gắn sự kiện giảm số lượng sản phẩm
@@ -626,7 +691,10 @@ function bindCartEvents(orderId) {
                 if (currentQuantity > 1) {
                     quantityInput.value = currentQuantity - 1;
                     updateOrderDetail(orderId, productId, quantityInput.value)
-                        .then(() => updateTotalPriceInTable(productId, quantityInput.value, price)); // Cập nhật tổng tiền
+                        .then(() => {
+                            updateTotalPriceInTable(productId, quantityInput.value, price); // Cập nhật tổng tiền của sản phẩm
+                            updateOrderTotal(); // Cập nhật tổng tiền của toàn bộ đơn hàng
+                        });
                 }
             } else {
                 console.error(`Quantity input for product ID ${productId} not found.`);
@@ -647,7 +715,10 @@ function bindCartEvents(orderId) {
                 // Tăng số lượng lên 1 và cập nhật thông tin
                 quantityInput.value = currentQuantity + 1;
                 updateOrderDetail(orderId, productId, quantityInput.value)
-                    .then(() => updateTotalPriceInTable(productId, quantityInput.value, price)); // Cập nhật tổng tiền
+                    .then(() => {
+                        updateTotalPriceInTable(productId, quantityInput.value, price); // Cập nhật tổng tiền của sản phẩm
+                        updateOrderTotal(); // Cập nhật tổng tiền của toàn bộ đơn hàng
+                    });
             } else {
                 console.error(`Quantity input for product ID ${productId} not found.`);
             }
@@ -677,7 +748,10 @@ function bindCartEvents(orderId) {
 
             // Cập nhật chi tiết đơn hàng
             updateOrderDetail(orderId, productId, currentQuantity)
-                .then(() => updateTotalPriceInTable(productId, currentQuantity, price)); // Cập nhật tổng tiền
+                .then(() => {
+                    updateTotalPriceInTable(productId, currentQuantity, price); // Cập nhật tổng tiền của sản phẩm
+                    updateOrderTotal(); // Cập nhật tổng tiền của toàn bộ đơn hàng
+                });
         });
     });
 }
@@ -711,13 +785,36 @@ function updateOrderDetail(orderId, productId, quantity) {
 }
 
 
-// Cập nhật tổng tiền trong bảng sau khi thay đổi số lượng
+// Cập nhật tổng tiền trong bảng và toàn bộ đơn hàng
 function updateTotalPriceInTable(productId, quantity, price) {
-    const totalPriceElement = document.querySelector(`tr[data-id="${productId}"] .total-price`);
+    const totalPriceElement = document.querySelector(`td[data-id="${productId}"]`);
+    console.log(totalPriceElement); //
     if (totalPriceElement) {
-        totalPriceElement.textContent = (quantity * price).toFixed(2); // Tính tổng tiền mới
+        // Tính tổng giá cho sản phẩm
+        const newTotalPrice = quantity * price;
+        totalPriceElement.textContent = newTotalPrice.toFixed(2);
+        console.log(newTotalPrice);
     }
 }
+
+// Hàm tính tổng giá trị toàn bộ đơn hàng
+function updateOrderTotal() {
+    const totalElements = document.querySelectorAll('.total-price');
+    let totalOrderPrice = 0;
+
+    totalElements.forEach(element => {
+        const price = parseFloat(element.textContent);
+        if (!isNaN(price)) {
+            totalOrderPrice += price;
+        }
+    });
+    // Hiển thị tổng tiền
+    const orderTotalElement = document.getElementById("orderTotal"); // Phần tử hiển thị tổng tiền
+    if (orderTotalElement) {
+        orderTotalElement.textContent = totalOrderPrice.toFixed(2);
+    }
+}
+
 
 
 // Hàm xóa sản phẩm khỏi đơn hàng
@@ -896,6 +993,64 @@ function addOrUpdateOrderDetail(productId) {
 
 
 </script>
+
+ <script>
+        // Khi người dùng nhấn nút "Check Out"
+        document.getElementById('checkOutButton').addEventListener('click', function () {
+            // Lấy dữ liệu từ giao diện
+            var orderId = "@Model.OrderId";
+            var staffId = "@Model.StaffId";
+
+            // Lấy giá trị amountGiven từ input
+            var amountGiven = parseFloat(document.getElementById('amountGivenInput')?.value || 0);
+            if (isNaN(amountGiven) || amountGiven <= 0) {
+                alert("Please enter a valid amount.");
+                return;
+            }
+
+            // Lấy giá trị paymentMethod từ radio button được chọn
+            var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+            if (paymentMethod === undefined) {
+                alert("Please select a payment method.");
+                return;
+            }
+
+            // Tạo URL với query string
+            var url = `https://localhost:7280/api/Orders/CheckOutInStore?orderId=${orderId}&staffId=${staffId}&amountGiven=${amountGiven}&paymentMethod=${paymentMethod}`;
+
+            // Gửi POST request đến API
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Header vẫn giữ nguyên
+                }
+            })
+                .then(data => {
+                    // Xử lý kết quả trả về từ API
+                    if (data.success) {
+                        if (paymentMethod == 0) {
+                            alert("Đơn hàng đã thanh toán thành công");
+                        } else {
+                            alert("Checkout successful!");
+                        }
+                        // Có thể chuyển hướng hoặc cập nhật giao diện sau khi thành công
+                        window.location.reload(); // Reload trang hoặc làm gì đó
+                    } else {
+                        alert("Error during checkout: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    // Xử lý lỗi khi gọi API
+                    console.error("Error during checkout:", error);
+                    alert(`An error occurred: ${error.message || "Unknown error"}. Please try again.`);
+                });
+        });
+
+
+    </script>
+
+
+
 
 <!---------------------------------------->
 

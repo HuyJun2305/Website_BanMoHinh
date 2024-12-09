@@ -9,6 +9,7 @@ namespace API.IRepositories
         Task Create(Image image);
         Task Update(Image image);
         Task Delete(Guid id);
+        Task DeleteImageInProduct(Guid productId, Guid imageId);
         Task SaveChanges();
     }
 }

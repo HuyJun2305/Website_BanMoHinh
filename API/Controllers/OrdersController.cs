@@ -46,19 +46,37 @@ namespace API.Controllers
 			}
 		}
 
-		[HttpGet("GetAllOrder")]
+		[HttpPost("CheckOutInStore")]
+		public async Task<ActionResult> CheckOutInStore([FromQuery] Guid orderId, [FromQuery] Guid staffId, [FromQuery]  decimal amountGiven,  PaymentMethod paymentMethod)
+		{
+				var result =  _orderRepo.CheckOutInStore(orderId, staffId, amountGiven, paymentMethod);
+				return Ok(result);
+			
+		}
+
+
+		[HttpGet("GetOrderStatus0")]
+        public async Task<ActionResult<List<Order>>> GetOrderStatus0()
+		{
+            var result = await _orderRepo.GetOrderStatus();
+            return Ok(result);
+
+        }
+        [HttpGet("GetOrdersByStatus")]
+        public async Task<ActionResult<List<Order>>> GetOrdersByStatus(OrderStatus status)
+        {
+            var orders = await _orderRepo.GetOrderByStatus(status);
+            return Ok(orders);
+        }
+
+
+
+        [HttpGet("GetAllOrder")]
 		public async Task<ActionResult<List<Order>>> GetAllOrder()
 		{
-			try
-			{
-				return await _orderRepo.GetAllOrder();
-
-			}
-			catch (Exception ex)
-			{
-				return Problem(ex.Message);
-			}
-		}
+            var result = await _orderRepo.GetAllOrder();
+            return Ok(result);
+        }
 
 		[HttpGet("GetOrderById")]
 		public async Task<ActionResult> GetOrderById(Guid id)

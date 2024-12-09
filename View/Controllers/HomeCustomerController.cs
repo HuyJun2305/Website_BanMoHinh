@@ -92,12 +92,12 @@ namespace View.Controllers
 				// Nếu không tìm thấy giỏ hàng, có thể tạo mới giỏ hàng hoặc trả về lỗi
 				return NotFound("Cart not found for the user.");
 			}
-
+				
 			// Lấy cartId từ giỏ hàng
 			var cartId = cart.Id;
 
 			// Lấy thông tin sản phẩm và hình ảnh
-			ViewData["SizeId"] = new SelectList(_sizeServices.GetAllSizes().Result, "Id", "Value");
+			ViewData["SizeId"] = new SelectList(_sizeServices.GetSizeByStatus().Result, "Id", "Value");
 			var products = _productServices.GetAllProduct().Result;
 			var selectedImage = _imageServices.GetAllImages().Result;
 			var selectedProduct = products.FirstOrDefault(p => p.Id == id);

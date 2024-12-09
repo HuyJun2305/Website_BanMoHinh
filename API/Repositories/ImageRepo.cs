@@ -25,7 +25,20 @@ namespace API.Repositories
             if (Image == null) throw new KeyNotFoundException("Not found this Image!");
             _context.Images.Remove(Image);
             await _context.SaveChangesAsync();
+        }
 
+        public async Task DeleteImageInProduct(Guid productId, Guid imageId)
+        {
+            // Tìm ảnh thuộc sản phẩm với ID tương ứng
+            var image = await _context.Images
+                .FirstOrDefaultAsync(img => img.Id == imageId && img.ProductId == productId);
+
+            if (image == null)
+                throw new KeyNotFoundException("Không tìm thấy ảnh hoặc ảnh không thuộc sản phẩm này!");
+
+            // Xóa ảnh và lưu thay đổi
+            _context.Images.Remove(image);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Image>> GetAllImage()

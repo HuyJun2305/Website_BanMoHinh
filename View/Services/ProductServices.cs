@@ -73,5 +73,6 @@ namespace View.Services
         {
             await _httpClient.PutAsJsonAsync($"https://localhost:7280/api/Products/{product.Id}", product);
         }
+
     }
 }

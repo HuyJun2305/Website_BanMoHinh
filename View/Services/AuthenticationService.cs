@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using View.IServices;
+using View.ViewModels;
 
 namespace View.Services
 {
@@ -55,7 +56,7 @@ namespace View.Services
             return jwt.Claims.First(c => c.Type == ClaimTypes.Name).Value;
         }
 
-		public async ValueTask<string> LoginAsync(LoginModel model)
+		public async ValueTask<string> LoginAsync(ViewModels.Sign_In_Up_ViewModel model)
 		{
 			string requestURL = "https://localhost:7280/api/Authentication/Login";
 
@@ -78,7 +79,7 @@ namespace View.Services
 
 			return Login.JwtToken;
 		}
-        public async Task<bool> Register(DangKyModel model)
+        public async Task<bool> Register(ViewModels.Sign_In_Up_ViewModel model)
         {
             string requestURL = "https://localhost:7280/api/Authentication/Register";
 

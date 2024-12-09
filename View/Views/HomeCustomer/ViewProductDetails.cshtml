@@ -34,18 +34,19 @@
 							<div class="wrap-slick3-dots"></div>
 							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 						<div class="slick3 gallery-lb">
-						@foreach(var image in Model.Images)
-						{
+							@foreach (var image in Model.Images)
+							{
 								<div class="item-slick3" data-thumb="@Url.Content(image.URL)">
-									<div class="wrap-pic-w pos-relative">
-											<img src="@Url.Content(image.URL)"  alt="Product Image">
-
-										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product-detail-01.jpg">
+									<div class="wrap-pic-w pos-relative product-image-container">
+										<img src="@Url.Content(image.URL)" style="height:25rem; width:auto; margin-left: 2.7rem" alt="Product Image">	
+										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
+										   href="@Url.Content(image.URL)">
 											<i class="fa fa-expand"></i>
 										</a>
 									</div>
 								</div>
-						}
+							}
+
 								
 							</div>
 						</div>
@@ -59,7 +60,7 @@
 						</h4>
 
 						<span class="mtext-106 cl2">
-								@Model.Products.FirstOrDefault()?.Price VND
+						@Model.Products.FirstOrDefault()?.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))
 						</span>
 
 						@if(@Model.Products.FirstOrDefault()?.Description == null)
@@ -71,31 +72,34 @@
 						}
 						else
 						{
+							<p class="stext-102 cl3 p-t-23">
 								@Model.Products.FirstOrDefault()?.Description
+							</p>
 						}
+						<hr />
 
-						<!--  -->
-						<div class="p-t-33">
-							<div class="flex-w flex-r-m p-b-10">
-								<div class="size-203 flex-c-m respon6">
-									Size
+						<div class="p-t-5">
+						<div class="rs1-select2 bor8 bg0">
+							<div>
+								<div id="sizeOptions" class="d-flex flex-wrap">
+									@foreach (var size in (IEnumerable<SelectListItem>)ViewData["SizeId"])
+									{
+										<button type="button"
+												class="btn btn-outline-secondary m-1 size-option"
+												data-size-id="@size.Value"
+												data-selected="@size.Selected">
+											@size.Text
+										</button>
+									}
 								</div>
-
-								<div class="size-204 respon6-next">
-									<div class="rs1-select2 bor8 bg0">
-										<select asp-for="@Model.Products.FirstOrDefault().SizeId" class="form-control" class="js-select2" name="time" required>
-											<option value="">------</option>
-											@foreach (var size in (IEnumerable<SelectListItem>)ViewData["SizeId"])
-											{
-												<option value="@size.Value">@size.Text</option>
-											}
-										</select>
-										<div class="dropDownSelect2"></div>
-									</div>
-								</div>
+								<!-- Input ẩn để lưu giá trị chọn -->
+								<input type="hidden" id="SizeId" name="SizeId" value="" />
 							</div>
+						</div>
+						</<div>
 
 
+						<div class="p-t-33">
 
 						<div class="flex-w flex-r-m p-b-10">
 							<div class="size-204 flex-w flex-m respon6-next">
@@ -119,9 +123,6 @@
 								</button>
 							</div>
 						</div>
-
-
-
 
 						</div>
 
@@ -330,7 +331,8 @@
 			</span>
 
 			<span class="stext-107 cl6 p-lr-25">
-				Categories: Jacket, Men
+				Categories: @Model.Products.FirstOrDefault()?.Category.Name
+
 			</span>
 		</div>
 	</section>
@@ -418,11 +420,96 @@
 		</div>
 	</section>
 
+<style>
+	.product-image-container {
+		border: 2px solid #ccc; /* Thêm đường viền */
+		border-radius: 10px; /* Góc bo tròn */
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow màu xám */
+		overflow: hidden; /* Đảm bảo nội dung không tràn ra ngoài */
+		transition: box-shadow 0.3s ease-in-out, transform 0.3s ease; /* Hiệu ứng hover */
+	}
+
+		.product-image-container img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+		}
+
+		.product-image-container:hover {
+			box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Shadow đậm hơn khi hover */
+			transform: scale(1.02); /* Phóng to nhẹ */
+		}
+
+	.flex-c-m.size-108.how-pos1.bor0.fs-16.cl10.bg0.hov-btn3.trans-04 {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		opacity: 0;
+		background: rgba(0, 0, 0, 0.7);
+		border-radius: 50%;
+		width: 50px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: opacity 0.3s ease;
+	}
+
+	.product-image-container:hover .flex-c-m.size-108.how-pos1 {
+		opacity: 1; /* Hiển thị nút mở rộng khi hover */
+	}
+	/* Style cho nút kích thước */
+	.size-option {
+		border-radius: 5px;
+		padding: 10px 20px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+		.size-option.selected {
+			background-color: #007bff; /* Màu xanh lam khi được chọn */
+			color: #fff; /* Màu chữ trắng */
+			border-color: #007bff;
+		}
+
+		.size-option:hover {
+			background-color: lavender; /* Màu xám nhạt khi hover */
+		}
+		.size-option:active{
+			background-color: lavender; 
+		}
+
+</style>
 
 @section Scripts {
 		<script>
 		document.addEventListener('DOMContentLoaded', function () {
-			const addToCartButtons = document.querySelectorAll('.js-addcart-detail');
+
+			const sizeButtons = document.querySelectorAll(".size-option");
+			const hiddenInput = document.getElementById("SizeId");
+
+			sizeButtons.forEach(button => {
+				// Đặt trạng thái ban đầu nếu đã chọn
+				if (button.dataset.selected === "True") {
+					button.classList.add("selected");
+					hiddenInput.value = button.dataset.sizeId;
+				}
+
+				// Sự kiện click để chọn kích thước
+				button.addEventListener("click", function () {
+					// Loại bỏ trạng thái "selected" khỏi tất cả nút
+					sizeButtons.forEach(btn => btn.classList.remove("selected"));
+					// Đặt trạng thái "selected" cho nút hiện tại
+					this.classList.add("selected");
+					// Gán giá trị vào input ẩn
+					hiddenInput.value = this.dataset.sizeId;
+				});
+			});
+			// Addtocart
+
+
+			const addToCartButtons = document.querySelectorAll('.js-addcart-detail');	
 
 			addToCartButtons.forEach(button => {
 				button.addEventListener('click', function () {

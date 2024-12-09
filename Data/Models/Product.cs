@@ -16,9 +16,6 @@ namespace Data.Models
         public string? Description { get; set; }
 
 
-        public Guid SizeId { get; set; }
-        public virtual Size? Size { get; set; }
-
         public Guid BrandId { get; set; }
         public virtual Brand? Brand { get; set; }
         public Guid MaterialId { get; set; }
@@ -28,10 +25,11 @@ namespace Data.Models
 
 
         public Guid? PromotionId { get; set; }
-        public virtual Promotion? Promotion { get; set; }
+        public virtual ICollection<Promotion>? Promotions { get; set; }
 
         public virtual ICollection<Image>? Images { get; set; }
+		public virtual ICollection<Size>? Sizes { get; set; }
 
 
-    }
+	}
 }

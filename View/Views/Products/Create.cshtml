@@ -85,17 +85,17 @@
                     <!-- Size -->
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label asp-for="SizeId" class="form-label">Kích thước <span class="text-danger">*</span></label>
-                            <div class="d-flex gap-2">
-                                <select asp-for="SizeId" class="form-control" required>
-                                    <option value="">------</option>
-                                    @foreach (var size in (IEnumerable<SelectListItem>)ViewData["SizeId"])
-                                    {
-                                        <option value="@size.Value">@size.Text</option>
-                                    }
-                                </select>
+                            <label class="form-label">Kích thước <span class="text-danger">*</span></label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var size in (IEnumerable<SelectListItem>)ViewData["SizeId"])
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="@Model.Sizes.FirstOrDefault().Id" name="sizeId" value="@size.Value">
+                                        <label class="form-check-label" for="size_@size.Value">@size.Text</label>
+                                    </div>
+                                }
                             </div>
-                            <span asp-validation-for="SizeId" class="text-danger"></span>
+                            <span asp-validation-for="Sizes" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -140,112 +140,136 @@
 @section Scripts {
 
     <script>
-    // JavaScript xử lý hiển thị ảnh đã chọn và xóa ảnh
-    document.getElementById('files').addEventListener('change', function(event) {
-        var files = event.target.files;
-        var previewContainer = document.getElementById('imagePreviewContainer');
-        previewContainer.innerHTML = ''; // Clear any previous previews
+        // JavaScript xử lý hiển thị ảnh đã chọn và xóa ảnh
+        document.getElementById('files').addEventListener('change', function (event) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = ''; // Xóa tất cả preview trước đó
 
-        if (files.length > 0) {
-            for (let i = 0; i < files.length; i++) {
-                var file = files[i];
-                var reader = new FileReader();
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
 
-                reader.onload = function(e) {
-                    // Tạo một thẻ <div> để chứa ảnh và nút xóa
-                    var imgContainer = document.createElement('div');
-                    imgContainer.classList.add('img-container');
-                    imgContainer.style.display = 'inline-block';
-                    imgContainer.style.marginRight = '10px';
-                    imgContainer.style.marginBottom = '10px';
+                reader.onload = function (e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.classList.add('img-container', 'd-inline-block', 'me-2', 'mb-2');
 
-                    // Tạo thẻ <img> để hiển thị ảnh
-                    var imgElement = document.createElement('img');
+                    const imgElement = document.createElement('img');
                     imgElement.src = e.target.result;
                     imgElement.classList.add('img-thumbnail');
-                    imgElement.style.width = '100px'; // Thay đổi kích thước hiển thị nếu cần
+                    imgElement.style.width = '100px';
 
-                    // Tạo nút xóa
-                    var removeBtn = document.createElement('button');
+                    const removeBtn = document.createElement('button');
                     removeBtn.textContent = 'Xóa';
-                    removeBtn.classList.add('btn', 'btn-danger', 'btn-sm');
-                    removeBtn.style.marginTop = '5px';
-                    removeBtn.style.display = 'block';
+                    removeBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'mt-2');
+                    removeBtn.addEventListener('click', () => imgContainer.remove());
 
-                    // Khi nhấn nút xóa, xóa ảnh khỏi preview container
-                    removeBtn.addEventListener('click', function() {
-                        imgContainer.remove(); // Xóa phần tử ảnh và nút
-                    });
-
-                    // Thêm ảnh và nút xóa vào container
                     imgContainer.appendChild(imgElement);
                     imgContainer.appendChild(removeBtn);
-
-                    // Thêm vào preview container
                     previewContainer.appendChild(imgContainer);
                 };
 
                 reader.readAsDataURL(file);
-            }
-        }
-    });
-
-    // JavaScript xử lý submit form
-    document.getElementById('productForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        let form = e.target;
-        let formData = new FormData(form);
-
-        // Kiểm tra xem có ảnh nào được chọn hay không
-        let imageFiles = document.getElementById('files').files;
-        if (imageFiles.length === 0) {
-            alert('Vui lòng chọn ít nhất một ảnh.');
-            return; // Dừng xử lý nếu không có ảnh
-        }
-
-        try {
-            // Tạo sản phẩm
-            let productResponse = await fetch('/Products/Create', {
-                method: 'POST',
-                body: formData,
             });
-            if (productResponse.ok) {
-                let productData = await productResponse.json();
-                if (productData.success) {
-                    alert('Tạo sản phẩm thành công!');
-                    let productId = productData.productId;
+        });
 
-                    // Upload từng ảnh một cho sản phẩm
-                    for (let i = 0; i < imageFiles.length; i++) {
-                        let imageFormData = new FormData();
-                        imageFormData.append('imageFile', imageFiles[i]);
-                        imageFormData.append('productId', productId);
+        // JavaScript xử lý submit form
+        document.getElementById('productForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-                        let uploadResponse = await fetch('/Products/Upload', {
-                            method: 'POST',
-                            body: imageFormData,
-                        });
+            const form = e.target;
+            const formData = new FormData(form);
 
-                        let uploadData = await uploadResponse.json();
-                        if (!uploadData.success) {
-                            alert(`Lỗi tải ảnh: ${uploadData.message}`);
-                        }
-                    }
+            // Thêm các sizeId từ checkbox vào formData
+            const sizeIds = Array.from(document.querySelectorAll('input[name="sizeId"]:checked')).map(checkbox => checkbox.value);
 
-                        window.location.href = '/Products/Index';
-                    } else {
-                    alert(productData.message || 'Lỗi tạo sản phẩm.');
-                }
-            } else {
-                alert('Lỗi mạng khi tạo sản phẩm.');
+            console.log(sizeIds);
+
+            if (sizeIds.length === 0) {
+                toastr.warning('Vui lòng chọn ít nhất một size.');
+                return;
             }
-        } catch (error) {
-            console.error('Lỗi:', error);
-            alert('Đã xảy ra lỗi trong quá trình xử lý.');
+
+            sizeIds.forEach(sizeId => formData.append('sizeIds', sizeId));
+
+            const imageFiles = document.getElementById('files').files;
+            if (imageFiles.length === 0) {
+                toastr.warning('Vui lòng chọn ít nhất một ảnh.');
+                return;
+            }
+
+            try {
+                // Tạo sản phẩm
+                const productResponse = await fetch('/Products/Create', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!productResponse.ok) {
+                    toastr.error('Lỗi mạng khi tạo sản phẩm.');
+                    return;
+                }
+
+                const productData = await productResponse.json();
+
+                if (!productData.success) {
+                    toastr.error(productData.message || 'Lỗi tạo sản phẩm.');
+                    return;
+                }
+
+                toastr.success('Tạo sản phẩm thành công!');
+                const productId = productData.productId;
+
+                // Upload kích thước sản phẩm
+                const sizeUploadSuccess = await uploadSize(sizeIds, productId);
+                if (!sizeUploadSuccess) return;
+
+                // Upload từng ảnh một cho sản phẩm
+                for (const file of imageFiles) {
+                    const imageFormData = new FormData();
+                    imageFormData.append('imageFile', file);
+                    imageFormData.append('productId', productId);
+
+                    const uploadResponse = await fetch('/Products/Upload', {
+                        method: 'POST',
+                        body: imageFormData,
+                    });
+
+                    const uploadData = await uploadResponse.json();
+                    if (!uploadData.success) {
+                        toastr.error(`Lỗi tải ảnh: ${uploadData.message}`);
+                    }
+                }
+
+                window.location.href = '/Products/Index';
+            } catch (error) {
+                console.error('Lỗi:', error);
+                toastr.error('Đã xảy ra lỗi trong quá trình xử lý.');
+            }
+        });
+
+        // Hàm gọi API thêm size cho sản phẩm
+        async function uploadSize(sizeIds, productId) {
+            try {
+                for (const sizeId of sizeIds) {
+                    const response = await fetch(`/Products/AddSize?productId=${productId}&sizeId=${sizeId}`, {
+                        method: 'POST',
+                    });
+
+                    const data = await response.json();
+                    if (!data.success) {
+                        toastr.error(`Lỗi thêm size: ${data.message}`);
+                        return false;
+                    }
+                }
+
+                toastr.success('Thêm size thành công!');
+                return true;
+            } catch (error) {
+                console.error('Lỗi thêm size:', error);
+                toastr.error('Đã xảy ra lỗi khi thêm size.');
+                return false;
+            }
         }
-    });
-</script>
+    </script>
 
 }
-

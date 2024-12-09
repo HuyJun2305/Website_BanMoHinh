@@ -35,7 +35,14 @@ namespace View.Services
             return size;
         }
 
-        public async Task Update(Size size)
+		public async Task<IEnumerable<Size>?> GetSizeByStatus()
+		{
+			var response = await _httpClient.GetStringAsync("https://localhost:7280/api/Sizes/GetSizeByStatus");
+			var sizes = JsonConvert.DeserializeObject<IEnumerable<Size>>(response);
+			return sizes;
+		}
+
+		public async Task Update(Size size)
         {
             await _httpClient.PutAsJsonAsync($"https://localhost:7280/api/Sizes/{size.Id}", size);
         }

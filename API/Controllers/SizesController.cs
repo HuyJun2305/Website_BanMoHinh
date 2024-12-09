@@ -21,6 +21,11 @@ namespace API.Controllers
         {
             return await _SizeRepo.GetAllSize();
         }
+        [HttpGet("GetSizeByStatus")]
+        public async Task<ActionResult<IEnumerable<Size>>> GetSizeByStatus()
+        {
+            return await _SizeRepo.GetSizeByStatus();
+        }
         //GET id
         [HttpGet("{id}")]
         public async Task<ActionResult<Size>> GetSize(Guid id)
@@ -71,6 +76,19 @@ namespace API.Controllers
             }
             await _SizeRepo.SaveChanges();
             return Content("Success!");
+        }
+
+        [HttpGet("{productId}/GetSize")]
+        public async Task<IActionResult> GetSizeByProductId(Guid productId)
+        {
+            var sizes = await _SizeRepo.GetSizeByProductId(productId);
+
+            if (sizes == null)
+            {
+                return NotFound(new { message = "Không tìm thấy kích thước cho sản phẩm này." });
+            }
+
+            return Ok(sizes);
         }
     }
 }

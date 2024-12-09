@@ -20,10 +20,8 @@ namespace API.Repositories
 
         public async Task Delete(Guid id)
         {
-            //var size = await GetSizeById(id);
-            //if (size == null) throw new KeyNotFoundException("Not found this size!");
-            //if (_context.Products.Where(p => p.IdSize == id).Any()) throw new Exception("This size has used for some product!");
-            //_context.Sizes.Remove(size);
+            var size = await GetSizeById(id);
+            _context.Sizes.Remove(size);
         }
 
         public async Task<List<Size>> GetAllSize()
@@ -36,7 +34,19 @@ namespace API.Repositories
             return await _context.Sizes.FindAsync(id);
         }
 
-        public async Task SaveChanges()
+        public async Task<List<Size>> GetSizeByProductId(Guid productId)
+        {
+            return await _context.Sizes
+                                    .Where(size => size.ProductId == productId && size.Status == true)
+                                    .ToListAsync();
+        }
+
+        public async Task<List<Size>> GetSizeByStatus()
+		{
+			return await _context.Sizes.Where(s => s.Status == true).ToListAsync();
+		}
+
+		public async Task SaveChanges()
         {
             await _context.SaveChangesAsync();
         }

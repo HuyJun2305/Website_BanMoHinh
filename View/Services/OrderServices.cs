@@ -40,14 +40,28 @@ namespace View.Services
 			return result;
 		}
 
-		public async Task<Order> GetOrderById(Guid id)
+        public async Task<List<Order>> GetAllOrderStatus0()
+        {
+            var response = await _client.GetStringAsync("https://localhost:7280/api/Orders/GetOrderStatus0");
+            var result = JsonConvert.DeserializeObject<List<Order>>(response);
+            return result;
+        }
+
+        public async Task<Order> GetOrderById(Guid id)
 		{
 			var response = await _client.GetStringAsync($"https://localhost:7280/api/Orders/GetOrderById?id={id}");
 			var result = JsonConvert.DeserializeObject<Order>(response);
 			return result;
 		}
 
-		public Task Update(Order order)
+        public async Task<List<Order>> GetOrdersByStatus(OrderStatus status)
+        {
+            var response = await _client.GetStringAsync($"https://localhost:7280/api/Orders/GetOrdersByStatus?status={status}");
+            var result = JsonConvert.DeserializeObject<List<Order>>(response);
+            return result;
+        }
+
+        public Task Update(Order order)
 		{
 			throw new NotImplementedException();
 		}

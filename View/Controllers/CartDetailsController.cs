@@ -52,25 +52,25 @@ namespace View.Controllers
 
 
 
-		public ActionResult Index()
+		public async Task<ActionResult> Index()
 		{
 			var userId = GetUserIdFromJwtInSession(); // Lấy userId từ JWT trong session
 
 			if (userId != Guid.Empty)
 			{
 				// Lấy thông tin giỏ hàng của userId
-				var cart = _cartServices.GetCartByUserId(userId).Result;
+				var cart = await _cartServices.GetCartByUserId(userId);
 
 				if (cart != null)
 				{
-					var cartDetails = _cartServices.GetCartDetailByCartId(cart.Id).Result;
-					var products = _productServices.GetAllProduct().Result;
-					var selectedImage = _imageServices.GetAllImages().Result;
-
+					var cartDetails = await _cartServices.GetCartDetailByCartId(cart.Id);
+					var products = await _productServices.GetAllProduct();
+					var selectedImage = await _imageServices.GetAllImages();
 
 					// Nếu có sản phẩm, trả về view với dữ liệu giỏ hàng
 					var productData = new CartDetailsViewModel()
 					{
+						CartId = cart.Id,
 						Products = products,
 						Images = selectedImage,
 						CartDetails = cartDetails
@@ -86,6 +86,7 @@ namespace View.Controllers
 
 
 
-		
+
+
 	}
 }

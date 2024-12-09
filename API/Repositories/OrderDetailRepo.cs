@@ -25,9 +25,9 @@ namespace API.Repositories
 		.Include(od => od.Product)
 			.ThenInclude(p => p.Images)
 		.Include(od => od.Product)
-			.ThenInclude(p => p.Promotion)
+			.ThenInclude(p => p.Promotions)
 		.Include(od => od.Product)
-			.ThenInclude(p => p.Size)
+			.ThenInclude(p => p.Sizes)
 		.Where(od => od.OrderId == orderId)
 		.ToListAsync();
 		}
@@ -44,9 +44,9 @@ namespace API.Repositories
         .Include(od => od.Product)
             .ThenInclude(p => p.Images)
         .Include(od => od.Product)
-            .ThenInclude(p => p.Promotion)
+            .ThenInclude(p => p.Promotions)
         .Include(od => od.Product)
-            .ThenInclude(p => p.Size)
+            .ThenInclude(p => p.Sizes)
                 .FirstOrDefaultAsync(od => od.Id == id);
 		}
 

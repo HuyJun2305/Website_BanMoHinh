@@ -74,9 +74,6 @@ namespace API.Controllers
             }
         }
 
-
-
-
 		[HttpPost("RemoveOrderDetail")]
 		public async Task<ActionResult> RemoveOrderDetail(Guid orderId, Guid productId, int quantity)
 		{
@@ -91,5 +88,8 @@ namespace API.Controllers
 			}
 			
 		}
-	}
+
+        
+    }
 }
+

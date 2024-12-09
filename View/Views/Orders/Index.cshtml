@@ -1,0 +1,54 @@
+﻿@using Data.Models
+@using View.Utilities.Extensions
+@model View.ViewModels.OrderIndexViewModel
+
+@{
+    ViewData["Title"] = "Order Details";
+    Layout = "_LayoutAdmin";
+}
+
+<div>
+    <ul class="nav nav-tabs" id="orderTabs">
+        @foreach (var status in Model.OrdersByStatus.Keys)
+        {
+            <li class="nav-item">
+                <a class="nav-link @((status == OrderStatus.TaoDonHang) ? "active" : "")" id="tab-@status" data-bs-toggle="tab" href="#status-@status">
+                    @Enum.GetName(typeof(OrderStatus), status)
+                </a>
+            </li>
+        }
+    </ul>
+
+    <div class="tab-content">
+        @foreach (var status in Model.OrdersByStatus.Keys)
+        {
+            <div class="tab-pane fade @((status == OrderStatus.TaoDonHang) ? "show active" : "")" id="status-@status">
+                <h5>@Enum.GetName(typeof(OrderStatus), status)</h5>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Customer Name</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Payment Method</th>
+                            <th scope="col">Created On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.OrdersByStatus[status])
+                        {
+                            <tr>
+                                <td>@order.OrderId</td>
+                                <td>@order.CustomerName</td>
+                                <td>@order.Price</td>
+                                <td>@Enum.GetName(typeof(PaymentMethod), order.PaymentMethods)</td>
+                                <td>@order.DayCreate</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

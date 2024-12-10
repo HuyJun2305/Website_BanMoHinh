@@ -75,7 +75,7 @@ namespace API.Controllers
             {
                 return BadRequest("Id sản phẩm không khớp.");
             }
-            await _productRepo.Update(productUpdateDto.Product, productUpdateDto.SizeIds);
+            await _productRepo.Update(productUpdateDto);
             return Ok();
         }
         //Delete Product

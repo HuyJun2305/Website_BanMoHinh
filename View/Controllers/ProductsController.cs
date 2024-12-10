@@ -1,11 +1,9 @@
-﻿using Data.Models;
+﻿using Data.DTO;
+using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using NuGet.Packaging;
 using View.IServices;
-using View.Services;
 using View.ViewModels;
 
 namespace View.Controllers
@@ -37,30 +35,33 @@ namespace View.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            // Lấy dữ liệu bất đồng bộ
             var brands = await _brandServices.GetAllBrands();
             var materials = await _materialServices.GetAllMaterials();
             var categories = await _categoryServices.GetAllCategories();
+            var products = await _productServives.GetAllProduct();
+            var selectedImage = await _imageServices.GetAllImages();
+            var selectedSize = await _sizeServices.GetSizeByStatus();
 
             // Tạo ViewData cho các dropdown list
             ViewData["BrandId"] = new SelectList(brands, "Id", "Name");
             ViewData["MaterialId"] = new SelectList(materials, "Id", "Name");
             ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
 
-            var products = _productServives.GetAllProduct().Result;
-                var selectedImage = _imageServices.GetAllImages().Result;
-                var selectedSize = _sizeServices.GetSizeByStatus().Result;
-                var productData = new ProductIndex()
-                {
-                    Products = products,
-                    Images = selectedImage,
-                    Sizes = selectedSize,
-                    Brands = brands,
-                    Materials = materials,
-                    Categories = categories
-                };
-                return View(productData);
-        }
+            // Chuẩn bị dữ liệu cho View
+            var productData = new ProductIndex()
+            {
+                Products = products,
+                Images = selectedImage,
+                Sizes = selectedSize,
+                Brands = brands,
+                Materials = materials,
+                Categories = categories
+            };
 
+            // Trả về view với model dữ liệu
+            return View(productData);
+        }
         public async Task<IActionResult> GetProductById(Guid id)
         {
             var product = await _productServives.GetProductById(id);
@@ -73,32 +74,32 @@ namespace View.Controllers
 
 
         }
-		public async Task<IActionResult> Create()
-		{
-			// Lấy dữ liệu bất đồng bộ
-			var brands = await _brandServices.GetAllBrands();
-			var materials = await _materialServices.GetAllMaterials();
-			var categories = await _categoryServices.GetAllCategories();
-			var images = await _imageServices.GetAllImages();
-			var sizes = await _sizeServices.GetSizeByStatus();
+        public async Task<IActionResult> Create()
+        {
+            // Lấy dữ liệu bất đồng bộ
+            var brands = await _brandServices.GetAllBrands();
+            var materials = await _materialServices.GetAllMaterials();
+            var categories = await _categoryServices.GetAllCategories();
+            var images = await _imageServices.GetAllImages();
+            var sizes = await _sizeServices.GetSizeByStatus();
 
-			// Tạo ViewData cho các dropdown list
-			ViewData["BrandId"] = new SelectList(brands, "Id", "Name");
-			ViewData["MaterialId"] = new SelectList(materials, "Id", "Name");
-			ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
-			ViewData["SizeId"] = new SelectList(sizes, "Id", "Value");
+            // Tạo ViewData cho các dropdown list
+            ViewData["BrandId"] = new SelectList(brands, "Id", "Name");
+            ViewData["MaterialId"] = new SelectList(materials, "Id", "Name");
+            ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
+            ViewData["SizeId"] = new SelectList(sizes, "Id", "Value");
 
-			// Tạo ViewModel và truyền vào view
-			var dataImage = new ProductViewModel
-			{
-				Images = images,
-				Sizes = sizes
-			};
+            // Tạo ViewModel và truyền vào view
+            var dataImage = new ProductViewModel
+            {
+                Images = images,
+                Sizes = sizes
+            };
 
-			return View(dataImage);
-		}
+            return View(dataImage);
+        }
 
-		[HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Create([Bind("Price, Name, Description,Stock, BrandId, SizeId, MaterialId, CategoryId")] Product product)
         {
             if (ModelState.IsValid)
@@ -106,7 +107,7 @@ namespace View.Controllers
                 product.Id = Guid.NewGuid();
                 await _productServives.Create(product);
 
-                return Json( new { success = true, productId = product.Id });
+                return Json(new { success = true, productId = product.Id });
             }
 
             return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
@@ -125,29 +126,18 @@ namespace View.Controllers
 
 
         [HttpPut]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Price,Name,Stock,Description,BrandId,MaterialId,CategoryId, Sizes,Images")] Product product)
+        public async Task<IActionResult> Edit([FromBody] ProductDto productDto)
         {
-            if (id != product.Id)
+            if (productDto == null)
             {
-                return NotFound("ID không khớp với sản phẩm cần chỉnh sửa.");
+                return BadRequest("Invalid product data.");
             }
-            if (!ModelState.IsValid)
-            {
-                return View(product); 
-            }
-            try
-            {
-                // Gọi service để cập nhật sản phẩm
-                await _productServives.Update(product);
-                TempData["SuccessMessage"] = "Cập nhật sản phẩm thành công.";
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Đã xảy ra lỗi khi cập nhật sản phẩm: " + ex.Message);
-                return View(product);
-            }
-            return RedirectToAction(nameof(Index));
+
+            // Cập nhật sản phẩm
+            await _productServives.Update(productDto);
+            return Json(new { success = true });
         }
+
         [HttpDelete]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -162,7 +152,7 @@ namespace View.Controllers
 
                 // Xóa sản phẩm
                 await _productServives.Delete(id);
-                
+
                 return Json(new { success = true, message = "Sản phẩm đã được xóa thành công." });
             }
             catch (Exception ex)
@@ -230,7 +220,7 @@ namespace View.Controllers
         }
 
 
-        
+
 
 
         [HttpGet("GetSizes")]

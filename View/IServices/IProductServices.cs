@@ -1,4 +1,6 @@
-﻿using Data.Models;
+﻿using Data.DTO;
+using Data.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace View.IServices
 {
@@ -7,7 +9,7 @@ namespace View.IServices
         Task<IEnumerable<Product>> GetAllProduct();
         Task<Product> GetProductById(Guid id);
         Task Create(Product product);
-        Task Update(Product product);
+        Task Update(ProductDto productUpdateDto);
         Task Delete(Guid id);
         Task<List<Product>> GetFilteredProduct(string? searchQuery = null,
             Guid? sizeId = null,

@@ -1,5 +1,6 @@
 ﻿using API.Data;
 using API.IRepositories;
+using Data.DTO;
 using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -114,8 +115,11 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(Product product, List<Guid> newSizeIds)
+        public async Task Update(ProductDto productDto)
         {
+            // Lấy thông tin sản phẩm từ ProductDto
+            var product = productDto.Product;
+
             // Tìm sản phẩm trong cơ sở dữ liệu
             var existingProduct = await _context.Products
                 .FirstOrDefaultAsync(p => p.Id == product.Id);
@@ -142,8 +146,8 @@ namespace API.Repositories
             var currentSizeIds = currentProductSizes.Select(ps => ps.SizeId).ToList();
 
             // Xác định những SizeId cần thêm và cần xóa
-            var sizesToRemove = currentSizeIds.Except(newSizeIds).ToList();
-            var sizesToAdd = newSizeIds.Except(currentSizeIds).ToList();
+            var sizesToRemove = currentSizeIds.Except(productDto.SizeIds).ToList();
+            var sizesToAdd = productDto.SizeIds.Except(currentSizeIds).ToList();
 
             // Xóa các mối quan hệ cũ không còn tồn tại
             if (sizesToRemove.Any())
@@ -172,6 +176,7 @@ namespace API.Repositories
             // Lưu thay đổi vào cơ sở dữ liệu
             await _context.SaveChangesAsync();
         }
+
 
 
 

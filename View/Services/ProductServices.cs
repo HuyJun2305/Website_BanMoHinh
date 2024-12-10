@@ -1,4 +1,6 @@
-﻿using Data.Models;
+﻿using Data.DTO;
+using Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using View.IServices;
 
@@ -69,9 +71,9 @@ namespace View.Services
             return product;
         }
 
-        public async Task Update(Product product)
+        public async Task Update([FromBody] ProductDto productUpdateDto)
         {
-            await _httpClient.PutAsJsonAsync($"https://localhost:7280/api/Products/{product.Id}", product);
+            await _httpClient.PutAsJsonAsync($"https://localhost:7280/api/Products/", productUpdateDto);
         }
 
     }

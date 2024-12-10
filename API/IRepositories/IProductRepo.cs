@@ -1,4 +1,5 @@
-﻿using Data.Models;
+﻿using Data.DTO;
+using Data.Models;
 
 namespace API.IRepositories
 {
@@ -7,7 +8,7 @@ namespace API.IRepositories
         Task<List<Product>> GetAllProduct();
         Task<Product> GetProductById(Guid id);
         Task Create(Product product);
-        Task Update(Product product, List<Guid> newSizeIds);
+        Task Update(ProductDto productDto);
         Task Delete(Guid productId, Guid? sizeId);
         Task SaveChanges();
         Task<List<Product>> GetFilteredProduct(string? searchQuery = null,  Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null);

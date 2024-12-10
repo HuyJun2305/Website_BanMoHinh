@@ -28,6 +28,7 @@ namespace API.Data
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
+        public DbSet<ProductSize> ProductSizes { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -40,11 +41,18 @@ namespace API.Data
             modelBuilder.Seed();
 
             base.OnModelCreating(modelBuilder);
-            // Cấu hình quan hệ nhiều-nhiều (nếu muốn thêm các ràng buộc)
             modelBuilder.Entity<Product>()
-                        .HasMany(p => p.Sizes)
-                        .WithMany(s => s.Products)
-                        .UsingEntity(j => j.ToTable("ProductSizes"));
+        .HasMany(p => p.ProductSizes)
+        .WithOne(ps => ps.Product)
+        .HasForeignKey(ps => ps.ProductId);
+
+            modelBuilder.Entity<Size>()
+                .HasMany(s => s.ProductSizes)
+                .WithOne(ps => ps.Size)
+                .HasForeignKey(ps => ps.SizeId);
+
+            modelBuilder.Entity<ProductSize>()
+                .HasKey(ps => new { ps.ProductId, ps.SizeId });
         }
     }
 }

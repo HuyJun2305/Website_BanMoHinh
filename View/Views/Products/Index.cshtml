@@ -58,7 +58,7 @@
                 <td>
                     @if (Model.Sizes != null && Model.Sizes.Any())
                     {
-                        @foreach (var size in item.Sizes.Where(s => s.ProductId == item.Id))
+                        @foreach (var size in item.Sizes)
                         {
                             <span class="badge badge-info" style="margin-right: 5px; color:#000">@size.Value</span>
                         }

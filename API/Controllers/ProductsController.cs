@@ -74,12 +74,12 @@ namespace API.Controllers
             return Ok();
         }
         //Delete Product
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(Guid id)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteProduct(Guid productId, Guid? sizeId)
         {
             try
             {
-                await _productRepo.Delete(id);
+                await _productRepo.Delete( productId,sizeId);
                 await _productRepo.SaveChanges();
             }
             catch (Exception ex)
@@ -88,5 +88,21 @@ namespace API.Controllers
             }
             return NoContent();
         }
+
+        [HttpPost("AddSize")]
+        public async Task<IActionResult> AddSize(Guid productId, Guid sizeId)
+        {
+            try
+            {
+                await _productRepo.AddSize(productId, sizeId);
+                return Ok(new { success = true, message = "Size đã được thêm vào sản phẩm thành công." });
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                return BadRequest(new { success = false, message = errorMessage });
+            }
+        }
+
     }
 }

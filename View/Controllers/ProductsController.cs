@@ -230,43 +230,8 @@ namespace View.Controllers
         }
 
 
-        // Thêm route cho phương thức AddSizes
-        [HttpPost("AddSize")]
-        public async Task<IActionResult> AddSize(Guid productId, Guid sizeId)
-        {
-            var product = await _productServives.GetProductById(productId);
-            if (product == null)
-            {
-                return Json(new { success = false, message = "Mã sản phẩm không hợp lệ" });
-            }
+        
 
-            var existingSize = await _sizeServices.GetSizeById(sizeId);
-            if (existingSize == null)
-            {
-                return Json(new { success = false, message = "Size không tồn tại" });
-            }
-
-            // Kiểm tra nếu size đã có trong danh sách sizes của sản phẩm
-            if (product.Sizes.Contains(existingSize))
-            {
-                return Json(new { success = false, message = "Size này đã được liên kết với sản phẩm" });
-            }
-
-            // Thêm size vào sản phẩm
-            product.Sizes.Add(existingSize);
-
-            try
-            {
-                // Đánh dấu product đã thay đổi để EF theo dõi
-                await _productServives.Update(product);
-
-                return Json(new { success = true, message = "Size đã được thêm vào sản phẩm thành công" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"Lỗi khi thêm size: {ex.Message}" });
-            }
-        }
 
         [HttpGet("GetSizes")]
         public async Task<IActionResult> GetSizes()

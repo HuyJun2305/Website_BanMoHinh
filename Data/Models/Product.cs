@@ -30,7 +30,6 @@ namespace Data.Models
 		public virtual ICollection<Size>? Sizes { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<CartDetail>? CartDetails { get; set; }
-
+        public virtual ICollection<ProductSize>? ProductSizes { get; set; }
     }
 }

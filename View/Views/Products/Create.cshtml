@@ -170,120 +170,124 @@
                 reader.readAsDataURL(file);
             });
         });
-        // JavaScript xử lý submit form
-        document.getElementById('productForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
 
-            const form = e.target;
-            const formData = new FormData(form);
+       // JavaScript xử lý submit form
+document.getElementById('productForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-            // Lấy các sizeId từ checkbox được chọn
-            const sizeIds = Array.from(document.querySelectorAll('input[name="sizeId"]:checked')).map(checkbox => checkbox.value);
+    const form = e.target;
+    const formData = new FormData(form);
 
-            if (sizeIds.length === 0) {
-                toastr.warning('Vui lòng chọn ít nhất một size.');
-                return;
-            }
+    // Lấy các sizeId từ checkbox được chọn
+    const sizeIds = Array.from(document.querySelectorAll('input[name="sizeId"]:checked')).map(checkbox => checkbox.value);
 
-            // Kiểm tra ảnh đã chọn
-            const imageFiles = document.getElementById('files').files;
-            if (imageFiles.length === 0) {
-                toastr.warning('Vui lòng chọn ít nhất một ảnh.');
-                return;
-            }
+    if (sizeIds.length === 0) {
+        toastr.warning('Vui lòng chọn ít nhất một size.');
+        return;
+    }
 
-            try {
-                // Tạo sản phẩm
-                const productResponse = await fetch('/Products/Create', {
-                    method: 'POST',
-                    body: formData,
-                });
+    // Kiểm tra ảnh đã chọn
+    const imageFiles = document.getElementById('files').files;
+    if (imageFiles.length === 0) {
+        toastr.warning('Vui lòng chọn ít nhất một ảnh.');
+        return;
+    }
 
-                if (!productResponse.ok) {
-                    toastr.error('Lỗi mạng khi tạo sản phẩm.');
-                    return;
-                }
-
-                const productData = await productResponse.json();
-
-                if (!productData.success) {
-                    toastr.error(productData.message || 'Lỗi tạo sản phẩm.');
-                    return;
-                }
-
-                toastr.success('Tạo sản phẩm thành công!');
-                const productId = productData.productId;
-
-                console.log(productId);
-
-                // Upload kích thước cho sản phẩm (dùng API tạo từng size một)
-                const sizeUploadSuccess = await uploadSizesOneByOne(sizeIds, productId);
-                if (!sizeUploadSuccess) return;
-
-                // Upload từng ảnh một cho sản phẩm
-                for (const file of imageFiles) {
-                    const imageFormData = new FormData();
-                    imageFormData.append('imageFile', file);
-                    imageFormData.append('productId', productId);
-
-                    const uploadResponse = await fetch('/Products/Upload', {
-                        method: 'POST',
-                        body: imageFormData,
-                    });
-
-                    const uploadData = await uploadResponse.json();
-                    if (!uploadData.success) {
-                        toastr.error(`Lỗi tải ảnh: ${uploadData.message}`);
-                    }
-                }
-
-                window.location.href = '/Products/Index';
-            } catch (error) {
-                console.error('Lỗi:', error);
-                toastr.error('Đã xảy ra lỗi trong quá trình xử lý.');
-            }
+    try {
+        // Tạo sản phẩm
+        const productResponse = await fetch('/Products/Create', {
+            method: 'POST',
+            body: formData,
         });
 
-        // Hàm gọi API để thêm size cho sản phẩm từng cái một
-        async function uploadSizesOneByOne(sizeIds, productId) {
-            try {
-                // Duyệt qua tất cả các size đã chọn và gọi API để thêm từng size vào sản phẩm
-                for (let i = 0; i < sizeIds.length; i++) {
-                    const sizeId = sizeIds[i];
+        if (!productResponse.ok) {
+            toastr.error('Lỗi mạng khi tạo sản phẩm.');
+            return;
+        }
 
-                    // Gọi API để thêm size vào sản phẩm
-                    const response = await fetch(`/Products/AddSize?productId=${productId}&sizeId=${sizeId}`, {
-                        method: 'POST',
-                    });
+        const productData = await productResponse.json();
 
-                    // Kiểm tra nếu response không thành công
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        toastr.error(`Lỗi thêm size: ${errorData.message || 'Có lỗi xảy ra'}`);
-                        return false; // Dừng nếu có lỗi
-                    }
+        if (!productData.success) {
+            toastr.error(productData.message || 'Lỗi tạo sản phẩm.');
+            return;
+        }
 
-                    // Lấy dữ liệu trả về từ API
-                    const data = await response.json();
+        toastr.success('Tạo sản phẩm thành công!');
+        const productId = productData.productId;
 
-                    // Kiểm tra kết quả từ API
-                    if (!data.success) {
-                        toastr.error(`Lỗi thêm size: ${data.message || 'Có lỗi xảy ra'}`);
-                        return false; // Dừng nếu có lỗi
-                    }
+        // Upload kích thước cho sản phẩm (dùng API tạo từng size một)
+        const sizeUploadSuccess = await uploadSizesOneByOne(sizeIds, productId);
+        if (!sizeUploadSuccess) return;
 
-                    // Thông báo thêm size thành công (dành cho mỗi size)
-                    toastr.success(`Thêm size ${sizeId} vào sản phẩm thành công!`);
-                }
+        // Upload từng ảnh một cho sản phẩm
+        for (const file of imageFiles) {
+            const imageFormData = new FormData();
+            imageFormData.append('imageFile', file);
+            imageFormData.append('productId', productId);
 
-                return true;
-            } catch (error) {
-                console.error('Lỗi thêm size:', error);
-                toastr.error('Đã xảy ra lỗi khi thêm size.');
-                return false;
+            const uploadResponse = await fetch('/Products/Upload', {
+                method: 'POST',
+                body: imageFormData,
+            });
+
+            const uploadData = await uploadResponse.json();
+            if (!uploadData.success) {
+                toastr.error(`Lỗi tải ảnh: ${uploadData.message || 'Có lỗi xảy ra'}`);
+            } else {
+                toastr.success(`Ảnh ${file.name} đã được tải lên thành công!`);
             }
         }
 
+        window.location.href = '/Products/Index';
+    } catch (error) {
+        console.error('Lỗi:', error);
+        toastr.error('Đã xảy ra lỗi trong quá trình xử lý.');
+    }
+});
+
+// Hàm gọi API để thêm size cho sản phẩm từng cái một
+async function uploadSizesOneByOne(sizeIds, productId) {
+    try {
+        // Duyệt qua tất cả các size đã chọn và gọi API để thêm từng size vào sản phẩm
+        for (let i = 0; i < sizeIds.length; i++) {
+            const sizeId = sizeIds[i];
+
+            // Thay đổi đường dẫn API trực tiếp
+            const apiUrl = `https://localhost:7280/api/Products/AddSize?productId=${productId}&sizeId=${sizeId}`;
+
+            // Gọi API để thêm size vào sản phẩm
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+            });
+
+            console.log(response);
+            // Kiểm tra nếu response không thành công
+            if (!response.ok) {
+                const errorData = await response.json();
+                toastr.error(`Lỗi thêm size ${sizeId}: ${errorData.message || 'Có lỗi xảy ra'}`);
+                return false; // Dừng nếu có lỗi
+            }
+
+            // Lấy dữ liệu trả về từ API
+            const data = await response.json();
+
+            // Kiểm tra kết quả từ API
+            if (!data.success) {
+                toastr.error(`Lỗi thêm size ${sizeId}: ${data.message || 'Có lỗi xảy ra'}`);
+                return false; // Dừng nếu có lỗi
+            }
+
+            // Thông báo thêm size thành công (dành cho mỗi size)
+            toastr.success(`Thêm size ${sizeId} vào sản phẩm thành công!`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Lỗi thêm size:', error);
+        toastr.error('Đã xảy ra lỗi khi thêm size.');
+        return false;
+    }
+}
 
 
     </script>

@@ -138,7 +138,6 @@
 
 
 @section Scripts {
-
     <script>
         // JavaScript xử lý hiển thị ảnh đã chọn và xóa ảnh
         document.getElementById('files').addEventListener('change', function (event) {
@@ -171,7 +170,6 @@
                 reader.readAsDataURL(file);
             });
         });
-
         // JavaScript xử lý submit form
         document.getElementById('productForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -179,18 +177,15 @@
             const form = e.target;
             const formData = new FormData(form);
 
-            // Thêm các sizeId từ checkbox vào formData
+            // Lấy các sizeId từ checkbox được chọn
             const sizeIds = Array.from(document.querySelectorAll('input[name="sizeId"]:checked')).map(checkbox => checkbox.value);
-
-            console.log(sizeIds);
 
             if (sizeIds.length === 0) {
                 toastr.warning('Vui lòng chọn ít nhất một size.');
                 return;
             }
 
-            sizeIds.forEach(sizeId => formData.append('sizeIds', sizeId));
-
+            // Kiểm tra ảnh đã chọn
             const imageFiles = document.getElementById('files').files;
             if (imageFiles.length === 0) {
                 toastr.warning('Vui lòng chọn ít nhất một ảnh.');
@@ -219,8 +214,10 @@
                 toastr.success('Tạo sản phẩm thành công!');
                 const productId = productData.productId;
 
-                // Upload kích thước sản phẩm
-                const sizeUploadSuccess = await uploadSize(sizeIds, productId);
+                console.log(productId);
+
+                // Upload kích thước cho sản phẩm (dùng API tạo từng size một)
+                const sizeUploadSuccess = await uploadSizesOneByOne(sizeIds, productId);
                 if (!sizeUploadSuccess) return;
 
                 // Upload từng ảnh một cho sản phẩm
@@ -247,22 +244,38 @@
             }
         });
 
-        // Hàm gọi API thêm size cho sản phẩm
-        async function uploadSize(sizeIds, productId) {
+        // Hàm gọi API để thêm size cho sản phẩm từng cái một
+        async function uploadSizesOneByOne(sizeIds, productId) {
             try {
-                for (const sizeId of sizeIds) {
+                // Duyệt qua tất cả các size đã chọn và gọi API để thêm từng size vào sản phẩm
+                for (let i = 0; i < sizeIds.length; i++) {
+                    const sizeId = sizeIds[i];
+
+                    // Gọi API để thêm size vào sản phẩm
                     const response = await fetch(`/Products/AddSize?productId=${productId}&sizeId=${sizeId}`, {
                         method: 'POST',
                     });
 
-                    const data = await response.json();
-                    if (!data.success) {
-                        toastr.error(`Lỗi thêm size: ${data.message}`);
-                        return false;
+                    // Kiểm tra nếu response không thành công
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        toastr.error(`Lỗi thêm size: ${errorData.message || 'Có lỗi xảy ra'}`);
+                        return false; // Dừng nếu có lỗi
                     }
+
+                    // Lấy dữ liệu trả về từ API
+                    const data = await response.json();
+
+                    // Kiểm tra kết quả từ API
+                    if (!data.success) {
+                        toastr.error(`Lỗi thêm size: ${data.message || 'Có lỗi xảy ra'}`);
+                        return false; // Dừng nếu có lỗi
+                    }
+
+                    // Thông báo thêm size thành công (dành cho mỗi size)
+                    toastr.success(`Thêm size ${sizeId} vào sản phẩm thành công!`);
                 }
 
-                toastr.success('Thêm size thành công!');
                 return true;
             } catch (error) {
                 console.error('Lỗi thêm size:', error);
@@ -270,6 +283,8 @@
                 return false;
             }
         }
-    </script>
 
+
+
+    </script>
 }

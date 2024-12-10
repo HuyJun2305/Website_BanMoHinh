@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.Packaging;
 using View.IServices;
 using View.Services;
 using View.ViewModels;
@@ -229,16 +230,16 @@ namespace View.Controllers
         }
 
 
+        // Thêm route cho phương thức AddSizes
+        [HttpPost("AddSize")]
         public async Task<IActionResult> AddSize(Guid productId, Guid sizeId)
         {
-            // Lấy thông tin sản phẩm từ database
             var product = await _productServives.GetProductById(productId);
             if (product == null)
             {
                 return Json(new { success = false, message = "Mã sản phẩm không hợp lệ" });
             }
 
-            // Lấy thông tin size từ database
             var existingSize = await _sizeServices.GetSizeById(sizeId);
             if (existingSize == null)
             {
@@ -251,19 +252,13 @@ namespace View.Controllers
                 return Json(new { success = false, message = "Size này đã được liên kết với sản phẩm" });
             }
 
-            // Cập nhật productId cho size, nếu chưa có
-            existingSize.ProductId = productId;
-
-            // Liên kết Size với sản phẩm
+            // Thêm size vào sản phẩm
             product.Sizes.Add(existingSize);
 
             try
             {
-                // Cập nhật sản phẩm trong database
+                // Đánh dấu product đã thay đổi để EF theo dõi
                 await _productServives.Update(product);
-
-                // Cập nhật size nếu cần thiết
-                await _sizeServices.Update(existingSize);
 
                 return Json(new { success = true, message = "Size đã được thêm vào sản phẩm thành công" });
             }

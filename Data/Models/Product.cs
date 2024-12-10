@@ -26,10 +26,11 @@ namespace Data.Models
 
         public Guid? PromotionId { get; set; }
         public virtual ICollection<Promotion>? Promotions { get; set; }
-
         public virtual ICollection<Image>? Images { get; set; }
 		public virtual ICollection<Size>? Sizes { get; set; }
 
+        [JsonIgnore]
+        public virtual ICollection<CartDetail>? CartDetails { get; set; }
 
-	}
+    }
 }

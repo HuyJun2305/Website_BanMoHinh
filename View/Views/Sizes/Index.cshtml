@@ -24,13 +24,13 @@
                 </div>
             </div>
 
-            <!-- Table Danh sách chất liệu -->
+            <!-- Table  -->
             <div class="table-responsive">
                 <table class="table table-striped styled-table">
                     <thead class="table-light">
                         <tr>
                             <th>STT</th>
-                            <th>Cân nặng - Chiều dài - Độ rộng</th>
+                            <th>Loại kích cỡ</th>
                             <th>Trạng thái</th>
                             <th>Chức năng</th>
                         </tr>
@@ -38,7 +38,6 @@
                     <tbody id="materialsTableBody">
                         @if (Model.Sizes != null && Model.Sizes.Any())
                         {
-                            // Không cần tính toán số thứ tự ở đây nữa
                             foreach (var item in Model.Sizes)
                             {
                                 <tr>
@@ -81,7 +80,7 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="addSoleModalLabel">Thêm mới chất liệu</h5>
+                            <h5 class="modal-title" id="addSoleModalLabel">Thêm mới Size</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -89,8 +88,8 @@
                                 <input type="hidden" asp-for="Sizes" />
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                 <div class="mb-3">
-                                    <label asp-for="NewSize.Value" class="form-label">Cân nặng (gram) - Chiều cao (cm) - Độ rộng (cm) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Value" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
+                                    <label asp-for="NewSize.Value" class="form-label">Loại kích cỡ <span class="text-danger">*</span></label>
+                                    <input asp-for="NewSize.Value" type="text" class="form-control" placeholder="Loại kích cỡ" required>
                                     <span asp-validation-for="NewSize.Value" class="text-danger"></span>
                                 </div>
 
@@ -109,12 +108,12 @@
                 </div>
             </div>
 
-            <!-- Modal Chỉnh sửa chất liệu -->
+            <!-- Modal Chỉnh sửa Loại kích cỡ -->
             <div class="modal fade" id="editSoleModal" tabindex="-1" aria-labelledby="editSoleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="editSoleModalLabel">Chỉnh sửa chất liệu</h5>
+                            <h5 class="modal-title" id="editSoleModalLabel">Chỉnh sửa Loại kích cỡ</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -123,8 +122,8 @@
                                 <input type="hidden" asp-for="Sizes" />
                                 <input type="hidden" asp-for="NewSize.Id" id="editMaterialId" />
                                 <div class="mb-3">
-                                    <label asp-for="NewSize.Value" class="form-label">Cân nặng (gram) - Chiều cao (cm) - Độ rông (cm) <span class="text-danger">*</span></label>
-                                    <input asp-for="NewSize.Value" type="text" class="form-control" placeholder="Nhập tên chất liệu" required>
+                                    <label asp-for="NewSize.Value" class="form-label">Loại kích cỡ <span class="text-danger">*</span></label>
+                                    <input asp-for="NewSize.Value" type="text" class="form-control" placeholder="Nhập Loại kích cỡ" required>
                                     <span asp-validation-for="NewSize.Value" class="text-danger"></span>
                                 </div>
                                 

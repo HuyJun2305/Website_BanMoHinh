@@ -69,7 +69,10 @@ namespace API.Repositories
 
         public async Task Update(Product product)
         {
-            var existingProduct = await _context.Products.FindAsync(product.Id);
+            var existingProduct = await _context.Products
+                .Include(p => p.Sizes) // Đảm bảo rằng các Sizes cũng được load ra
+                .FirstOrDefaultAsync(p => p.Id == product.Id);
+
             if (existingProduct == null)
             {
                 throw new Exception("Sản phẩm không tồn tại.");
@@ -85,11 +88,29 @@ namespace API.Repositories
             existingProduct.CategoryId = product.CategoryId;
             existingProduct.Promotions = product.Promotions;
             existingProduct.Images = product.Images;
-            existingProduct.Sizes = product.Sizes;
 
+            // Xử lý Sizes: Thêm các size mới và xóa các size không còn
+            foreach (var size in product.Sizes)
+            {
+                // Nếu size không tồn tại trong danh sách cũ, thêm vào
+                if (!existingProduct.Sizes.Contains(size))
+                {
+                    existingProduct.Sizes.Add(size);
+                }
+            }
+
+            // Xóa các size không còn trong danh sách
+            var sizesToRemove = existingProduct.Sizes.Where(s => !product.Sizes.Contains(s)).ToList();
+            foreach (var size in sizesToRemove)
+            {
+                existingProduct.Sizes.Remove(size);
+            }
+
+            // Cập nhật các thay đổi
             _context.Products.Update(existingProduct);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null,  Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
         {

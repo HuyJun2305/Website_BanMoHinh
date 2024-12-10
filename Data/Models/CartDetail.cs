@@ -16,5 +16,7 @@ namespace Data.Models
         public virtual Cart? Cart { get; set; }
         public Guid ProductId { get; set; }
         public virtual Product? Product { get; set; }
+        public Guid SizeId { get; set; } 
+        public virtual Size? Size { get; set; }
     }
 }

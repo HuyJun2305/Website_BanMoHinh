@@ -1,4 +1,5 @@
 ﻿using API.IRepositories;
+using Data.DTO;
 using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,9 +69,13 @@ namespace API.Controllers
         }
         //
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(Product product)
+        public async Task<IActionResult> PutProduct(Guid id,[FromBody] ProductDto productUpdateDto)
         {
-            await _productRepo.Update(product);
+            if (id != productUpdateDto.Product.Id)
+            {
+                return BadRequest("Id sản phẩm không khớp.");
+            }
+            await _productRepo.Update(productUpdateDto.Product, productUpdateDto.SizeIds);
             return Ok();
         }
         //Delete Product

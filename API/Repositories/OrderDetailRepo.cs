@@ -12,7 +12,7 @@ namespace API.Repositories
 		{
 			_context = context;
 		}
-
+		//sửa
 		public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(Guid? orderId)
 		{
 			return await _context.OrderDetails
@@ -26,12 +26,10 @@ namespace API.Repositories
 			.ThenInclude(p => p.Images)
 		.Include(od => od.Product)
 			.ThenInclude(p => p.Promotions)
-		.Include(od => od.Product)
-			.ThenInclude(p => p.Sizes)
 		.Where(od => od.OrderId == orderId)
 		.ToListAsync();
 		}
-
+		//sửa
 		public async Task<OrderDetail> GetOrderDetailByIdAsync(Guid id)
 		{
 			return await _context.OrderDetails
@@ -45,8 +43,6 @@ namespace API.Repositories
             .ThenInclude(p => p.Images)
         .Include(od => od.Product)
             .ThenInclude(p => p.Promotions)
-        .Include(od => od.Product)
-            .ThenInclude(p => p.Sizes)
                 .FirstOrDefaultAsync(od => od.Id == id);
 		}
 

@@ -42,7 +42,6 @@ namespace API.Repositories
 		{
 		var cartDetails = await _context.CartDetails
 		      .Include(cd => cd.Product)  
-	           .ThenInclude(p => p.Sizes)  
 				.ToListAsync();
 
 
@@ -126,62 +125,61 @@ namespace API.Repositories
 
         public async Task AddToCart(Guid cartId, Guid productId, Guid sizeId, int quantity)
         {
-            // Kiểm tra xem giỏ hàng có tồn tại không
-            var cart = await _context.Carts
-                .FirstOrDefaultAsync(c => c.Id == cartId);
+            //// Kiểm tra xem giỏ hàng có tồn tại không
+            //var cart = await _context.Carts
+            //    .FirstOrDefaultAsync(c => c.Id == cartId);
 
-            if (cart == null)
-            {
-                throw new Exception("Giỏ hàng không tồn tại");
-            }
+            //if (cart == null)
+            //{
+            //    throw new Exception("Giỏ hàng không tồn tại");
+            //}
 
-            // Kiểm tra xem sản phẩm có tồn tại không
-            var product = await _context.Products
-                .Include(p => p.Sizes)
-                .FirstOrDefaultAsync(p => p.Id == productId);
+            //// Kiểm tra xem sản phẩm có tồn tại không
+            //var product = await _context.Products
+            //    .FirstOrDefaultAsync(p => p.Id == productId);
 
-            if (product == null)
-            {
-                throw new Exception("Sản phẩm không tồn tại");
-            }
+            //if (product == null)
+            //{
+            //    throw new Exception("Sản phẩm không tồn tại");
+            //}
 
-            // Kiểm tra xem kích thước có tồn tại trong sản phẩm không
-            var size = product.Sizes.FirstOrDefault(s => s.Id == sizeId);
-            if (size == null)
-            {
-                throw new Exception("Kích thước không hợp lệ");
-            }
+            //// Kiểm tra xem kích thước có tồn tại trong sản phẩm không
+            //var size = product.Sizes.FirstOrDefault(s => s.Id == sizeId);
+            //if (size == null)
+            //{
+            //    throw new Exception("Kích thước không hợp lệ");
+            //}
 
-            // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
-            var existingCartDetail = await _context.CartDetails
-                .FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.ProductId == productId && cd.SizeId == sizeId);
+            //// Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+            //var existingCartDetail = await _context.CartDetails
+            //    .FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.ProductId == productId && cd.SizeId == sizeId);
 
-            if (existingCartDetail != null)
-            {
-                // Cập nhật số lượng nếu sản phẩm đã có trong giỏ
-                existingCartDetail.Quatity += quantity;
-                existingCartDetail.TotalPrice = existingCartDetail.Quatity * product.Price;
+            //if (existingCartDetail != null)
+            //{
+            //    // Cập nhật số lượng nếu sản phẩm đã có trong giỏ
+            //    existingCartDetail.Quatity += quantity;
+            //    existingCartDetail.TotalPrice = existingCartDetail.Quatity * product.Price;
 
-                _context.CartDetails.Update(existingCartDetail);
-            }
-            else
-            {
-                // Thêm sản phẩm mới vào giỏ hàng
-                var cartDetail = new CartDetail
-                {
-                    Id = Guid.NewGuid(),
-                    CartId = cartId,
-                    ProductId = productId,
-                    SizeId = sizeId,
-                    Quatity = quantity,
-                    TotalPrice = quantity * product.Price
-                };
+            //    _context.CartDetails.Update(existingCartDetail);
+            //}
+            //else
+            //{
+            //    // Thêm sản phẩm mới vào giỏ hàng
+            //    var cartDetail = new CartDetail
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        CartId = cartId,
+            //        ProductId = productId,
+            //        SizeId = sizeId,
+            //        Quatity = quantity,
+            //        TotalPrice = quantity * product.Price
+            //    };
 
-                await _context.CartDetails.AddAsync(cartDetail);
-            }
+            //    await _context.CartDetails.AddAsync(cartDetail);
+            //}
 
-            // Lưu thay đổi vào cơ sở dữ liệu
-            await _context.SaveChangesAsync();
+            //// Lưu thay đổi vào cơ sở dữ liệu
+            //await _context.SaveChangesAsync();
         }
 
         public async Task CheckOut(Guid cartId)

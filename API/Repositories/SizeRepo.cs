@@ -34,20 +34,9 @@ namespace API.Repositories
             return await _context.Sizes.FindAsync(id);
         }
 
-        public async Task<List<Size>> GetSizeByProductId(Guid productId)
+        public Task<List<Size>> GetSizeByProductId(Guid productId)
         {
-            var product = await _context.Products
-                                         .Where(p => p.Id == productId)
-                                         .Include(p => p.Sizes) 
-                                         .FirstOrDefaultAsync();
-
-            // Kiểm tra nếu sản phẩm không tồn tại hoặc không có sizes
-            if (product == null || product.Sizes == null)
-            {
-                return new List<Size>(); // Trả về danh sách rỗng nếu không có sản phẩm hoặc sizes
-            }
-
-            return product.Sizes.Where(s => s.Status).ToList();
+            throw new NotImplementedException();
         }
 
         public async Task<List<Size>> GetSizeByStatus()

@@ -3,6 +3,7 @@ using API.IRepositories;
 using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging;
 
 namespace API.Repositories
 {
@@ -92,7 +93,8 @@ namespace API.Repositories
                 .Include(p => p.Material)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
-                .Include(p => p.Sizes) 
+                .Include(p => p.ProductSizes)
+                 .ThenInclude(ps => ps.Size)
                 .ToListAsync();
             return result;
         }
@@ -102,9 +104,9 @@ namespace API.Repositories
             return await _context.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Material)
-                .Include(p => p.Sizes)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
+                 .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         public async Task SaveChanges()
@@ -112,11 +114,10 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(Product product)
+        public async Task Update(Product product, List<Guid> newSizeIds)
         {
-            // Tìm sản phẩm trong bảng Products và bao gồm Sizes
+            // Tìm sản phẩm trong cơ sở dữ liệu
             var existingProduct = await _context.Products
-                .Include(p => p.Sizes) // Đảm bảo lấy thông tin Sizes
                 .FirstOrDefaultAsync(p => p.Id == product.Id);
 
             if (existingProduct == null)
@@ -132,96 +133,43 @@ namespace API.Repositories
             existingProduct.BrandId = product.BrandId;
             existingProduct.MaterialId = product.MaterialId;
             existingProduct.CategoryId = product.CategoryId;
-            existingProduct.Promotions = product.Promotions;
-            existingProduct.Images = product.Images;
 
-            var currentSizeIds = existingProduct.Sizes.Select(s => s.Id).ToList();
-            var newSizeIds = product.Sizes.Select(s => s.Id).ToList();
+            // Lấy danh sách SizeId hiện tại trong bảng ProductSizes
+            var currentProductSizes = await _context.ProductSizes
+                .Where(ps => ps.ProductId == product.Id)
+                .ToListAsync();
 
-            var sizesToRemove = currentSizeIds.Except(newSizeIds).ToList(); // Những size đã bị xóa
-            var sizesToAdd = newSizeIds.Except(currentSizeIds).ToList(); // Những size mới cần thêm
+            var currentSizeIds = currentProductSizes.Select(ps => ps.SizeId).ToList();
 
-            if (!sizesToRemove.Any() && !sizesToAdd.Any())
-            {
-                throw new Exception("Không có thay đổi nào về size.");
-            }
+            // Xác định những SizeId cần thêm và cần xóa
+            var sizesToRemove = currentSizeIds.Except(newSizeIds).ToList();
+            var sizesToAdd = newSizeIds.Except(currentSizeIds).ToList();
 
-            // Bước 1: Xóa những Size không còn trong danh sách cập nhật
+            // Xóa các mối quan hệ cũ không còn tồn tại
             if (sizesToRemove.Any())
             {
-                foreach (var sizeId in sizesToRemove)
-                {
-                    var productSizeToRemove = await _context.ProductSizes
-                        .FirstOrDefaultAsync(ps => ps.ProductId == product.Id && ps.SizeId == sizeId);
+                var productSizesToRemove = currentProductSizes
+                    .Where(ps => sizesToRemove.Contains(ps.SizeId))
+                    .ToList();
 
-                    if (productSizeToRemove != null)
-                    {
-                        _context.ProductSizes.Remove(productSizeToRemove); // Xóa mối quan hệ size đã bị xóa
-                    }
-                    else
-                    {
-                        // Nếu không tìm thấy mối quan hệ size để xóa, ghi log cảnh báo
-                        Console.WriteLine($"Cảnh báo: Không tìm thấy mối quan hệ size với SizeId {sizeId} để xóa.");
-                    }
-                }
-
-                // Lưu thay đổi của bảng ProductSizes ngay sau khi xóa
-                await _context.SaveChangesAsync();
+                _context.ProductSizes.RemoveRange(productSizesToRemove);
             }
 
+            // Thêm các mối quan hệ mới vào bảng ProductSizes
             if (sizesToAdd.Any())
             {
-                foreach (var sizeId in sizesToAdd)
-                {
-                    // Thêm mối quan hệ mới vào bảng ProductSizes nếu chưa có
-                    var existingProductSize = await _context.ProductSizes
-                        .FirstOrDefaultAsync(ps => ps.ProductId == product.Id && ps.SizeId == sizeId);
+                var productSizesToAdd = sizesToAdd
+                    .Select(sizeId => new ProductSize
+                    {
+                        ProductId = product.Id,
+                        SizeId = sizeId
+                    })
+                    .ToList();
 
-                    if (existingProductSize == null)
-                    {
-                        // Nếu chưa có mối quan hệ, thêm mới
-                        _context.ProductSizes.Add(new ProductSize { ProductId = product.Id, SizeId = sizeId });
-                    }
-                    else
-                    {
-                        // Nếu đã có, bỏ qua
-                        Console.WriteLine($"Cảnh báo: Mối quan hệ size với SizeId {sizeId} đã tồn tại.");
-                    }
-                }
+                _context.ProductSizes.AddRange(productSizesToAdd);
             }
 
-            if (sizesToRemove.Any())
-            {
-                foreach (var sizeId in sizesToRemove)
-                {
-                    // Kiểm tra nếu size còn sản phẩm nào khác liên kết không
-                    var isSizeLinkedToOtherProducts = await _context.ProductSizes
-                        .AnyAsync(ps => ps.SizeId == sizeId);
-
-                    if (!isSizeLinkedToOtherProducts)
-                    {
-                        var sizeToUpdate = await _context.Sizes
-                            .FirstOrDefaultAsync(s => s.Id == sizeId);
-
-                        if (sizeToUpdate != null)
-                        {
-                            sizeToUpdate.ProductId = null; // Xóa ProductId
-                            _context.Sizes.Update(sizeToUpdate);
-                        }
-                    }
-                }
-
-                // Lưu thay đổi vào bảng Sizes
-                await _context.SaveChangesAsync();
-            }
-
-            // Cập nhật lại danh sách Sizes của sản phẩm nếu không còn size nào
-            if (!existingProduct.Sizes.Any()) 
-            {
-                existingProduct.Sizes = new List<Size>(); 
-            }
-
-            // Lưu tất cả thay đổi vào cơ sở dữ liệu
+            // Lưu thay đổi vào cơ sở dữ liệu
             await _context.SaveChangesAsync();
         }
 
@@ -259,40 +207,37 @@ namespace API.Repositories
 
         public async Task AddSize(Guid productId, Guid sizeId)
         {
-            var product = await _context.Products
-                                        .Include(p => p.Sizes) // Bao gồm danh sách size liên kết
-                                        .FirstOrDefaultAsync(p => p.Id == productId);
-            if (product == null)
+            // Kiểm tra sản phẩm có tồn tại không
+            var productExists = await _context.Products.AnyAsync(p => p.Id == productId);
+            if (!productExists)
             {
                 throw new ArgumentException("Mã sản phẩm không hợp lệ.");
             }
 
-            // Lấy size theo sizeId
-            var existingSize = await _context.Sizes.FindAsync(sizeId);
-            if (existingSize == null)
+            // Kiểm tra size có tồn tại không
+            var sizeExists = await _context.Sizes.AnyAsync(s => s.Id == sizeId);
+            if (!sizeExists)
             {
                 throw new ArgumentException("Size không tồn tại.");
             }
 
-            if (product.Sizes.Any(s => s.Id == sizeId))
+            // Kiểm tra xem mối quan hệ giữa sản phẩm và size đã tồn tại chưa
+            var productSizeExists = await _context.ProductSizes
+                                                  .AnyAsync(ps => ps.ProductId == productId && ps.SizeId == sizeId);
+            if (productSizeExists)
             {
-                return;
+                throw new ArgumentException("Size đã được liên kết với sản phẩm.");
             }
 
-            var existingProductSize = await _context.ProductSizes
-                                                     .FirstOrDefaultAsync(ps => ps.ProductId == productId && ps.SizeId == sizeId);
-            if (existingProductSize != null)
-            {
-                throw new ArgumentException("Đã tồn tại sản phẩm thuộc size không tồn tại.");
-            }
+            // Tạo mới mối quan hệ giữa sản phẩm và size
             var productSize = new ProductSize
             {
                 ProductId = productId,
                 SizeId = sizeId
             };
             _context.ProductSizes.Add(productSize);
-            product.Sizes.Add(existingSize);
-            _context.Products.Update(product); // Cập nhật sản phẩm với danh sách sizes mới
+
+            // Lưu thay đổi vào cơ sở dữ liệu
             await _context.SaveChangesAsync();
         }
 

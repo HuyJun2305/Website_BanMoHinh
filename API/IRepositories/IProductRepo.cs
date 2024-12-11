@@ -13,6 +13,7 @@ namespace API.IRepositories
         Task SaveChanges();
         Task<List<Product>> GetFilteredProduct(string? searchQuery = null,  Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null);
         Task AddSize(Guid productId, Guid sizeId);
+        Task DistributeStockToProductSizesAsync(Guid productId, int totalStock, Dictionary<Guid, int> productSizesStock);
     }
 }
 

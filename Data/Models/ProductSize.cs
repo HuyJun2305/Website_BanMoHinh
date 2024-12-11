@@ -15,6 +15,7 @@ namespace Data.Models
 
         public Guid SizeId { get; set; }
         public virtual Size? Size { get; set; }
+        public int Stock { get; set; }
     }
 
 }

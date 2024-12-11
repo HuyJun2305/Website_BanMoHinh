@@ -109,5 +109,46 @@ namespace API.Controllers
             }
         }
 
+        [HttpPost("DistributeStock")]
+        public async Task<IActionResult> DistributeStock(Guid productId, int totalStock, Dictionary<Guid, int> productSizesStock)
+        {
+            try
+            {
+                await _productRepo.DistributeStockToProductSizesAsync(productId, totalStock, productSizesStock);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                return BadRequest(new { success = false, message = errorMessage });
+            }
+        }
+
+
+        [HttpGet("GetProductSizes/{productId}")]
+        public async Task<IActionResult> GetProductSizes(Guid productId)
+        {
+            try
+            {
+                var product = await _productRepo.GetProductById(productId);
+                if (product == null)
+                    return NotFound("Product not found.");
+
+                var productSizes = product.ProductSizes
+                    .Select(ps => new
+                    {
+                        SizeId = ps.SizeId,
+                        Value = ps.Size.Value, // Giả sử Size có thuộc tính Value
+                        Stock = ps.Stock
+                    }).ToList();
+
+                return Ok(productSizes);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
     }
 }

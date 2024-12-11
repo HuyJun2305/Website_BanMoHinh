@@ -4,6 +4,7 @@ using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241210232342__add_stock_productsize")]
+    partial class _add_stock_productsize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +55,7 @@ namespace API.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("Data.Models.ApplicationUser", b =>
@@ -203,7 +205,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", (string)null);
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("Data.Models.Cart", b =>
@@ -223,7 +225,7 @@ namespace API.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("Carts", (string)null);
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("Data.Models.CartDetail", b =>
@@ -255,7 +257,7 @@ namespace API.Migrations
 
                     b.HasIndex("SizeId");
 
-                    b.ToTable("CartDetails", (string)null);
+                    b.ToTable("CartDetails");
                 });
 
             modelBuilder.Entity("Data.Models.Category", b =>
@@ -273,7 +275,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Data.Models.Image", b =>
@@ -293,7 +295,7 @@ namespace API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Images", (string)null);
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("Data.Models.Material", b =>
@@ -311,7 +313,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Materials", (string)null);
+                    b.ToTable("Materials");
                 });
 
             modelBuilder.Entity("Data.Models.Order", b =>
@@ -360,7 +362,7 @@ namespace API.Migrations
 
                     b.HasIndex("VoucherId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Data.Models.OrderDetail", b =>
@@ -387,7 +389,7 @@ namespace API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetails", (string)null);
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("Data.Models.Product", b =>
@@ -429,7 +431,7 @@ namespace API.Migrations
 
                     b.HasIndex("MaterialId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Data.Models.ProductSize", b =>
@@ -447,7 +449,7 @@ namespace API.Migrations
 
                     b.HasIndex("SizeId");
 
-                    b.ToTable("ProductSizes", (string)null);
+                    b.ToTable("ProductSizes");
                 });
 
             modelBuilder.Entity("Data.Models.Promotion", b =>
@@ -480,7 +482,7 @@ namespace API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Promotions", (string)null);
+                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("Data.Models.Size", b =>
@@ -498,7 +500,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sizes", (string)null);
+                    b.ToTable("Sizes");
                 });
 
             modelBuilder.Entity("Data.Models.Voucher", b =>
@@ -537,7 +539,7 @@ namespace API.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.ToTable("Vouchers", (string)null);
+                    b.ToTable("Vouchers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>

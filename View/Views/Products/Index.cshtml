@@ -60,7 +60,10 @@
                     {
                         @foreach (var productSize in item.ProductSizes)
                         {
-                            <span class="badge badge-info" style="margin-right: 5px; color:#000">@productSize.Size.Value</span>
+                            <div>
+                                <span class="badge badge-info" style="margin-right: 5px; color:#000">@productSize.Size.Value</span>
+                                <span>Stock: @productSize.Stock</span>  <!-- Hiển thị số lượng tồn kho -->
+                           </div>
                         }
                     }
                     else
@@ -72,10 +75,9 @@
                 <td>@Html.DisplayFor(modelItem => item.Brand.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Material.Name)</td>
                 <td>
+                    <button class="btn btn-primary btn-sm" onclick="openStockEditModal('@item.Id', @item.Stock)">Edit Stock</button>
                     <button class="btn btn-warning btn-sm" onclick="openEditModal('@item.Id')">Edit</button>
-                    <button class="btn btn-danger btn-sm" data-id="@item.Id" onclick="deleteProduct(this)">
-                        Delete
-                    </button>
+                    <button class="btn btn-danger btn-sm" data-id="@item.Id" onclick="deleteProduct(this)">Delete</button>
                 </td>
             </tr>
         }
@@ -176,6 +178,44 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal -->
+<div id="stockDistributionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="stockDistributionModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stockDistributionModalLabel">Phân bổ kho</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Ẩn ProductId -->
+                <input type="hidden" id="modalProductId" />
+
+                <!-- Hiển thị tổng số lượng kho -->
+                <div class="form-group">
+                    <label for="modalTotalStock">Tổng số lượng kho:</label>
+                    <input type="number" id="modalTotalStock" class="form-control" placeholder="Đang tải..." readonly />
+                </div>
+
+                <!-- Container cho các size inputs -->
+                <div id="sizeInputsContainer">
+                    <!-- Các input SizeId sẽ được thêm vào đây bằng script -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="submitStockDistribution()">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 
 
 @section Scripts{
@@ -302,8 +342,10 @@
     function removeImage(productId, imageId) {
         if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) return;
 
+        
+
         $.ajax({
-            url: `https://localhost:7280/api/Images/DeleteImageInProduct/${productId}/${imageId}`,
+            url: `https://localhost:7280/api/Images/${productId}/${imageId}`,
             type: 'DELETE',
             success: function (response) {
                 if (response.success) {
@@ -373,6 +415,103 @@ $('#editProductForm').on('submit', async function (e) {
 });
 
 </script>
+
+    <script>
+        function openStockEditModal(productId) {
+            // Đặt ProductId vào modal
+            $('#modalProductId').val(productId);
+
+            // Xóa các input cũ
+            $('#sizeInputsContainer').empty();
+            $('#modalTotalStock').val("Đang tải..."); // Hiển thị placeholder khi dữ liệu đang được tải
+
+            // Lấy thông tin Product từ API
+            $.ajax({
+                url: `https://localhost:7280/api/Products/${productId}`, // API lấy thông tin sản phẩm
+                method: 'GET',
+                success: function (productResponse) {
+                    // Đặt tổng số lượng kho
+                    $('#modalTotalStock').val(productResponse.stock);
+
+                    // Lấy danh sách các ProductSize
+                    $.ajax({
+                        url: `https://localhost:7280/api/Products/GetProductSizes/${productId}`, // API lấy danh sách SizeId
+                        method: 'GET',
+                        success: function (sizeResponse) {
+                            sizeResponse.forEach(productSize => {
+                                var inputField = `
+                                    <div class="form-group">
+                                        <label>Size: ${productSize.value}</label>
+                                        <input type="hidden" class="size-id" value="${productSize.sizeId}" />
+                                        <input type="number" class="form-control stock-input" placeholder="Enter stock" value="${productSize.stock}" />
+                                    </div>
+                                `;
+                                $('#sizeInputsContainer').append(inputField);
+                            });
+                            // Mở modal sau khi tất cả dữ liệu đã được tải
+                            $('#stockDistributionModal').modal('show');
+                        },
+                        error: function (error) {
+                            toastr.error("Lỗi khi lấy thông tin kích thước sản phẩm.");
+                            console.error("Error fetching product sizes:", error);
+                        }
+                    });
+                },
+                error: function (error) {
+                    toastr.error("Lỗi khi lấy thông tin sản phẩm.");
+                    console.error("Error fetching product:", error);
+                }
+            });
+        }
+
+        function submitStockDistribution() {
+            const productId = $('#modalProductId').val();
+            const totalStock = parseInt($('#modalTotalStock').val());
+            const sizeInputs = $('#sizeInputsContainer .form-group');
+
+            const productSizesStock = {};
+
+            sizeInputs.each(function () {
+                const sizeId = $(this).find('.size-id').val();
+                const stock = parseInt($(this).find('.stock-input').val());
+
+                if (sizeId && !isNaN(stock)) {
+                    productSizesStock[sizeId] = stock;
+                }
+            });
+
+            if (!productId || isNaN(totalStock) || Object.keys(productSizesStock).length === 0) {
+                toastr.warning("Vui lòng nhập đầy đủ thông tin trước khi gửi.");
+                return;
+            }
+
+            // Gửi dữ liệu qua API
+            $.ajax({
+                url: `https://localhost:7280/api/Products/DistributeStock?productId=${productId}&totalStock=${totalStock}`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(productSizesStock),
+                success: function () {
+                    toastr.success("Phân bổ kho thành công!");
+                    $('#stockDistributionModal').modal('hide'); // Đóng modal
+                    setTimeout(() => location.reload(), 1000); // Reload lại trang sau 1 giây
+                },
+                error: function (xhr) {
+                    toastr.error("Có lỗi xảy ra khi phân bổ kho: " + xhr.responseText);
+                    console.error("Lỗi phân bổ kho:", xhr.responseText);
+                }
+            });
+        }
+
+        // Đóng modal khi nhấn nút "Close"
+        $('#stockDistributionModal').on('hidden.bs.modal', function () {
+            $('#modalProductId').val('');
+            $('#modalTotalStock').val('');
+            $('#sizeInputsContainer').empty();
+        });
+
+    </script>
+
 
 }
 

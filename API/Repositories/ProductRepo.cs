@@ -129,14 +129,27 @@ namespace API.Repositories
                 throw new Exception("Sản phẩm không tồn tại.");
             }
 
-            // Cập nhật thông tin cơ bản của sản phẩm
-            existingProduct.Name = product.Name;
-            existingProduct.Price = product.Price;
-            existingProduct.Stock = product.Stock;
-            existingProduct.Description = product.Description;
-            existingProduct.BrandId = product.BrandId;
-            existingProduct.MaterialId = product.MaterialId;
-            existingProduct.CategoryId = product.CategoryId;
+            // Kiểm tra và cập nhật thông tin cơ bản của sản phẩm nếu có thay đổi
+            if (existingProduct.Name != product.Name)
+                existingProduct.Name = product.Name;
+
+            if (existingProduct.Price != product.Price)
+                existingProduct.Price = product.Price;
+
+            if (existingProduct.Stock != product.Stock)
+                existingProduct.Stock = product.Stock;
+
+            if (existingProduct.Description != product.Description)
+                existingProduct.Description = product.Description;
+
+            if (existingProduct.BrandId != product.BrandId)
+                existingProduct.BrandId = product.BrandId;
+
+            if (existingProduct.MaterialId != product.MaterialId)
+                existingProduct.MaterialId = product.MaterialId;
+
+            if (existingProduct.CategoryId != product.CategoryId)
+                existingProduct.CategoryId = product.CategoryId;
 
             // Lấy danh sách SizeId hiện tại trong bảng ProductSizes
             var currentProductSizes = await _context.ProductSizes
@@ -178,6 +191,50 @@ namespace API.Repositories
         }
 
 
+        public async Task DistributeStockToProductSizesAsync(Guid productId, int totalStock, Dictionary<Guid, int> productSizesStock)
+        {
+            var product = await _context.Products
+                .Include(p => p.ProductSizes)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                throw new Exception("Sản phẩm không tồn tại");
+            }
+
+            int totalRequestedStock = productSizesStock.Values.Sum();
+            if (totalRequestedStock != totalStock)
+            {
+                throw new Exception($"Tổng số lượng tồn kho của các kích thước phải bằng {totalStock}. Bạn đã nhập tổng tồn kho là {totalRequestedStock}.");
+            }
+
+            var productSizes = product.ProductSizes.ToList();
+            if (productSizes.Count != productSizesStock.Count)
+            {
+                throw new Exception("Số lượng kích thước không khớp với số lượng tồn kho nhập vào.");
+            }
+
+            foreach (var productSize in productSizes)
+            {
+                if (productSizesStock.ContainsKey(productSize.SizeId)) // Dùng SizeId làm khóa
+                {
+                    var stock = productSizesStock[productSize.SizeId];
+                    if (stock < 0)
+                    {
+                        throw new Exception($"Số lượng tồn kho cho kích thước {productSize.SizeId} không thể là số âm.");
+                    }
+                    productSize.Stock = stock;
+                    _context.ProductSizes.Update(productSize);
+                }
+                else
+                {
+                    throw new Exception($"Không có thông tin tồn kho cho kích thước {productSize.SizeId}. Vui lòng kiểm tra lại dữ liệu.");
+                }
+            }
+            product.Stock = totalStock;
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+        }
 
 
 

@@ -21,10 +21,12 @@ namespace Data.Models
         public Guid MaterialId { get; set; }
         public virtual Material? Material { get; set; }
         public Guid CategoryId { get; set; }
+
         public virtual Category? Category { get; set; }
 
 
         public Guid? PromotionId { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Promotion>? Promotions { get; set; }
         public virtual ICollection<Image>? Images { get; set; }
 

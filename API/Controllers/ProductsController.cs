@@ -38,6 +38,21 @@ namespace API.Controllers
                 return Problem(ex.Message);
             }
         }
+
+        [HttpGet("ProductSize")]
+        public async Task<ActionResult<IEnumerable<ProductSize>>> GetProductSize()
+        {
+            try
+            {
+                return await _productRepo.GetAllProductSizes();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+
         //
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetByIdProduct(Guid id)

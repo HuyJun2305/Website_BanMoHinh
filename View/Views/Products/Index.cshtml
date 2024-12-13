@@ -45,14 +45,14 @@
                             @foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
                             {
                                 <div class="carousel-item @(image.index == 0 ? "active" : "")">
-                                    <img src="@Url.Content(image.value.URL)" alt="NotFound" style="width:100%; height:auto;">
+                                    <img src="@Url.Content(image.value.URL)" alt="NotFound" style="width:100%; height:100px;">
                                 </div>
                             }
                         </div>
                     </div>
                 </td>
                 <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                <td>@item.Price.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))</td>
                 <td>@Html.DisplayFor(modelItem => item.Stock)</td>
                 <td>@Html.DisplayFor(modelItem => item.Description)</td>
                 <td>
@@ -62,7 +62,7 @@
                         {
                             <div>
                                 <span class="badge badge-info" style="margin-right: 5px; color:#000">@productSize.Size.Value</span>
-                                <span>Stock: @productSize.Stock</span>  <!-- Hiển thị số lượng tồn kho -->
+                                <span>Stock: @productSize.Stock</span>  
                            </div>
                         }
                     }
@@ -71,7 +71,7 @@
                         <span>No sizes available</span>
                     }
                 </td>
-                <td>@Html.DisplayFor(modelItem => item.Category.Name)</td>
+                 <td>@Html.DisplayFor(modelItem => item.Category.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Brand.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Material.Name)</td>
                 <td>
@@ -416,7 +416,7 @@ $('#editProductForm').on('submit', async function (e) {
 
 </script>
 
-    <script>
+<script>
         function openStockEditModal(productId) {
             // Đặt ProductId vào modal
             $('#modalProductId').val(productId);

@@ -12,11 +12,18 @@ namespace Data.Models
         public Guid Id { get; set; }
         public decimal TotalPrice { get; set; }
         public int Quatity { get; set; }
+
         public Guid CartId { get; set; }
+        [JsonIgnore]
         public virtual Cart? Cart { get; set; }
+
         public Guid ProductId { get; set; }
+        [JsonIgnore]
+
         public virtual Product? Product { get; set; }
-        public Guid SizeId { get; set; } 
+
+        public Guid SizeId { get; set; }
+        [JsonIgnore]
         public virtual Size? Size { get; set; }
     }
 }

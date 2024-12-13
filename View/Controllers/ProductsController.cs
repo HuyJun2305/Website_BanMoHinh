@@ -53,7 +53,6 @@ namespace View.Controllers
             {
                 Products = products,
                 Images = selectedImage,
-                Sizes = selectedSize,
                 Brands = brands,
                 Materials = materials,
                 Categories = categories

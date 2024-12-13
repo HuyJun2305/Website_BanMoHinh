@@ -1,26 +1,24 @@
 ﻿using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text.Json;
 using View.IServices;
-using View.Services;
-using View.Utilities.Extensions;
 using View.ViewModels;
 
 namespace View.Controllers
 {
-    public class HomeCustomerController : Controller
-    {
-        private readonly IProductServices _productServices;
-        private readonly ISizeServices _sizeServices;
-        private readonly IBrandServices _brandServices;
-        private readonly IMaterialServices _materialServices;
-        private readonly IImageServices _imageServices;
+	public class HomeCustomerController : Controller
+	{
+		private readonly IProductServices _productServices;
+		private readonly ISizeServices _sizeServices;
+		private readonly IBrandServices _brandServices;
+		private readonly IMaterialServices _materialServices;
+		private readonly IImageServices _imageServices;
 		private readonly IAuthenticationService _authenticationService;
 		private readonly ICartServices _cartServices;
-        public HomeCustomerController(IProductServices productServices, ISizeServices sizeServices,
+		public HomeCustomerController(IProductServices productServices, ISizeServices sizeServices,
 			IBrandServices brandServices, IMaterialServices materialServices, IImageServices imageServices, ICartServices cartServices)
 		{
 			_productServices = productServices;
@@ -31,26 +29,26 @@ namespace View.Controllers
 			_cartServices = cartServices;
 		}
 		public IActionResult Index()
-        {
+		{
 			var username = HttpContext.Session.GetString("username");
 			ViewBag.Username = username;
 
 			return View();
-        }
+		}
 
 
-        public IActionResult ViewProducts()
-        {
-            var products = _productServices.GetAllProduct().Result;
-            var selectedImage = _imageServices.GetAllImages().Result;
-            if (products == null) return View("'Product is null'");
-            var productData = new ProductIndex()
-            {
-                Products = products,
-                Images = selectedImage,
-            };
-            return View(productData);
-        }
+		public IActionResult ViewProducts()
+		{
+			var products = _productServices.GetAllProduct().Result;
+			var selectedImage = _imageServices.GetAllImages().Result;
+			if (products == null) return View("'Product is null'");
+			var productData = new ProductIndex()
+			{
+				Products = products,
+				Images = selectedImage,
+			};
+			return View(productData);
+		}
 
 		private Guid GetUserIdFromJwtInSession()
 		{
@@ -81,52 +79,54 @@ namespace View.Controllers
 		public async Task<IActionResult> ViewProductDetails(Guid id)
 		{
 			// Lấy userId từ JWT trong session
-			var userId = GetUserIdFromJwtInSession(); // Hàm lấy userId từ JWT đã lưu trong session
+			var userId = GetUserIdFromJwtInSession();
 
-
-			// Lấy giỏ hàng của người dùng dựa trên userId
 			var cart = await _cartServices.GetCartByUserId(userId);
-
 			if (cart == null)
 			{
-				// Nếu không tìm thấy giỏ hàng, có thể tạo mới giỏ hàng hoặc trả về lỗi
 				return NotFound("Cart not found for the user.");
 			}
-				
-			// Lấy cartId từ giỏ hàng
 			var cartId = cart.Id;
 
-			// Lấy thông tin sản phẩm và hình ảnh
-			ViewData["SizeId"] = new SelectList(_sizeServices.GetSizeByStatus().Result, "Id", "Value");
-			var products = _productServices.GetAllProduct().Result;
-			var selectedImage = _imageServices.GetAllImages().Result;
+			// Lấy thông tin sản phẩm
+			var products = await _productServices.GetAllProduct();
 			var selectedProduct = products.FirstOrDefault(p => p.Id == id);
-
 			if (selectedProduct == null)
 			{
 				return NotFound("Product not found!");
 			}
 
-			var relatedImages = selectedImage.Where(i => i.ProductId == id).ToList();
-			var relatedProductDetails = products.Where(d => d.Id == id).ToList();
+			// Lấy danh sách kích thước và stock
+			var allProductSizes = await _productServices.GetAllProductSizes();
+			var productSizes = allProductSizes.Where(ps => ps.ProductId == id).ToList();
 
-			// Tạo CartDetailsViewModel và thêm cartId vào
-			var productDetailData = new ProductIndex
+			var allSizes = await _sizeServices.GetAllSizes(); // Lấy tất cả kích thước để khớp tên
+			var sizes = productSizes.Select(ps => new ProductSizeViewModel
+			{
+				SizeId = ps.SizeId,
+				Value = allSizes.FirstOrDefault(s => s.Id == ps.SizeId)?.Value, // Lấy tên kích thước từ danh sách kích thước
+				Stock = ps.Stock,
+				Selected = false // Hoặc thiết lập logic để đánh dấu kích thước mặc định
+			}).ToList();
+
+			// Đánh dấu kích thước mặc định nếu cần
+			if (sizes.Any())
+			{
+				sizes[0].Selected = true; // Chọn kích thước đầu tiên làm mặc định
+			}
+
+			// Lọc hình ảnh liên quan đến sản phẩm
+			var relatedImages = await _imageServices.GetAllImages();
+			var productDetailData = new ProductIndexVM
 			{
 				Products = new List<Product> { selectedProduct },
-				Images = relatedImages,
-				CartId = cartId // Thêm cartId vào ViewModel
+				Images = relatedImages.Where(i => i.ProductId == id).ToList(),
+				CartId = cartId,
+				Sizes = sizes // Gán danh sách kích thước vào model
 			};
 
 			return View(productDetailData);
 		}
-
-
-
-
-
-
-
 
 		private Guid GetUserId()
 		{

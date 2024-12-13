@@ -63,16 +63,23 @@ namespace API.Controllers
             return Ok();
         }
         [HttpPut("Update")]
-        public async Task<IActionResult> Update( Guid cartId, Guid productId, int quantity)
+        public async Task<IActionResult> Update( Guid cartDetailId, Guid productId, Guid sizeId, int quantity)
 		{
-            await _cartRepo.Update(cartId, productId, quantity);
-			return Ok();
+            try
+            {
+                await _cartRepo.Update(cartDetailId, productId, sizeId, quantity);
+                return Ok(new { success = true, message = "Cập nhật thành công!" });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { success = false, message = "Đã có lỗi xảy ra. Vui lòng thử lại!" });
+            }
         }
         [HttpDelete("Delete")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _cartRepo.Delete(id);
-            return Ok();
+            return Ok("Cart updated successfully.");
         }
 
 		[HttpPost("AddToCart")]
@@ -81,7 +88,7 @@ namespace API.Controllers
 			try
 			{
 				await _cartRepo.AddToCart(cartId, productId, sizeId, quantity );
-				return Ok();
+				return Ok("The product has been added to the cart");
 			}
 			catch (Exception ex)
 			{
@@ -90,20 +97,23 @@ namespace API.Controllers
 
 		}
 
-        [HttpPost("CheckOut")] 
-        public async Task<IActionResult> CheckOut(Guid cartId)
+        [HttpPost("CheckOut")]
+        public async Task<IActionResult> CheckOut([FromBody] List<Guid> cartDetailIds, decimal
+            shippingFee, string city, string district, string ward, string addressDetail)
         {
             try
             {
-                await _cartRepo.CheckOut(cartId);
-                return Ok();
+                // Gọi phương thức xử lý checkout từ repository (repo)
+                await _cartRepo.CheckOut(cartDetailIds, shippingFee, city,district,ward,addressDetail);
+                return Ok(new { message = "Checkout successful!" });
             }
             catch (Exception ex)
             {
+                // Trả về lỗi 500 nếu có sự cố trong quá trình xử lý
+                return StatusCode(500, new { message = "An error occurred during checkout.", details = ex.InnerException?.Message });
+            }
+        }
 
-				return StatusCode(500, new { message = "An error from checkout.", details = ex.InnerException?.Message });
-			}
-		}
 
-	}
+    }
 }

@@ -263,7 +263,7 @@
                                         @foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
                                         {
                                             <div class="carousel-item @(image.index == 0 ? "active" : "")">
-											<img src="@Url.Content(image.value.URL)" style="width:340px; height:auto;" alt="Product Image">
+											<img src="@Url.Content(image.value.URL)" style="width:250px; height:200px;" alt="Product Image">
                                             </div>
                                         }
                                     </div>

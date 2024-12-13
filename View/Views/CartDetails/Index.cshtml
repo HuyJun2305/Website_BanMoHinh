@@ -1,4 +1,4 @@
-﻿@model View.ViewModels.CartDetailsViewModel
+﻿@model View.ViewModels.CartDetailViewModel
 
 @{
     ViewData["Title"] = "Danh Sách Sản Phẩm";
@@ -6,8 +6,6 @@
 }
 @{
     var message = ViewBag.Message as string;
-    var totalPrice = Model.CartDetails.Sum(item => item.Product.Price * item.Quatity);
-
 }
 
 @if (!string.IsNullOrEmpty(message))
@@ -16,9 +14,6 @@
         @message
     </div>
 }
-
-
-
 <!-- breadcrumb -->
 <div class="container">
 	<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
@@ -26,189 +21,250 @@
 			Home
 			<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
 		</a>
-
 		<span class="stext-109 cl4">
 			Shoping Cart
 		</span>
 	</div>
 </div>
 
-
-<!-- Shoping Cart -->
+<!-- Shopping Cart -->
 <form class="bg0 p-t-75 p-b-85">
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
-				<div class="m-l-25 m-r--38 m-lr-0-xl">
-					<div class="wrap-table-shopping-cart">
-						<table class="table-shopping-cart">
-							<tr class="table_head">
-								<th class="column-6">
-									<!-- Checkbox chọn tất cả -->
-									<input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" />
-								</th>
-								<th class="column-1">Product</th>
-								<th class="column-2"></th>
-								<th class="column-3">Price</th>
-								<th class="column-4">Quantity</th>
-								<th class="column-5">Total</th>
-							</tr>
-							@foreach(var item in Model.CartDetails)
-							{
-								<tr class="table_row">
-									<td class="column-6">
-										<input type="checkbox"
-											   class="select-item"
-											   value="@item.ProductId"
-											   data-product-name="@item.Product.Name"
-											   data-product-price="@item.Product.Price"
-											   data-quantity="@item.Quatity"
-											   data-total-price="@item.TotalPrice" />
-									</td>
-
-									<td class="column-1">
-									<!-- Carousel for Images -->
-                                <div id="carousel-@item.Id" class="carousel slide" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                        @foreach (var image in Model.Images.Where(i => i.ProductId == item.ProductId).Select((value, index) => new { value, index }))
-                                        {
-                                            <div class="carousel-item @(image.index == 0 ? "active" : "")">
-											<img src="@Url.Content(image.value.URL)" style="width:100px; height:auto;" alt="Product Image">
+    <div class="container">
+        <div class="row">
+            <!-- Giỏ hàng -->
+            <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
+                <div class="m-l-25 m-r--38 m-lr-0-xl">
+                    <div class="wrap-table-shopping-cart cart-content">
+                        <table class="table-shopping-cart">
+                            <thead>
+                                <tr class="table_head">
+                                    <th class="column-6">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="select-all" class="checkbox-all">
+                                            <span class="custom-checkbox"></span>
+                                        </label>
+                                    </th>
+                                    <th class="column-1">Product</th>
+                                    <th class="column-7">Product Name</th>
+                                    <th class="column-2">Size</th>
+                                    <th class="column-3">Price</th>
+                                    <th class="column-4">Quantity</th>
+                                    <th class="column-5">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CartDetails)
+                                {
+                                    <tr class="table_row" id="cart-row-@item.Id">
+                                        <td class="column-6">
+                                            <div class="checkbox-container">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" class="checkbox-item" data-cart-detail-id="@item.Id" onclick="updateCartSummary()">
+                                                    <span class="custom-checkbox"></span>
+                                                </label>
                                             </div>
-                                        }
-                                    </div>
+                                        </td>
+                                        <td class="column-1">
+                                            <!-- Carousel cho hình ảnh -->
+                                            <div id="carousel-@item.ProductId" class="carousel slide" data-bs-ride="carousel">
+                                                <div class="carousel-inner">
+                                                    @foreach (var image in Model.Images.Where(i => i.ProductId == item.ProductId).Select((value, index) => new { value, index }))
+                                                    {
+                                                        <div class="carousel-item @(image.index == 0 ? "active" : "")">
+                                                            <img src="@Url.Content(image.value.URL)" style="width:80px; height:auto;" alt="Product Image">
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="column-7" data-product-id="@item.ProductId">@item.ProductName</td>
+                                        <td class="column-2" data-size-id="@item.SizeId">@item.SizeName <input type="hidden" id="stock-@item.Id" data-weight="@item.Weight" data-stock="@item.Stock" /></td>
+                                        <td class="column-3">
+                                            @item.Price.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))
+                                        </td>
+                                        <td class="column-4">
+                                            <div class="wrap-num-product flex-w m-l-auto m-r-0">
+                                                <!-- Nút giảm số lượng -->
+                                                <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="decreaseQuantity('@item.Id')">
+                                                    <i class="fs-16 zmdi zmdi-minus"></i>
+                                                </div>
+
+                                                <!-- Ô input số lượng -->
+                                                <input class="mtext-104 cl3 txt-center num-product"
+                                                       type="number"
+                                                       id="quantity-@item.Id"
+                                                       value="@item.Quantity"
+                                                       min="0"
+                                                       data-cart-detail-id="@item.Id"
+                                                       data-price-per-unit="@item.Price"
+                                                       onchange="updateQuantityValue('@item.Id'); updateTotalWeight()">
+
+                                                <!-- Nút tăng số lượng -->
+                                                <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="increaseQuantity('@item.Id')">
+                                                    <i class="fs-16 zmdi zmdi-plus"></i>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="column-5" id="total-price-@item.Id">
+                                            @item.TotalPrice.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Coupon and Update Cart buttons -->
+                    <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+                        <div class="flex-w flex-m m-r-20 m-tb-5">
+                            <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="coupon" placeholder="Coupon Code">
+                            <div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
+                                Apply coupon
+                            </div>
+                        </div>
+
+                        <div class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10">
+                            Update Cart
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Totals -->
+            <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
+                <div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm totals-content">
+                    <h4 class="mtext-109 cl2 p-b-30">
+                        Cart Totals
+                    </h4>
+                    <div class="flex-w flex-t bor12 p-b-13">
+                        <div class="size-208">
+                            <span class="stext-110 cl2">
+                                Subtotal:
+                            </span>
+                        </div>
+                        <div class="size-209">
+                            <span class="mtext-110 cl2" id="subtotal">
+                                0đ
+                                <input type="hidden" id="total-weight" />
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex-w flex-t bor12 p-t-15 p-b-30">
+                        <div class="size-208 w-full-ssm">
+                            <span class="stext-110 cl2">
+                                Shipping: 
+                            </span>
+                        </div>
+
+                        <div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
+                            <p class="stext-111 cl6 p-t-2">
+                                Đơn vị giao hàng toàn quốc. Thời gian giao hàng có thể mất khá lâu tầm 1 đến 2 tuần.
+                            </p>
+                            <!-- Shipping Calculation Fields -->
+                            <div class="p-t-15">
+                                <span class="stext-112 cl8">
+                                    Calculate Shipping:
+                                </span>
+                                <hr />
+                                <div>
+                                    <label for="city">Chọn Thành Phố</label>
+                                    <select id="city" class="form-control">
+                                        <option disabled selected>------</option>
+                                        <!-- Các thành phố sẽ được thêm vào đây qua JavaScript -->
+                                    </select>
                                 </div>
-								</td>
-									<td class="column-2">@item.Product.Name</td>
-									<td class="column-3">@item.Product.Price.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))</td>
-									<td class="column-4">
-									    <div class="wrap-num-product flex-w m-l-auto m-r-0">
-									        <!-- Nút giảm số lượng -->
-									        <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="updateCartDetail()">
-									            <i class="fs-16 zmdi zmdi-minus"></i>
-									        </div>
-									
-									        <!-- Ô nhập số lượng -->
-											<input class="mtext-104 cl3 txt-center num-product"
-												   type="number"
-												   name="num-product1"
-												   id="quantity-@item.ProductId"
-												   value="@item.Quatity"
-												   min="0"
-												   onchange="updateCartDetail('@item.ProductId')">
+                            
+                                <div>
+                                    <label for="district">Chọn Quận/Huyện</label>
+                                    <select id="district" class="form-control" onchange="loadAvailableServices()">
+                                        <option disabled selected>------</option>
+                                        <!-- Các quận huyện sẽ được thêm vào đây qua JavaScript -->
+                                    </select>
+                                </div>
+                            
+                                <div>
+                                    <label for="ward">Chọn Phường/Xã</label>
+                                    <select id="ward" class="form-control">
+                                        <option disabled selected>------</option>
+                                        <!-- Các phường xã sẽ được thêm vào đây qua JavaScript -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="addressDetail">Chọn Phường/Xã</label>
+                                    <textarea id="addressDetail" style="border: 1px solid #ccc" placeholder="Địa chỉ chi tiết" class="form-control"></textarea>
+                                </div>
+                            
+                                <div>
+                                    <label for="weight">Trọng lượng hàng (gram):</label>
+                                    <input type="number" id="weight" class="form-control" disabled />
+                                </div>
+                            
+                                <div>
+                                    <label for="serviceId">Dịch vụ giao hàng:</label>
+                                    <select id="serviceId" class="form-control">
+                                        <option value="">Chọn gói dịch vụ</option> <!-- Mặc định có một lựa chọn ban đầu -->
+                                    </select>
+                                </div>
+                            
+                                <div>
+                                    <button id="calculateShippingButton" class="btn btn-primary mt-3" type="button" onclick="calculateShippingFee()">Tính phí giao hàng</button>
+                                </div>
+                                <div>
+                                    <label for="shippingFee">Phí giao hàng:</label>
+                                    <input type="text" id="shippingFee" class="form-control" readonly />
+                                </div>
+                            </div>
 
-											<!-- Nút tăng số lượng -->
-									        <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="updateCartDetail()">
-									            <i class="fs-16 zmdi zmdi-plus"></i>
-									        </div>
-									    </div>
-									</td>
 
-									<td class="column-5">@item.TotalPrice.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))</td>
 
-								</tr>
-							}
-							
+                        </div>
+                    </div>
 
-							
-						</table>
-					</div>
+                    <div class="flex-w flex-t bor12 p-t-15 p-b-30">
+                        <div class="size-208 w-full-ssm">
+                            <span class="stext-110 cl2">
+                                Payment Method:
+                            </span>
+                        </div>
 
-					<div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
-						<div class="flex-w flex-m m-r-20 m-tb-5">
-							<input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="coupon" placeholder="Coupon Code">
+                        <div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
+                            <!-- Radio Button for Cash -->
+                            <label class="payment-method-label">
+                                <input id="paymentByCash" type="radio" name="paymentMethod" value="cash" class="payment-method-radio" />
+                                <img src="/path/Cash_Logo.png" alt="Cash" />
+                            </label>
 
-							<div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
-								Apply coupon
-							</div>
-						</div>
+                            <!-- Radio Button for MoMo -->
+                            <label class="payment-method-label">
+                                <input id="paymentByMoMo" type="radio" name="paymentMethod" value="momo" class="payment-method-radio" />
+                                <img src="/path/MoMo_Logo.png" alt="MoMo" />
+                            </label>
 
-						<div class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10">
-							Update Cart
-						</div>
-					</div>
-				</div>
-			</div>
+                            <!-- Radio Button for VNPay -->
+                            <label class="payment-method-label">
+                                <input id="paymentByVNPay" type="radio" name="paymentMethod" value="vnpay" class="payment-method-radio" />
+                                <img src="/path/VNPay_Logo.png" alt="VNPay" />
+                            </label>
 
-			<div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
-				<div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
-					<h4 class="mtext-109 cl2 p-b-30">
-						Cart Totals
-					</h4>
-
-					<div class="flex-w flex-t bor12 p-b-13">
+                            <!-- Radio Button for ZaloPay -->
+                            <label class="payment-method-label">
+                                <input id="paymentByZaloPay" type="radio" name="paymentMethod" value="zalopay" class="payment-method-radio" />
+                                <img src="/path/ZaloPay_Logo.png" alt="ZaloPay" />
+                            </label>
+                        </div>
+                    </div>
+                   <div class="flex-w flex-t p-t-27 p-b-33">
 						<div class="size-208">
-							<span class="stext-110 cl2">
-								Subtotal:
-							</span>
-						</div>
-
-						<div class="size-209">
-							<span class="mtext-110 cl2">
-								$79.65
-							</span>
-						</div>
-					</div>
-
-					<div class="flex-w flex-t bor12 p-t-15 p-b-30">
-						<div class="size-208 w-full-ssm">
-							<span class="stext-110 cl2">
-								Shipping:
-							</span>
-						</div>
-
-						<div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
-							<p class="stext-111 cl6 p-t-2">
-								Đơn vị giao hàng toàn quốc. Thời gian giao hàng có thể mất khá lâu tầm 1 đến 2 tuần.
-							</p>
-
-							<div class="p-t-15">
-								<span class="stext-112 cl8">
-									Calculate Shipping
-								</span>
-
-								<div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
-									<select id="city" class="form-control js-select2" name="time">
-										<option value="" selected>Chọn tỉnh thành</option>
-									</select>
-									<div class="dropDownSelect2"></div>
-								</div>
-
-								<div class="bor8 bg0 m-b-12">
-									<select id="district" class="form-control js-select2">
-										<option value="" selected>Chọn quận huyện</option>
-									</select>
-								</div>
-
-								<div class="bor8 bg0 m-b-22">
-									<select id="ward" class="form-control js-select2">
-										<option value="" selected>Chọn phường xã</option>
-									</select>
-								</div>
-								<div class="bor8 bg0 m-b-22">
-									<textarea id="detail" placeholder="Địa chỉ chi tiết" class="form-control js-select2"></textarea>
-								</div>
-
-								<div class="flex-w">
-									<div class="flex-c-m stext-101 cl2 size-115 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer">
-										Update Totals
-									</div>
-								</div>
-
-							</div>
-						</div>
-					</div>
-
-					<div class="flex-w flex-t p-t-27 p-b-33">
-						<div class="size-208">
-							<span class="mtext-101 cl2">
+							<span class="mtext-101 cl2" >
 								Total: 
 							</span>
 						</div>
 
 						<div class="size-209 p-t-1">
-							<span class="mtext-110 cl2">
-								@totalPrice.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"));
+                            <span class="mtext-110 cl2" id="shipfeeAndTotal">
+                                0 đ
 							</span>
 						</div>
 					</div>
@@ -216,131 +272,679 @@
 					<button id="checkoutButton" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
 						Proceed to Checkout
 					</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
+@section Styles{
+
+<style>
+        .cart-content {
+            max-height: 950px; 
+            overflow-y: auto; 
+            width: 100%;
+            overflow-x: hidden;
+
+        }
+
+        .table-shopping-cart thead th {
+            position: sticky; 
+            top: 0; 
+            background-color: #f8f8f8; 
+            z-index: 10; 
+            padding: 15px; 
+            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .table-shopping-cart {
+            width: 100%;
+            table-layout: auto;
+            border-spacing: 0;
+        }
+
+        .column-1, .column-7, .column-2, .column-3, .column-4, .column-5 {
+            width: auto;
+            max-width: 200px; /* Điều chỉnh độ rộng tối đa cho các cột */
+        }
+
+        /* Các điều chỉnh khác */
+        .table_row {
+            text-align: left;
+        }
+
+.table-shopping-cart .table_head th {
+    text-align : center;
+}
+.column-6, .column-2, .column-4, .column-7  {
+    text-align: center;
+    vertical-align: middle;
+    width: 100px;
+}
+
+.table-shopping-cart .column-6, .column-2,  .column-7 {
+    width : 150px;
+}
+/* Ẩn checkbox mặc định */
+.checkbox-item, .checkbox-all {
+    display: none;
+}
+
+/* Thiết kế checkbox tùy chỉnh (sản phẩm và tổng) */
+.custom-checkbox {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 4px; /* Làm góc checkbox bo tròn */
+    background-color: #fff;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 15px;
+}
+
+/* Hiệu ứng hover vào checkbox */
+.checkbox-label:hover .custom-checkbox {
+    border-color: #666;
+}
+
+/* Hiệu ứng khi checkbox được chọn */
+.checkbox-item:checked + .custom-checkbox, 
+.checkbox-all:checked + .custom-checkbox {
+    background-color: #4caf50; /* Màu xanh khi được chọn */
+    border-color: #4caf50;
+}
+
+/* Dấu tick ngược */
+.checkbox-item:checked + .custom-checkbox::after, 
+.checkbox-all:checked + .custom-checkbox::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10%;
+    width: 8px; /* Kích thước nhỏ hơn */
+    height:11px; /* Chiều cao nhỏ hơn */
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(30deg); /* Xoay ngược */
+    box-sizing: border-box; /* Giữ dấu tick trong ô */
+}
+
+/* Bố cục checkbox container */
+.checkbox-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+</style>
+
+<style>
+        .size-209 {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+        .payment-method-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+            .payment-method-label input[type="radio"] {
+                display: none; /* Ẩn radio button thực sự */
+            }
+
+            .payment-method-label img {
+                max-height: 30px;
+                max-width: 60px;
+            }
+
+        /* Khi radio button được chọn, border của label sẽ thay đổi */
+        .payment-method-radio:checked + img {
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+        }
+
+        .payment-method-radio:checked {
+            outline: 4px solid #4CAF50;
+            border-radius : 5px;
+        }
+
+            /* Chỉ hiển thị border của label khi radio button được chọn */
+            .payment-method-radio:checked + img {
+                border: 2px solid #4CAF50; /* Border xanh khi radio button được chọn */
+            }
+    </style>
+
+}
+
 
 @section Scripts{
 
-	<script>
-		// Cập nhật giỏ hàng khi thay đổi số lượng hoặc checkbox
-		function updateCartDetail(productId) {
-			// Lấy giá trị số lượng từ input
-			var quantity = document.getElementById('quantity-' + productId).value;
-
-			// Lấy giá trị cartId và productId từ các thuộc tính của sản phẩm
-			var cartId = '@Model.CartId'; // Bạn có thể lấy giá trị này từ session hoặc một biến toàn cục khác
-			var checkbox = document.querySelector('input[value="' + productId + '"].select-item');
-			var isChecked = checkbox.checked;
-
-			// Gọi API để cập nhật giỏ hàng
-			var apiUrl = `https://localhost:7280/api/CartDetail/Update?cartId=${cartId}&productId=${productId}&quantity=${quantity}`;
-
-			// Gửi yêu cầu PUT hoặc POST đến API để cập nhật giỏ hàng
-			fetch(apiUrl, {
-				method: 'POST', // Hoặc 'PUT' nếu cần thiết
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					productId: productId,
-					quantity: quantity,
-					isChecked: isChecked
-				})
-			})
-				.then(response => response.json())
-				.then(data => {
-					// Xử lý kết quả trả về từ server (nếu cần thiết)
-					console.log('Giỏ hàng đã được cập nhật', data);
-				})
-				.catch(error => {
-					console.error('Có lỗi xảy ra khi cập nhật giỏ hàng:', error);
-				});
-		}
-
-	</script>
-	<!--Check out-->
-	<script>
-		$(document).ready(function () {
-			$('#checkoutButton').click(function () {
-				// Get the cartId from the session or pass it dynamically
-				var cartId = '@Model.CartId'; // You can dynamically fetch this if needed
-
-				// Make the API call to Checkout
-				$.ajax({
-					url: `https://localhost:7280/api/CartDetail/CheckOut?cartId=${cartId}`, // The API URL
-					type: 'POST',  // Assuming POST, change if necessary
-					success: function (response) {
-						// Handle success (e.g., redirect to a confirmation page or display a success message)
-						alert('Checkout successful!');
-						window.location.href = '/Order/Confirmation';  // Redirect to a confirmation page or any other page you want
-					},
-					error: function (xhr, status, error) {
-						// Handle error (e.g., display an error message)
-						alert('An error occurred during checkout. Please try again.');
-					}
-				});
-			});
-		});
-	</script>
 
 
+    <!--Phần select checkbox-->
+    <script>
+        // Lắng nghe sự kiện click của checkbox "select-all"
+        document.getElementById('select-all').addEventListener('change', function () {
+            // Lấy tất cả checkbox có class là 'checkbox-item'
+            const checkboxes = document.querySelectorAll('.checkbox-item');
+
+            // Lặp qua tất cả checkbox và đặt trạng thái của chúng giống với "select-all"
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+
+            // Cập nhật lại thông tin giỏ hàng
+            updateCartSummary();
+        });
+
+    </script>
+    <!--Phần tính tổng tiền và tổng số lượng-->
+    <script>
+        // Cập nhật giỏ hàng, tính toán tổng tiền, tổng trọng lượng và phí ship
+        function updateCartSummary() {
+            let totalPrice = 0;
+            let totalWeight = 0;
+            let isUpdated = false;  // Biến để kiểm tra nếu có thay đổi
+
+            // Lặp qua tất cả các checkbox có class "checkbox-item"
+            $(".checkbox-item").each(function () {
+                // Kiểm tra nếu checkbox được checked
+                if ($(this).prop('checked')) {
+                    const productId = $(this).data('cart-detail-id');
+
+                    // Lấy giá trị số lượng từ input quantity
+                    const quantity = parseInt($("#quantity-" + productId).val()); // Đảm bảo là số nguyên
+                    // Lấy giá trị pricePerUnit từ thuộc tính data-price-per-unit
+                    const pricePerUnit = parseFloat($("#quantity-" + productId).data('price-per-unit')); // Đảm bảo là số thực
+                    // Lấy giá trị weight từ thuộc tính data-weight
+                    const weight = parseFloat($("#stock-" + productId).data('weight')); // Đảm bảo là số thực
+
+
+                    console.log(quantity, pricePerUnit, weight, quantity)
+                    // Kiểm tra nếu các giá trị là hợp lệ (không phải NaN)
+                    if (!isNaN(quantity) && !isNaN(pricePerUnit) && !isNaN(weight)) {
+                        // Tính tổng tiền và tổng khối lượng
+                        totalPrice += pricePerUnit * quantity;
+                        totalWeight += weight * quantity;
+                        console.log(totalPrice, totalWeight);
+                        // Đánh dấu rằng có thay đổi
+                        isUpdated = true;
+
+                        // Cập nhật giá trị tổng tiền cho từng sản phẩm
+                        const totalPriceForItem = pricePerUnit * quantity;
+                        $("#total-price-" + productId).text(totalPriceForItem.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫");
+                    }
+                }
+            });
+
+            // Cập nhật tổng tiền vào phần tử "subtotal"
+            if (!isNaN(totalPrice)) {
+                const formattedTotalPrice = totalPrice.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
+                $("#subtotal").text(formattedTotalPrice);
+            } else {
+                $("#subtotal").text("0₫");
+            }
+
+            // Cập nhật tổng khối lượng vào phần tử "total-weight"
+            if (!isNaN(totalWeight)) {
+                $("#total-weight").val(totalWeight.toFixed(2)); // Ví dụ 2 chữ số thập phân cho trọng lượng
+            } else {
+                $("#total-weight").val("0");
+            }
+
+            // Tính phí ship giả lập
+            let shippingFee = 0;
+            if (totalWeight > 5) {
+                shippingFee = 50000; // 50,000 VND nếu trọng lượng > 5kg
+            } else if (totalWeight > 2) {
+                shippingFee = 30000; // 30,000 VND nếu trọng lượng > 2kg và <= 5kg
+            } else {
+                shippingFee = 15000; // 15,000 VND nếu trọng lượng <= 2kg
+            }
+
+            // Nếu giá trị giỏ hàng lớn hơn 1 triệu, miễn phí ship
+            if (totalPrice > 1000000) {
+                shippingFee = 0; // Phí ship miễn phí nếu giá trị giỏ hàng > 1 triệu
+            }
+
+            // Cập nhật phí ship vào phần tử "shipping-fee"
+            const formattedShippingFee = shippingFee.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
+            $("#shipping-fee").text(formattedShippingFee);
+
+            // Cập nhật tổng giá sau khi cộng phí ship
+            const totalWithShipping = totalPrice + shippingFee;
+            const formattedTotalWithShipping = totalWithShipping.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
+            $("#total-with-shipping").text(formattedTotalWithShipping);
+
+            // Kiểm tra nếu có thay đổi và thông báo cho người dùng
+            if (isUpdated) {
+                console.log("Tổng tiền, tổng khối lượng và phí ship đã được tính lại.");
+            } else {
+                console.log("Không có sản phẩm nào được chọn.");
+            }
+        }
+
+        // Gán sự kiện change cho các checkbox
+        $(document).on('change', '.checkbox-item', function () {
+            updateCartSummary();
+        });
+
+        // Cập nhật số lượng khi thay đổi giá trị input
+        function updateQuantityValue(cartDetailId) {
+            updateCartSummary();
+        }
+    </script>
+    <!--Phần script chỉnh validate số lượng-->
+    <script> 
+        // Giảm số lượng
+        function decreaseQuantity(itemId) {
+            var quantityInput = document.getElementById('quantity-' + itemId);
+            var currentQuantity = parseInt(quantityInput.value);
+
+            var newQuantity = currentQuantity - 1;
+            quantityInput.value = newQuantity + 1;
+            if (newQuantity < 0) {
+                newQuantity = 0;
+            }
+            if (newQuantity === 0) {
+                if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
+                    showDeleteConfirmation(itemId);
+                } else {
+                    // Nếu người dùng chọn No, quay lại giá trị ban đầu
+                    quantityInput.value = 1;
+                    updateTotalPrice(itemId, 1);
+                    updateCartDetail(itemId, 1);  // Cập nhật vào API
+                    // Quay lại giá trị 1
+                    location.reload();
+                }
+            } else {
+                updateTotalPrice(itemId, newQuantity);
+                updateCartDetail(itemId, newQuantity);  // Cập nhật vào API
+            }
+        }
+
+        // Tăng số lượng
+        function increaseQuantity(itemId) {
+            var quantityInput = document.getElementById('quantity-' + itemId);
+            var currentQuantity = parseInt(quantityInput.value);
+
+            if (newQuantity < 0) {
+                newQuantity = 0;
+            }
+            var newQuantity = currentQuantity + 1;
+            quantityInput.value = newQuantity - 1;  // Cập nhật lại giá trị ô input
+
+
+            var stockInput = document.getElementById('stock-' + itemId);
+            var stock = parseInt(stockInput.getAttribute('data-stock'));
+
+
+            if (newQuantity > stock) {
+                newQuantity = stock;
+                quantityInput.value = newQuantity;
+                alert('Số lượng sản phẩm vượt quá số lượng tồn kho! Đã đặt lại số lượng tối đa: ' + stock);
+                location.reload();
+            }
+
+            console.log(currentQuantity, newQuantity);
+
+            updateTotalPrice(itemId, newQuantity);  // Cập nhật giá tiền
+            updateCartDetail(itemId, newQuantity);  // Cập nhật vào API
+        }
+
+        // Hàm khi thay đổi số lượng trong input
+        function updateQuantityValue(itemId) {
+            var quantityInput = document.getElementById('quantity-' + itemId);
+            var newQuantity = parseInt(quantityInput.value);  // Lấy giá trị mới từ ô input
+            var stockInput = document.getElementById('stock-' + itemId);
+            var stock = parseInt(stockInput.getAttribute('data-stock'));
+            
+            // Kiểm tra và đảm bảo số lượng không âm
+            if (newQuantity < 0) {
+                newQuantity = 0;
+            }
+            if (newQuantity > stock) {
+                // Nếu vượt quá, giới hạn số lượng và thông báo
+                newQuantity = stock;
+                quantityInput.value = newQuantity;  // Cập nhật lại số lượng trong input
+                alert('Số lượng sản phẩm vượt quá số lượng tồn kho! Đã đặt lại số lượng tối đa: ' + stock);
+                location.reload();
+            }
+            console.log(newQuantity);
+
+            if (newQuantity === 0) {
+                if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
+                    showDeleteConfirmation(itemId);
+                } else {
+                    // Nếu người dùng chọn No, quay lại giá trị ban đầu
+                    quantityInput.value = 1;
+                    updateTotalPrice(itemId, 1);
+                    updateCartDetail(itemId, 1);  // Cập nhật vào API
+                    // Quay lại giá trị 1
+                }
+            } else {
+                updateTotalPrice(itemId, newQuantity);
+                updateCartDetail(itemId, newQuantity);  // Cập nhật vào API
+            }
+        }
+
+        // Hiển thị thông báo xác nhận xóa
+        function showDeleteConfirmation(itemId) {
+            if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
+                // Cập nhật giỏ hàng ở backend thông qua API (sản phẩm sẽ tự động bị xóa khi số lượng = 0)
+                updateCartDetail(itemId, 0);  // Cập nhật số lượng sản phẩm về 0
+            } else {
+                // Quay lại số lượng = 1 nếu người dùng chọn No
+                var quantityInput = document.getElementById('quantity-' + itemId);
+                quantityInput.value = 1;
+            }
+        }
+
+        // Cập nhật giá tiền
+        function updateTotalPrice(itemId, quantity) {
+            var quantityInput = document.getElementById('quantity-' + itemId);
+            var pricePerUnit = parseFloat(quantityInput.getAttribute('data-price-per-unit'));
+
+            // Tính lại tổng giá tiền
+            var totalPrice = pricePerUnit * quantity;
+
+            // Cập nhật giá tiền vào phần tử HTML
+            var totalPriceElement = document.getElementById('total-price-' + itemId);
+            totalPriceElement.innerHTML = totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+        }
+
+        // Hàm gọi API để cập nhật thông tin vào server
+function updateCartDetail(itemId, newQuantity) {
+    // Lấy các giá trị từ các phần tử <td>
+    var cartDetailId = document.getElementById('quantity-' + itemId).getAttribute('data-cart-detail-id'); // Lấy cartDetailId từ input
+    var productId = document.querySelector(`#cart-row-${itemId} .column-7`).getAttribute('data-product-id'); // Lấy productId từ <td class="column-7">
+    var sizeId = document.querySelector(`#cart-row-${itemId} .column-2`).getAttribute('data-size-id'); // Lấy sizeId từ <td class="column-2">
+
+    console.log(newQuantity);
+    // Tạo URL API
+    var apiUrl = `https://localhost:7280/api/CartDetail/Update?cartDetailId=${cartDetailId}&productId=${productId}&sizeId=${sizeId}&quantity=${newQuantity}`;
+
+    // Gọi API với fetch
+    fetch(apiUrl, {
+        method: 'PUT', // Sử dụng PUT để cập nhật
+        headers: {
+            'Content-Type': 'application/json',
+            // Thêm các headers khác nếu cần, ví dụ authorization token
+        },
+    })
+                .then(response => response.json()) 
+                .then(data => {
+                    console.log('Cập nhật thành công');
+                })
+                .catch(error => {
+                    toastr.error('Có lỗi xảy ra khi cập nhật giỏ hàng.', 'Lỗi');
+                    console.error('Lỗi khi gọi API:', error);
+                });
+}
+
+
+    </script>
 	<!--API địa chỉ-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-	<script>
-		const host = "https://provinces.open-api.vn/api/";
-		var callAPI = (api) => {
-			return axios.get(api)
-				.then((response) => {
-					renderData(response.data, "city");
-				});
-		}
-		callAPI('https://provinces.open-api.vn/api/?depth=1');
-		var callApiDistrict = (api) => {
-			return axios.get(api)
-				.then((response) => {
-					renderData(response.data.districts, "district");
-				});
-		}
-		var callApiWard = (api) => {
-			return axios.get(api)
-				.then((response) => {
-					renderData(response.data.wards, "ward");
-				});
-		}
+    <script>
+        const token = "bc6a9e28-b8cc-11ef-9834-7e8875c3faf5"; // Thay bằng token từ GHN
+        const GHN_API_URL = `https://online-gateway.ghn.vn/shiip/public-api`;
 
-		var renderData = (array, select) => {
-			let row = ' <option disable value="">Chọn</option>';
-			array.forEach(element => {
-				row += `<option data-id="${element.code}" value="${element.name}">${element.name}</option>`
-			});
-			document.querySelector("#" + select).innerHTML = row
-		}
+        // Đảm bảo khai báo headers đúng cách
+        const headers = {
+            'Token': token,
+            'Content-Type': 'application/json'
+        };
 
-		$("#city").change(() => {
-			callApiDistrict(host + "p/" + $("#city").find(':selected').data('id') + "?depth=2");
-			printResult();
-		});
-		$("#district").change(() => {
-			callApiWard(host + "d/" + $("#district").find(':selected').data('id') + "?depth=2");
-			printResult();
-		});
-		$("#ward").change(() => {
-			printResult();
-		})
+        // Tải danh sách tỉnh/thành
+        const loadProvinces = async () => {
+            try {
+                const response = await axios.get(`${GHN_API_URL}/master-data/province`, { headers });
 
-		var printResult = () => {
-			if ($("#district").find(':selected').data('id') != "" && $("#city").find(':selected').data('id') != "" &&
-				$("#ward").find(':selected').data('id') != "") {
-				let result = $("#city option:selected").text() +
-					" | " + $("#district option:selected").text() + " | " +
-					$("#ward option:selected").text();
-				$("#result").text(result)
-			}
+                if (response.data.code === 200) {
+                    const provinces = response.data.data;
+                    const citySelect = document.getElementById('city');
 
-		}
-	</script>
+                    provinces.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.ProvinceID;
+                        option.textContent = province.ProvinceName;
+                        citySelect.appendChild(option);
+                    });
+
+                    citySelect.removeEventListener('change', handleCityChange);
+                    citySelect.addEventListener('change', handleCityChange);
+                }
+            } catch (error) {
+                console.error("Lỗi khi gọi API tỉnh/thành:", error.message);
+            }
+        };
+
+        // Xử lý sự kiện thay đổi tỉnh/thành
+        const handleCityChange = async (event) => {
+            const provinceId = parseInt(event.target.value);
+            if (!isNaN(provinceId) && provinceId > 0) {
+                await loadDistricts(provinceId);
+            } else {
+                console.error("Province ID không hợp lệ");
+            }
+        };
+
+        // Tải danh sách quận/huyện theo tỉnh thành
+        const loadDistricts = async (provinceId) => {
+            try {
+                const response = await axios.post(
+                    `${GHN_API_URL}/master-data/district`,
+                    { province_id: provinceId },
+                    { headers }
+                );
+
+                if (response.data.code === 200) {
+                    const districts = response.data.data;
+                    const districtSelect = document.getElementById('district');
+                    districtSelect.innerHTML = '<option disabled selected>Chọn quận/huyện</option>';
+
+                    districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.DistrictID;
+                        option.textContent = district.DistrictName;
+                        districtSelect.appendChild(option);
+                    });
+
+                    districtSelect.addEventListener('change', async (event) => {
+                        const districtId = parseInt(event.target.value);
+                        if (!isNaN(districtId) && districtId > 0) {
+                            await loadWards(districtId);
+                        } else {
+                            console.error("District ID không hợp lệ");
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Lỗi khi gọi API quận/huyện:", error.message);
+            }
+        };
+
+        // Tải danh sách phường/xã theo quận/huyện
+        const loadWards = async (districtId) => {
+            try {
+                const response = await axios.post(
+                    `${GHN_API_URL}/master-data/ward`,
+                    { district_id: districtId },
+                    { headers }
+                );
+
+                if (response.data.code === 200) {
+                    const wards = response.data.data;
+                    const wardSelect = document.getElementById('ward');
+                    wardSelect.innerHTML = '<option disabled selected>Chọn phường/xã</option>';
+
+                    wards.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward.WardCode;
+                        option.textContent = ward.WardName;
+                        wardSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error("Lỗi khi gọi API phường/xã:", error.message);
+            }
+        };
+
+        // Gắn sự kiện cho phần tử <select> tỉnh/thành
+        const citySelect = document.getElementById('province');
+        if (citySelect) {
+            citySelect.addEventListener('change', handleCityChange);
+        }
+
+        // Gọi hàm tải tỉnh/thành khi trang được tải
+        document.addEventListener('DOMContentLoaded', loadProvinces);
+
+        // Lấy gói dịch vụ sau khi đã chọn đầy đủ tỉnh, quận, phường
+        const loadAvailableServices = async () => {
+            const districtId = document.getElementById('district').value; // Lấy ID của quận/huyện (to_district)
+            const shopDistrictId = 1805; // Mã quận/huyện của shop
+            const shopId = 5120281; // Mã shop (shop_id)
+
+            // Kiểm tra dữ liệu đầu vào
+            if (!districtId) {
+                console.error("Vui lòng chọn đầy đủ thông tin quận/huyện.");
+                return;
+            }
+
+            // Payload đúng định dạng yêu cầu của API
+            const payload = {
+                shop_id: shopId,
+                from_district: shopDistrictId,
+                to_district: parseInt(districtId), // Chuyển giá trị về kiểu số
+            };
+
+            try {
+                const response = await axios.post(
+                    'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services',
+                    payload,
+                    { headers }
+                );
+
+                if (response.data.code === 200) {
+                    const services = response.data.data;
+                    const serviceSelect = document.getElementById('serviceId');
+                    serviceSelect.innerHTML = '<option value="">Chọn gói dịch vụ</option>';
+
+                    if (services.length === 0) {
+                        console.warn("Không tìm thấy gói dịch vụ phù hợp.");
+                        return;
+                    }
+
+                    services.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.service_id;
+                        option.textContent = `${service.service_type_id} (${service.short_name})`;
+                        serviceSelect.appendChild(option);
+                    });
+                } else {
+                    console.error("Lỗi khi lấy gói dịch vụ:", response.data.message);
+                }
+            } catch (error) {
+                console.error("Lỗi khi gọi API gói dịch vụ:", error.response?.data || error.message);
+            }
+        };
+
+        const calculateShippingFee = async () => {
+            const serviceId = document.getElementById('serviceId').value;
+            const provinceId = document.getElementById('city').value;
+            const districtId = document.getElementById('district').value;
+            const wardCode = document.getElementById('ward').value;
+
+            let totalWeight = 0;
+            document.querySelectorAll('[id^="stock-"]').forEach(input => {
+                const weight = parseInt(input.dataset.weight) || 0;
+                totalWeight += weight;
+            });
+
+            // Cập nhật trọng lượng vào input #weight
+            const weightInput = document.getElementById('weight');
+            if (weightInput) {
+                weightInput.value = totalWeight;  // Gán totalWeight vào ô input
+            } else {
+                console.error("Không tìm thấy phần tử 'weight'.");
+            }
+
+            const subtotalElement = document.getElementById('subtotal');
+            const insuranceValue = parseInt(subtotalElement.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+            const shopDistrictId = 1805;
+            const length = 15;
+            const width = 15;
+            const height = 15;
+            const couponCode = null;
+
+            if (!serviceId || !provinceId || !districtId || !wardCode || totalWeight === 0) {
+                console.error("Vui lòng nhập đầy đủ thông tin để tính phí vận chuyển.");
+                return;
+            }
+
+            const payload = {
+                service_id: parseInt(serviceId),
+                insurance_value: insuranceValue,
+                coupon: couponCode,
+                to_province_id: parseInt(provinceId),
+                to_district_id: parseInt(districtId),
+                to_ward_code: wardCode,
+                weight: totalWeight,
+                length,
+                width,
+                height,
+                from_district_id: shopDistrictId,
+            };
+
+            try {
+                const response = await axios.post(
+                    `${GHN_API_URL}/v2/shipping-order/fee`,
+                    payload,
+                    { headers }
+                );
+
+                if (response.data.code === 200) {
+                    const shippingFee = response.data.data.total;
+
+                    // Cập nhật phí vận chuyển vào input
+                    const shippingFeeInput = document.getElementById('shippingFee');
+                    if (shippingFeeInput) {
+                        shippingFeeInput.value = `${shippingFee.toLocaleString()}₫`;
+                    } else {
+                        console.error("Không tìm thấy phần tử 'shippingFee'.");
+                    }
+
+                    // Tính tổng tiền và cập nhật
+                    let productPrice = 0;
+                    document.querySelectorAll('.column-5').forEach(totalPriceCell => {
+                        const priceText = totalPriceCell.textContent.replace(/\D/g, '');
+                        productPrice += parseInt(priceText) || 0;
+                    });
+                    const totalPrice = productPrice + shippingFee;
+
+                    const shipfeeAndTotalSpan = document.getElementById('shipfeeAndTotal');
+                    if (shipfeeAndTotalSpan) {
+                        shipfeeAndTotalSpan.textContent = `${totalPrice.toLocaleString()}₫`;
+                    } else {
+                        console.error("Không tìm thấy phần tử 'shipfeeAndTotal'.");
+                    }
+                } else {
+                    console.error("Lỗi khi tính phí ship:", response.data.message);
+                }
+            } catch (error) {
+                console.error("Chi tiết lỗi từ API:", error.response?.data || error.message);
+            }
+        };
+    </script>
+
 }

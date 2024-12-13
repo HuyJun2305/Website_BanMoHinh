@@ -6,6 +6,7 @@ namespace API.IRepositories
     public interface IProductRepos
     {
         Task<List<Product>> GetAllProduct();
+        Task<List<ProductSize>> GetAllProductSizes();
         Task<Product> GetProductById(Guid id);
         Task Create(Product product);
         Task Update(ProductDto productDto);

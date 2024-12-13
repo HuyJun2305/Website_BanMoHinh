@@ -29,6 +29,7 @@ namespace API.Data
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<ProductSize> ProductSizes { get; set; }
+        public DbSet<OrderAddress> OrderAddresses { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

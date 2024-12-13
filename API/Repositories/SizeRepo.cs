@@ -34,9 +34,13 @@ namespace API.Repositories
             return await _context.Sizes.FindAsync(id);
         }
 
-        public Task<List<Size>> GetSizeByProductId(Guid productId)
+        public async Task<List<Size>> GetSizeByProductId(Guid productId)
         {
-            throw new NotImplementedException();
+            var sizes = await _context.ProductSizes
+                                       .Where(ps => ps.ProductId == productId)
+                                       .Select(ps => ps.Size)
+                                       .ToListAsync();
+            return sizes;
         }
 
         public async Task<List<Size>> GetSizeByStatus()

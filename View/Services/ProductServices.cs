@@ -30,6 +30,13 @@ namespace View.Services
             return products;
         }
 
+        public async Task<IEnumerable<ProductSize>?> GetAllProductSizes()
+        {
+            var response = await _httpClient.GetStringAsync("https://localhost:7280/api/Products/ProductSize");
+            var products = JsonConvert.DeserializeObject<IEnumerable<ProductSize>>(response);
+            return products;
+        }
+
         public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? sizeId = null, Guid? imageId = null, Guid? brandId = null,Guid? categoryId = null, Guid? materialId = null)
         {
             //Xây dựng URL cho request

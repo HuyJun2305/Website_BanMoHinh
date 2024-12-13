@@ -12,6 +12,7 @@ namespace Data.Models
         public Guid Id { get; set; }
         public string Value { get; set; }
         public bool Status { get; set; }
+        public int Weight { get; set; }
         [JsonIgnore]
         public virtual ICollection<ProductSize>? ProductSizes { get; set; }
     }

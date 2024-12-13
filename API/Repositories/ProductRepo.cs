@@ -34,7 +34,6 @@ namespace API.Repositories
             await _context.Products.AddAsync(sp);
             await _context.SaveChangesAsync();
         }
-
         public async Task Delete(Guid productId, Guid? sizeId)
         {
             // Lấy sản phẩm theo productId và bao gồm cả ProductSizes
@@ -96,10 +95,10 @@ namespace API.Repositories
                 .Include(p => p.Images)
                 .Include(p => p.ProductSizes)
                  .ThenInclude(ps => ps.Size)
+                 .AsNoTracking()
                 .ToListAsync();
             return result;
         }
-
         public async Task<Product> GetProductById(Guid id)
         {
             return await _context.Products
@@ -114,7 +113,6 @@ namespace API.Repositories
         {
             await _context.SaveChangesAsync();
         }
-
         public async Task Update(ProductDto productDto)
         {
             // Lấy thông tin sản phẩm từ ProductDto
@@ -186,11 +184,9 @@ namespace API.Repositories
                 _context.ProductSizes.AddRange(productSizesToAdd);
             }
 
-            // Lưu thay đổi vào cơ sở dữ liệu
+            _context.Entry(existingProduct).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
-
-
         public async Task DistributeStockToProductSizesAsync(Guid productId, int totalStock, Dictionary<Guid, int> productSizesStock)
         {
             var product = await _context.Products
@@ -235,9 +231,6 @@ namespace API.Repositories
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
         }
-
-
-
         public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
         {
             var query = _context.Products
@@ -266,7 +259,6 @@ namespace API.Repositories
             }
             return await query.ToListAsync();
         }
-
         public async Task AddSize(Guid productId, Guid sizeId)
         {
             // Kiểm tra sản phẩm có tồn tại không
@@ -303,9 +295,10 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
         }
 
-
-
-
+        public async Task<List<ProductSize>> GetAllProductSizes()
+        {
+            return await _context.ProductSizes.Include(ps => ps.Size).ToListAsync();
+        }
     }
 
 }

@@ -3,7 +3,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace View.ViewModels
 {
+	public class ProductSizeViewModel
+	{
+		public Guid SizeId { get; set; }
+		public int Stock { get; set; }
+		public bool Selected { get; set; }
+		public string? Value { get; set; }
+	}
+	public class ProductIndexVM
+    {
+        
+        public IEnumerable<Category>? Categories { get; set; }
+        public IEnumerable<Brand>? Brands { get; set; }
+        public IEnumerable<Material>? Materials { get; set; }
+        public IEnumerable<Product>? Products { get; set; }
+        public IEnumerable<Image>? Images { get; set; }
+        public IEnumerable<ProductSizeViewModel>? Sizes { get; set; }
+        public Guid CartId { get; set; }
 
+
+    }
     public class ProductIndex
     {
         
@@ -14,6 +33,9 @@ namespace View.ViewModels
         public IEnumerable<Image>? Images { get; set; }
         public IEnumerable<Size>? Sizes { get; set; }
         public Guid CartId { get; set; }
+        public Guid SizeId { get; set; }
+        public int StockBySize { get; set; }
+
 
     }
     public class ProductDetailViewModel

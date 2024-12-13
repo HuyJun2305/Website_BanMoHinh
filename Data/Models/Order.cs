@@ -22,13 +22,14 @@ namespace Data.Models
 
         public decimal? AmountPaid { get; set; }             
         public decimal? Change { get; set; }
-
+        public decimal ShippingFee { get; set; }
         public Guid? AccountId { get; set; }
         public Guid? VoucherId { get; set; }
         [JsonIgnore]
         public virtual Voucher? Voucher { get; set; }
         public virtual ApplicationUser? Account { get; set; }
 		public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
+		public virtual OrderAddress? OrderAddresses { get; set; }
 
 
     }

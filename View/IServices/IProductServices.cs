@@ -7,6 +7,7 @@ namespace View.IServices
     public interface IProductServices
     {
         Task<IEnumerable<Product>> GetAllProduct();
+        Task<IEnumerable<ProductSize>> GetAllProductSizes();
         Task<Product> GetProductById(Guid id);
         Task Create(Product product);
         Task Update(ProductDto productUpdateDto);

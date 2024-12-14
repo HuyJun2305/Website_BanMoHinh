@@ -3,7 +3,7 @@ using Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace XuongTT_API.Model
+namespace API.Model
 {
     public static class ModelBuilderExtensions
     {

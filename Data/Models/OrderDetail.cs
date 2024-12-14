@@ -16,6 +16,12 @@ namespace Data.Models
         [JsonIgnore]
         public virtual Order? Order { get; set; }
         public Guid ProductId { get; set; }
+        [JsonIgnore]
         public virtual Product? Product { get; set; }
+        public Guid SizeId { get; set; }
+        [JsonIgnore]
+        public virtual ProductSize? ProductSize { get; set; }
+
     }
+
 }

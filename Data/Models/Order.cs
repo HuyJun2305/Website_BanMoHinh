@@ -22,7 +22,7 @@ namespace Data.Models
 
         public decimal? AmountPaid { get; set; }             
         public decimal? Change { get; set; }
-        public decimal ShippingFee { get; set; }
+        public decimal? ShippingFee { get; set; }
         public Guid? AccountId { get; set; }
         public Guid? VoucherId { get; set; }
         [JsonIgnore]

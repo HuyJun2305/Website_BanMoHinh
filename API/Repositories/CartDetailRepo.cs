@@ -185,20 +185,34 @@ namespace API.Repositories
 
 
 
-        public async Task CheckOut(List<Guid> cartDetailIds, decimal shippingFee, string city, string district, string ward, string addressDetail)
+        public async Task CheckOut(
+    List<Guid> cartDetailIds,
+    decimal shippingFee,
+    string city,
+    string district,
+    string ward,
+    string addressDetail)
         {
-            // Lấy thông tin CartDetails dựa trên các cartDetailIds
+            // Kiểm tra danh sách ID giỏ hàng
+            if (cartDetailIds == null || !cartDetailIds.Any())
+                throw new ArgumentException("CartDetailIds cannot be null or empty");
+
+            // Kiểm tra thông tin địa chỉ
+            if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) ||
+                string.IsNullOrWhiteSpace(ward) || string.IsNullOrWhiteSpace(addressDetail))
+                throw new ArgumentException("Address fields cannot be empty");
+
+            // Lấy thông tin CartDetails
             var cartDetails = await _context.CartDetails
                 .Include(cd => cd.Product)
+                .ThenInclude(p => p.ProductSizes)
                 .Where(cd => cartDetailIds.Contains(cd.Id))
                 .ToListAsync();
 
             if (cartDetails == null || !cartDetails.Any())
-            {
-                throw new KeyNotFoundException("No data found in cart details");
-            }
+                throw new KeyNotFoundException("No cart details found for the provided IDs");
 
-            // Kiểm tra thông tin giỏ hàng từ CartDetails (CartId được lấy từ cartDetails)
+            // Lấy thông tin giỏ hàng
             var cartId = cartDetails.First().CartId;
             var cart = await _context.Carts
                 .Include(c => c.Account)
@@ -206,13 +220,38 @@ namespace API.Repositories
                 .FirstOrDefaultAsync(c => c.Id == cartId);
 
             if (cart == null)
+                throw new KeyNotFoundException("Cart not found for the selected cart details");
+
+            // Tính tổng giá và kiểm tra số lượng sản phẩm
+            decimal totalPrice = 0;
+            foreach (var cartDetail in cartDetails)
             {
-                throw new KeyNotFoundException("No data found in the cart");
+                var product = cartDetail.Product;
+                if (product == null)
+                    throw new KeyNotFoundException($"Product with ID {cartDetail.ProductId} not found");
+
+                var productSize = product.ProductSizes?.FirstOrDefault(ps => ps.SizeId == cartDetail.SizeId);
+                if (productSize != null)
+                {
+                    if (productSize.Stock < cartDetail.Quatity)
+                        throw new InvalidOperationException(
+                            $"Not enough stock for product {product.Name} (Size: {productSize.Size?.Value}).");
+
+                    productSize.Stock -= cartDetail.Quatity;
+                    _context.Entry(productSize).State = EntityState.Modified;
+                }
+
+                if (product.Stock < cartDetail.Quatity)
+                    throw new InvalidOperationException($"Not enough stock for product {product.Name}");
+
+                product.Stock -= cartDetail.Quatity;
+                _context.Entry(product).State = EntityState.Modified;
+
+                totalPrice += cartDetail.Quatity * product.Price;
             }
 
-            decimal totalPrice = cartDetails.Sum(cd => cd.Quatity * cd.Product.Price);
-            decimal finalTotalPrice = totalPrice + shippingFee; // Thêm phí ship vào tổng giá trị đơn hàng
-            string customerName = cart.Account?.UserName ?? "Guest";
+            // Tính tổng giá cuối cùng (bao gồm phí ship)
+            decimal finalTotalPrice = totalPrice + shippingFee;
 
             // Tạo Order mới
             var newOrder = new Order
@@ -223,66 +262,46 @@ namespace API.Repositories
                 DayCreate = DateTime.Now,
                 Price = finalTotalPrice,
                 ShippingFee = shippingFee,
-                PaymentMethods = PaymentMethod.Cash, // Bạn có thể thay đổi phương thức thanh toán ở đây
+                PaymentMethods = PaymentMethod.Cash, // Điều chỉnh theo yêu cầu
                 Status = OrderStatus.ChoXacNhan,
-                CustomerName = customerName
+                CustomerName = cart.Account?.UserName ?? "Guest"
             };
 
             await _context.Orders.AddAsync(newOrder);
 
-            // Tạo danh sách OrderDetail (gộp các sản phẩm cùng ProductId)
-            var orderDetails = cartDetails
-                .GroupBy(cd => cd.ProductId)
-                .Select(g => new OrderDetail
-                {
-                    Id = Guid.NewGuid(),
-                    OrderId = newOrder.Id,
-                    ProductId = g.Key,
-                    Quatity = g.Sum(cd => cd.Quatity),
-                    TotalPrice = g.Sum(cd => cd.Quatity * cd.Product.Price)
-                })
-                .ToList();
+            // Tạo OrderDetails
+            var orderDetails = cartDetails.Select(cd => new OrderDetail
+            {
+                Id = Guid.NewGuid(),
+                OrderId = newOrder.Id,
+                ProductId = cd.ProductId,
+                SizeId = cd.SizeId,
+                Quatity = cd.Quatity,
+                TotalPrice = cd.Quatity * cd.Product.Price
+            }).ToList();
 
             await _context.OrderDetails.AddRangeAsync(orderDetails);
 
-            // Cập nhật lại số lượng kho trong ProductSize (giảm số lượng theo CartDetail)
-            foreach (var cartDetail in cartDetails)
-            {
-                var productSize = cartDetail.Product.ProductSizes
-                    .FirstOrDefault(ps => ps.SizeId == cartDetail.SizeId);
-
-                if (productSize != null)
-                {
-                    productSize.Stock -= cartDetail.Quatity;
-                    _context.Entry(productSize).State = EntityState.Modified;
-                }
-
-                if (cartDetail.Product != null)
-                {
-                    cartDetail.Product.Stock -= cartDetail.Quatity;
-                    _context.Entry(cartDetail.Product).State = EntityState.Modified;
-                }
-            }
-
-            // Xóa CartDetail đã được checkout
+            // Xóa CartDetails đã checkout
             _context.CartDetails.RemoveRange(cartDetails);
 
             // Tạo OrderAddress
             var orderAddress = new OrderAddress
             {
                 Id = Guid.NewGuid(),
+                OrderId = newOrder.Id,
                 City = city,
                 District = district,
                 Ward = ward,
-                AddressDetail = addressDetail,
-                OrderId = newOrder.Id // Liên kết với Order đã tạo
+                AddressDetail = addressDetail
             };
 
             await _context.OrderAddresses.AddAsync(orderAddress);
 
-            // Lưu thay đổi vào cơ sở dữ liệu
+            // Lưu thay đổi
             await _context.SaveChangesAsync();
         }
+
 
 
 

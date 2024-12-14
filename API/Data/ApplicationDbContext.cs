@@ -1,15 +1,14 @@
-﻿using Data.Models;
+﻿using API.Model;
+using Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
-using XuongTT_API.Model;
 
 namespace API.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
-        
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -22,7 +21,7 @@ namespace API.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Material> Materials { get; set; }
-        public DbSet<Order> Orders { get; set; }    
+        public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
@@ -39,7 +38,7 @@ namespace API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Seed();
+            //modelBuilder.Seed();
 
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Product>()
@@ -54,6 +53,10 @@ namespace API.Data
 
             modelBuilder.Entity<ProductSize>()
                 .HasKey(ps => new { ps.ProductId, ps.SizeId });
+
+
+           
+
         }
     }
 }

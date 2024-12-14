@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel;
-using XuongTT_API.Model;
 
-namespace XuongTT_API.Controllers
+namespace API.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]

@@ -48,6 +48,8 @@ builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IOrderRepo, OrderRepo>();
 //orderDetail
 builder.Services.AddScoped<IOrderDetailRepo, OrderDetailRepo>();
+//orderAddress
+builder.Services.AddScoped<IOrderAddressRepo, OrderAddressRepo>();
 
 // Add services to the container.
 

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Data;
 using Data.Models;
-using API.Repositories;
+using API.IRepositories;
 
 namespace API.Controllers
 {
@@ -15,9 +15,9 @@ namespace API.Controllers
     [ApiController]
     public class OrderAddressesController : ControllerBase
     {
-        private readonly OrderAddressRepo _repo;
+        private readonly IOrderAddressRepo _repo;
 
-        public OrderAddressesController(OrderAddressRepo repo)
+        public OrderAddressesController(IOrderAddressRepo repo)
         {
             _repo = repo;
         }
@@ -27,16 +27,15 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderAddress>>> GetOrderAddresses()
         {
-            await _repo.GetAllOrderAddress();
-            return Ok();
+            return await _repo.GetAllOrderAddress();
         }
 
         // GET: api/OrderAddresses/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderAddress>> GetOrderAddress(Guid id)
         {
-          await _repo.GetOrderAddressById(id);
-            return Ok();
+            return await _repo.GetOrderAddressById(id);
+            
         }
         [HttpGet("{orderId}")]
         public async Task<ActionResult<OrderAddress>> GetOrderAddressByOrderId(Guid orderId)

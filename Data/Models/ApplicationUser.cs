@@ -20,6 +20,7 @@ namespace Data.Models
         [JsonIgnore]
         public virtual ICollection<Address>? Addresses { get; set; }
 		public virtual Cart Cart { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Order>? Orders { get; set; }
     }
 }

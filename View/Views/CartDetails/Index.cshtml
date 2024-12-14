@@ -427,7 +427,91 @@
 
 
 @section Scripts{
+    <!--Phần get địa chỉ từ client và checkout-->
+    <script>
+        function getAddressInfo() {
+            // Lấy thông tin từ các trường trong form
+            const citySelect = document.getElementById('city');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            const addressDetail = document.getElementById('addressDetail')?.value;
 
+            // Lấy text từ các select (thành phố, quận/huyện, phường/xã)
+            const cityText = citySelect.options[citySelect.selectedIndex]?.text;
+            const districtText = districtSelect?.options[districtSelect.selectedIndex]?.text || '';
+            const wardText = wardSelect?.options[wardSelect.selectedIndex]?.text || '';
+
+            // Kiểm tra các giá trị bắt buộc
+            if (!cityText || !districtText || !wardText || !addressDetail) {
+                alert('Vui lòng nhập đầy đủ thông tin địa chỉ.');
+                return null; // Trả về null nếu thiếu thông tin
+            }
+
+            // Trả về thông tin địa chỉ dưới dạng text
+            return {
+                city: cityText,        // Tên của thành phố
+                district: districtText, // Tên của quận/huyện
+                ward: wardText,         // Tên của phường/xã
+                addressDetail: addressDetail // Chi tiết địa chỉ
+            };
+        }
+        async function checkout() {
+            // Lấy danh sách các cartDetailId được chọn
+            const checkedItems = Array.from(document.querySelectorAll('.checkbox-item:checked'));
+            const cartDetailIds = checkedItems.map(item => item.getAttribute('data-cart-detail-id'));
+
+            if (cartDetailIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
+                return;
+            }
+
+            // Lấy phí giao hàng và thông tin địa chỉ
+            const shippingFee = parseFloat(document.getElementById('shippingFee')?.value) || 0;
+            const { city, district, ward, addressDetail } = getAddressInfo();
+
+            if (!city || !district || !ward || !addressDetail) {
+                alert('Vui lòng nhập đầy đủ thông tin địa chỉ.');
+                return;
+            }
+
+            // Tạo URL với các tham số cần thiết
+            const url = `https://localhost:7280/api/CartDetail/CheckOut?shippingFee=${shippingFee}&city=${encodeURIComponent(city)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}&addressDetail=${encodeURIComponent(addressDetail)}`;
+
+            // Tạo body JSON cho cartDetailIds
+            const jsonBody = JSON.stringify(cartDetailIds);
+            console.log(jsonBody);
+
+            // Gửi yêu cầu đến server
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: jsonBody // Gửi cartDetailIds dưới dạng body
+                });
+
+                if (response.ok) {
+                    alert('Thanh toán thành công!');
+                    location.reload(); // Tải lại trang hoặc điều hướng đến trang khác
+                } else {
+                    const error = await response.json();
+                    alert(`Lỗi thanh toán: ${error.message}`);
+                }
+            } catch (error) {
+                console.error('Lỗi khi thanh toán:', error);
+                alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+            }
+        }
+
+
+        // Gán sự kiện onclick cho nút thanh toán
+        document.getElementById('checkoutButton').addEventListener('click', async function () {
+            await checkout();
+        });
+
+
+    </script>
 
 
     <!--Phần select checkbox-->

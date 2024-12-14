@@ -1,4 +1,5 @@
 ﻿@using Data.Models
+@using System.ComponentModel.DataAnnotations
 @using View.Utilities.Extensions
 @model View.ViewModels.OrderIndexViewModel
 
@@ -12,7 +13,7 @@
         @foreach (var status in Model.OrdersByStatus.Keys)
         {
             <li class="nav-item">
-                <a class="nav-link @((status == OrderStatus.TaoDonHang) ? "active" : "")" id="tab-@status" data-bs-toggle="tab" href="#status-@status">
+                <a class="nav-link @((status == OrderStatus.ChoXacNhan) ? "active" : "")" id="tab-@status" data-bs-toggle="tab" href="#status-@status">
                     @Enum.GetName(typeof(OrderStatus), status)
                 </a>
             </li>
@@ -22,28 +23,71 @@
     <div class="tab-content">
         @foreach (var status in Model.OrdersByStatus.Keys)
         {
-            <div class="tab-pane fade @((status == OrderStatus.TaoDonHang) ? "show active" : "")" id="status-@status">
-                <h5>@Enum.GetName(typeof(OrderStatus), status)</h5>
-
+            <div class="tab-pane fade @((status == OrderStatus.ChoXacNhan) ? "show active" : "")" id="status-@status">
                 <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">Order ID</th>
                             <th scope="col">Customer Name</th>
+                            <th scope="col">Customer PhoneNumber</th>
                             <th scope="col">Price</th>
                             <th scope="col">Payment Method</th>
+                            <th scope="col">Payment Status</th>
                             <th scope="col">Created On</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Note</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var order in Model.OrdersByStatus[status])
+                        @if (Model.OrdersByStatus.ContainsKey(status))
+                        {
+                            foreach (var order in Model.OrdersByStatus[status])
+                            {
+                                <tr>
+                                    <td>@order.OrderId</td>
+                                    <td>@order.CustomerName</td>
+                                    <td>@order.PhoneNumber</td>
+                                    <td>@order.Price</td>
+                                    <td>@Enum.GetName(typeof(PaymentMethod), order.PaymentMethods)</td>
+                                    <td>@Enum.GetName(typeof(PaymentStatus), order.PaymentStatus)</td>
+                                    <td>@order.DayCreate</td>
+                                    <td>
+                                        <div class="d-flex justify-content-start">
+                                            @if (status == OrderStatus.ChoXacNhan) // "Chờ xác nhận"
+                                            {
+                                                <button class="btn btn-success me-2" style="border-radius: 10px; font-size: 16px;">Accept</button>
+                                                <button class="btn btn-danger" style="border-radius: 10px; font-size: 16px;">Cancel</button>
+                                            }
+                                            else if (status == OrderStatus.ChuanBiDonHang) // "Đang chuẩn bị"
+                                            {
+                                            <button class="btn btn-primary me-2" style="border-radius: 10px; font-size: 16px;">Delivery</button>
+                                            <button class="btn btn-danger" style="border-radius: 10px; font-size: 16px;">Cancel</button>
+                                            }
+                                            else if (status == OrderStatus.DaGiaoHang) // "Đã giao"
+                                            {
+                                            <button class="btn btn-info me-2" style="border-radius: 10px; font-size: 16px;">Reorder</button>
+                                            }
+                                            else if (status == OrderStatus.DaGiaoHang) // "Đã giao"
+                                            {
+                                            <button class="btn btn-info me-2" style="border-radius: 10px; font-size: 16px;">Reorder</button>
+                                            }
+                                            else if (status == OrderStatus.DaHuy) // "Đã hủy"
+                                            {
+                                             <button class="btn btn-info me-2" style="border-radius: 10px; font-size: 16px;">Reorder</button>
+
+                                            }
+                                        </div>
+
+                                    </td>
+                                    <td>@order.Note</td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@order.OrderId</td>
-                                <td>@order.CustomerName</td>
-                                <td>@order.Price</td>
-                                <td>@Enum.GetName(typeof(PaymentMethod), order.PaymentMethods)</td>
-                                <td>@order.DayCreate</td>
+                                <td colspan="7" class="text-center">No orders for this status.</td>
                             </tr>
                         }
                     </tbody>
@@ -52,3 +96,13 @@
         }
     </div>
 </div>
+
+@functions {
+    // Phương thức để lấy DisplayName từ Enum
+    public string GetEnumDisplayName(Enum value)
+    {
+        var field = value.GetType().GetField(value.ToString());
+        var attribute = (DisplayAttribute)Attribute.GetCustomAttribute(field, typeof(DisplayAttribute));
+        return attribute != null ? attribute.Name : value.ToString();
+    }
+}

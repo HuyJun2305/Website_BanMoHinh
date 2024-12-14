@@ -33,17 +33,17 @@ namespace View.Services
 
 		}
 
-		public async Task<List<Order>> GetAllOrder()
+		public async Task<IEnumerable<Order>> GetAllOrder()
 		{
 			var response = await _client.GetStringAsync("https://localhost:7280/api/Orders/GetAllOrder");
 			var result = JsonConvert.DeserializeObject<List<Order>>(response);
 			return result;
 		}
 
-        public async Task<List<Order>> GetAllOrderStatus0()
+        public async Task<IEnumerable<Order>> GetAllOrderStatus0()
         {
             var response = await _client.GetStringAsync("https://localhost:7280/api/Orders/GetOrderStatus0");
-            var result = JsonConvert.DeserializeObject<List<Order>>(response);
+            var result = JsonConvert.DeserializeObject<IEnumerable<Order>>(response);
             return result;
         }
 
@@ -54,10 +54,24 @@ namespace View.Services
 			return result;
 		}
 
-        public async Task<List<Order>> GetOrdersByStatus(OrderStatus status)
+        public async Task<IEnumerable<Order>> GetOrdersByCustomerId(Guid customerId)
+        {
+            var response = await _client.GetStringAsync($"https://localhost:7280/api/Orders/GetOrderByCustomerId?customerId={customerId}");
+            var result = JsonConvert.DeserializeObject<IEnumerable<Order>>(response);
+            return result;
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByCustomerIdAndStatus(Guid customerId, OrderStatus status)
+        {
+            var response = await _client.GetStringAsync($"https://localhost:7280/api/Orders/GetOrderByCustomerId?customerId={customerId}&status{status}");
+            var result = JsonConvert.DeserializeObject<IEnumerable<Order>>(response);
+            return result;
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByStatus(OrderStatus status)
         {
             var response = await _client.GetStringAsync($"https://localhost:7280/api/Orders/GetOrdersByStatus?status={status}");
-            var result = JsonConvert.DeserializeObject<List<Order>>(response);
+            var result = JsonConvert.DeserializeObject<IEnumerable<Order>>(response);
             return result;
         }
 
@@ -65,5 +79,6 @@ namespace View.Services
 		{
 			throw new NotImplementedException();
 		}
-	}
+
+    }
 }

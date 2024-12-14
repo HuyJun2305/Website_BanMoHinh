@@ -12,9 +12,12 @@ namespace Data.Models
     {
         public Guid Id { get; set; }
         public DateTime DayCreate { get; set; }
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
 		public PaymentMethod PaymentMethods { get; set; } = PaymentMethod.Cash;
-		public OrderStatus Status { get; set; } = OrderStatus.TaoDonHang;
+		public OrderStatus Status { get; set; } = OrderStatus.ChoXacNhan;
+		public PaymentStatus PaymentStatus {  get; set; }	
+
+		public string Note { get; set; }
 
 		public Guid CreateBy { get; set; }
         public DateTime? DayPayment { get; set; }
@@ -50,8 +53,6 @@ namespace Data.Models
 
 	public enum OrderStatus
 	{
-		[Display(Name = "Tạo đơn hàng")]
-		TaoDonHang = 0,
 		[Display(Name = "Chờ xác nhận")]	
 		ChoXacNhan = 1,
 		[Display(Name = "Chuẩn bị đơn hàng")]
@@ -69,6 +70,27 @@ namespace Data.Models
 		[Display(Name = "Mất hàng")]
 		MatHang = 7,
 		[Display(Name = "Hoàn trả")]
-		HoanTra = 8
-	}
+		HoanTra = 8,
+        [Display(Name = "Sai thông tin địa chỉ")]
+        SaiThongTinDiaChi = 9,
+        [Display(Name = "Nhân viên giao hàng bị tai nạn giao thông")]
+        TaiNanGiaoThong = 10
+
+    }
+
+	public enum PaymentStatus
+	{
+		[Display(Name = "Chờ thanh toán")]
+		Pending,
+        [Display(Name = "Bên giao hàng đang tạm ứng")]
+        Advance,
+        [Display(Name = "Đã thanh toán")]
+        Paid,
+        [Display(Name = "Thanh toán thất bại")]
+        Failed,
+        [Display(Name = "Thanh toán đang xử lý")]
+        Processing,
+        [Display(Name = "Hoàn tiền")]
+        Refunded
+    }
 }

@@ -1,0 +1,245 @@
+﻿@using Data.Models
+@using View.Utilities.Extensions
+@model View.ViewModels.OrderVM
+@using System.ComponentModel.DataAnnotations
+
+@{
+    ViewData["Title"] = "Track Your Orders";
+    Layout = "_LayoutCustomer";
+
+    // Lấy danh sách các trạng thái đơn hàng từ enum OrderStatus
+    var orderStatuses = Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>().ToList();
+}
+
+<div class="order-status-filter container mt-5">
+    <h2 class="text-center mb-4">Track Your Orders</h2>
+
+    <!-- Nav Bar for Order Status -->
+    <div class="status-nav mb-4">
+        <ul class="nav nav-pills justify-content-center">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="filterOrders('')">All Orders</a>
+            </li>
+            @foreach (var status in orderStatuses)
+            {
+                // Lấy Display Name từ enum
+                var displayName = GetEnumDisplayName(status);
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="filterOrders('@status')">@displayName</a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Orders Container -->
+    <div id="ordersContainer">
+        @foreach (var status in orderStatuses)
+        {
+            var ordersInStatus = Model.OrdersByStatus.ContainsKey(status) ? Model.OrdersByStatus[status] : new List<Order>();
+            if (ordersInStatus.Any())
+            {
+                <div class="order-status-group" id="status_@status" style="display:none;">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <ul class="list-group">
+                                @foreach (var order in ordersInStatus)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Order ID:</strong> @order.Id <br />
+                                            <strong>Order Date:</strong> @order.DayCreate <br />
+                                            <strong>Total:</strong> @order.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-info btn-sm" onclick="viewOrderDetails(@order.Id)">View Details</button>
+                                            <button class="btn btn-danger btn-sm" onclick="cancelOrder(@order.Id)">Cancel Order</button>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+
+</div>
+@section Styles {
+    <style>
+        /* Thêm khoảng cách và bóng cho thẻ card */
+        .card {
+            margin-bottom: 20px;
+            border-radius: 8px; /* Bo góc các thẻ card */
+            border: none; /* Bỏ viền ngoài thẻ card */
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Các item trong list-group */
+        .list-group-item {
+            margin-bottom: 15px; /* Tạo khoảng cách giữa các mục */
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+            /* Hover hiệu ứng cho item trong list-group */
+            .list-group-item:hover {
+                background-color: #e9ecef;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+        /* Nút View Details */
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+            /* Thay đổi màu của nút khi hover */
+            .btn-info:hover {
+                background-color: #138496;
+                border-color: #117a8b;
+            }
+
+        /* Đảm bảo các nút vừa vặn trong item */
+        .list-group-item .btn {
+            margin-left: 15px;
+        }
+
+        /* Navigation bar styling */
+        .status-nav {
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Navigation bar styling */
+        .status-nav {
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+            /* Pills style for navigation links */
+            .status-nav .nav-pills {
+                background-color: #e9ecef;
+                border-radius: 30px;
+                padding: 5px 20px;
+            }
+
+                .status-nav .nav-pills .nav-link {
+                    border-radius: 30px;
+                    font-weight: bold;
+                    color: #333;
+                    text-transform: uppercase;
+                    padding: 10px 20px;
+                    margin-right: 10px;
+                    background-color: transparent;
+                    position: relative;
+                    transition: background-color 0.3s ease, color 0.3s ease;
+                }
+
+                    /* Hover effect for nav links */
+                    .status-nav .nav-pills .nav-link:hover {
+                        background-color: #c6e0f5;
+                        color: #0056b3;
+                    }
+
+                    /* Active state for nav link */
+                    .status-nav .nav-pills .nav-link.active {
+                        background-color: #007bff;
+                        color: white;
+                        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+                    }
+
+                        /* Styles for active state link hover */
+                        .status-nav .nav-pills .nav-link.active::after {
+                            content: "";
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0, 123, 255, 0.2);
+                            border-radius: 30px;
+                            transform: translateY(-50%);
+                            z-index: -1;
+                        }
+
+                    /* Focus style for links */
+                    .status-nav .nav-pills .nav-link:focus {
+                        background-color: #007bff;
+                        color: white;
+                        outline: none;
+                        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Giữ shadow khi focus */
+                    }
+
+                    /* Remove focus style when clicking away */
+                    .status-nav .nav-pills .nav-link:not(:focus) {
+                        background-color: transparent;
+                        box-shadow: none; /* Loại bỏ bóng khi không focus */
+                    }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Hàm lọc đơn hàng theo trạng thái
+        function filterOrders(status) {
+            // Ẩn tất cả các nhóm trạng thái đơn hàng
+            document.querySelectorAll('.order-status-group').forEach(function (group) {
+                group.style.display = 'none';
+            });
+
+            // Nếu trạng thái không phải 'All Orders', chỉ hiển thị nhóm đơn hàng có trạng thái đó
+            if (status) {
+                document.getElementById('status_' + status).style.display = 'block';
+            } else {
+                // Hiển thị tất cả các đơn hàng nếu chọn 'All Orders'
+                document.querySelectorAll('.order-status-group').forEach(function (group) {
+                    group.style.display = 'block';
+                });
+            }
+
+            // Cập nhật trạng thái active cho các nav link
+            document.querySelectorAll('.nav-link').forEach(function (link) {
+                link.classList.remove('active');
+            });
+
+            // Set active class cho liên kết đã chọn
+            var selectedLink = status ? document.querySelector(`a[href='#'][onclick='filterOrders("${status}")']`) : document.querySelector("a[href='#'][onclick='filterOrders(\"\")']");
+            if (selectedLink) {
+                selectedLink.classList.add('active');
+            }
+        }
+
+        // Chạy filter ban đầu nếu có trạng thái được chọn
+        document.addEventListener('DOMContentLoaded', function () {
+            var selectedStatus = document.querySelector('.nav-link.active').getAttribute('onclick').split('"')[1];
+            filterOrders(selectedStatus);
+        });
+    </script>
+}
+
+@functions {
+    public string GetEnumDisplayName(OrderStatus status)
+    {
+        var fieldInfo = status.GetType().GetField(status.ToString());
+        var attribute = (DisplayAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(DisplayAttribute));
+        return attribute?.Name ?? status.ToString();
+    }
+}

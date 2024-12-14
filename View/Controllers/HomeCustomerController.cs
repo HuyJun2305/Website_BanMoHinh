@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using View.IServices;
@@ -18,25 +19,29 @@ namespace View.Controllers
 		private readonly IImageServices _imageServices;
 		private readonly IAuthenticationService _authenticationService;
 		private readonly ICartServices _cartServices;
-		public HomeCustomerController(IProductServices productServices, ISizeServices sizeServices,
-			IBrandServices brandServices, IMaterialServices materialServices, IImageServices imageServices, ICartServices cartServices)
-		{
-			_productServices = productServices;
-			_sizeServices = sizeServices;
-			_brandServices = brandServices;
-			_materialServices = materialServices;
-			_imageServices = imageServices;
-			_cartServices = cartServices;
-		}
-		public IActionResult Index()
+		private readonly IOrderDetailServices _orderDetailServices;
+		private readonly IOrderServices _orderServices;
+
+        public HomeCustomerController(IProductServices productServices, ISizeServices sizeServices,
+            IBrandServices brandServices, IMaterialServices materialServices, IImageServices imageServices,
+			ICartServices cartServices, IOrderServices orderServices, IOrderDetailServices orderDetailServices)
+        {
+            _productServices = productServices;
+            _sizeServices = sizeServices;
+            _brandServices = brandServices;
+            _materialServices = materialServices;
+            _imageServices = imageServices;
+            _cartServices = cartServices;
+            _orderServices = orderServices;
+            _orderDetailServices = orderDetailServices;
+        }
+        public IActionResult Index()
 		{
 			var username = HttpContext.Session.GetString("username");
 			ViewBag.Username = username;
 
 			return View();
 		}
-
-
 		public IActionResult ViewProducts()
 		{
 			var products = _productServices.GetAllProduct().Result;
@@ -76,7 +81,32 @@ namespace View.Controllers
 			return Guid.Empty; // Nếu không lấy được userId, trả về Guid.Empty
 		}
 
-		public async Task<IActionResult> ViewProductDetails(Guid id)
+        public async Task<IActionResult> TrackOrder()
+        {
+            var userId = GetUserIdFromJwtInSession();
+            if (userId == Guid.Empty)
+            {
+                return RedirectToAction("Login", "Authenticator");
+            }
+
+            var orders = await _orderServices.GetOrdersByCustomerId(userId);
+
+            // Phân loại đơn hàng theo trạng thái
+            var ordersByStatus = orders
+                .GroupBy(o => o.Status)
+                .ToDictionary(g => g.Key, g => g.AsEnumerable());
+
+            var orderData = new OrderVM
+            {
+                Orders = orders,
+                OrdersByStatus = ordersByStatus
+            };
+
+            return View(orderData);
+        }
+
+
+        public async Task<IActionResult> ViewProductDetails(Guid id)
 		{
 			// Lấy userId từ JWT trong session
 			var userId = GetUserIdFromJwtInSession();
@@ -127,7 +157,6 @@ namespace View.Controllers
 
 			return View(productDetailData);
 		}
-
 		private Guid GetUserId()
 		{
 			if (HttpContext.User.Identity.IsAuthenticated)

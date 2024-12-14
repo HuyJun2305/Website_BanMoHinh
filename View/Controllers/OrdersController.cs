@@ -55,8 +55,13 @@ namespace View.Controllers
                     CustomerName = o.CustomerName,
                     Price = o.Price,
                     PaymentMethods = o.PaymentMethods,
+                    PaymentStatus = o.PaymentStatus,
                     DayCreate = o.DayCreate,
-                    Status = o.Status
+                    Status = o.Status,
+                    Note = o.Note,
+                    PhoneNumber = o.Account.PhoneNumber
+                    
+                    
                 });
 
                 ordersByStatus[status] = orderViewModels;

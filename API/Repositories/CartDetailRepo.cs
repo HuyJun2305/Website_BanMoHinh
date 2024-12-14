@@ -202,58 +202,30 @@ namespace API.Repositories
                 string.IsNullOrWhiteSpace(ward) || string.IsNullOrWhiteSpace(addressDetail))
                 throw new ArgumentException("Address fields cannot be empty");
 
-            // Lấy thông tin CartDetails
+            // Lấy thông tin CartDetails với sản phẩm
             var cartDetails = await _context.CartDetails
-                .Include(cd => cd.Product)
-                .ThenInclude(p => p.ProductSizes)
                 .Where(cd => cartDetailIds.Contains(cd.Id))
+                .Include(cd => cd.Product) 
+                .ThenInclude(p => p.ProductSizes).AsNoTracking()
                 .ToListAsync();
 
-            if (cartDetails == null || !cartDetails.Any())
+            if (!cartDetails.Any())
                 throw new KeyNotFoundException("No cart details found for the provided IDs");
 
             // Lấy thông tin giỏ hàng
             var cartId = cartDetails.First().CartId;
             var cart = await _context.Carts
-                .Include(c => c.Account)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == cartId);
+                .Where(c => c.Id == cartId)
+                .FirstOrDefaultAsync();
 
             if (cart == null)
                 throw new KeyNotFoundException("Cart not found for the selected cart details");
 
-            // Tính tổng giá và kiểm tra số lượng sản phẩm
-            decimal totalPrice = 0;
-            foreach (var cartDetail in cartDetails)
-            {
-                var product = cartDetail.Product;
-                if (product == null)
-                    throw new KeyNotFoundException($"Product with ID {cartDetail.ProductId} not found");
+            decimal totalPrice = cartDetails.Sum(cd => cd.Quatity * cd.Product.Price);
 
-                var productSize = product.ProductSizes?.FirstOrDefault(ps => ps.SizeId == cartDetail.SizeId);
-                if (productSize != null)
-                {
-                    if (productSize.Stock < cartDetail.Quatity)
-                        throw new InvalidOperationException(
-                            $"Not enough stock for product {product.Name} (Size: {productSize.Size?.Value}).");
 
-                    productSize.Stock -= cartDetail.Quatity;
-                    _context.Entry(productSize).State = EntityState.Modified;
-                }
-
-                if (product.Stock < cartDetail.Quatity)
-                    throw new InvalidOperationException($"Not enough stock for product {product.Name}");
-
-                product.Stock -= cartDetail.Quatity;
-                _context.Entry(product).State = EntityState.Modified;
-
-                totalPrice += cartDetail.Quatity * product.Price;
-            }
-
-            // Tính tổng giá cuối cùng (bao gồm phí ship)
             decimal finalTotalPrice = totalPrice + shippingFee;
 
-            // Tạo Order mới
             var newOrder = new Order
             {
                 Id = Guid.NewGuid(),
@@ -274,18 +246,15 @@ namespace API.Repositories
             {
                 Id = Guid.NewGuid(),
                 OrderId = newOrder.Id,
-                ProductId = cd.ProductId,
+                ProductId = cd.Product.Id, // Sử dụng Product.Id thay vì ProductId
                 SizeId = cd.SizeId,
                 Quatity = cd.Quatity,
                 TotalPrice = cd.Quatity * cd.Product.Price
             }).ToList();
 
             await _context.OrderDetails.AddRangeAsync(orderDetails);
-
-            // Xóa CartDetails đã checkout
             _context.CartDetails.RemoveRange(cartDetails);
 
-            // Tạo OrderAddress
             var orderAddress = new OrderAddress
             {
                 Id = Guid.NewGuid(),
@@ -298,9 +267,11 @@ namespace API.Repositories
 
             await _context.OrderAddresses.AddAsync(orderAddress);
 
-            // Lưu thay đổi
             await _context.SaveChangesAsync();
         }
+
+
+
 
 
 

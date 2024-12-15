@@ -40,10 +40,12 @@ namespace API.Repositories
 
         public async Task<Cart> GetCartById(Guid id)
         {
-            return await _context.Carts.Include(p => p.Account).FirstOrDefaultAsync();
+            return await _context.Carts.Include(p => p.Account)
+                .Where(c => c.AccountId == id)
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<Cart?> GetCartByUserId(Guid userId)
+        public async Task<Cart> GetCartByUserId(Guid userId)
         {
             // Lấy thông tin người dùng
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -55,6 +57,7 @@ namespace API.Repositories
 
             // Nếu là "Customer", lấy giỏ hàng
             return await _context.Carts
+                .Include(c => c.CartDetails).ThenInclude(x => x.Product).ThenInclude(i => i.Images)
                 .Include(c => c.Account)
                 .Where(c => c.AccountId == userId)
                 .FirstOrDefaultAsync();

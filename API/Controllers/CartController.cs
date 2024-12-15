@@ -3,20 +3,23 @@ using API.Repositories;
 using Data.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
-    {
+	{
         private readonly ICartRepo _cartRepo;
-
-        public CartController(ICartRepo cartRepo)
-        {
-           _cartRepo = cartRepo;
-        }
-        [HttpGet]
+		private readonly ILogger<CartController> _logger;
+		public CartController(ICartRepo cartRepo, ILogger<CartController> logger)
+		{
+			_cartRepo = cartRepo;
+			_logger = logger;
+		}
+		[HttpGet]
         public async Task<ActionResult<IEnumerable<Cart>>> GetCart()
         {
             try
@@ -98,6 +101,39 @@ namespace API.Controllers
             }
             return NoContent();
         }
-        
+        [HttpGet("GetCartForLayout")]
+        public async Task<IActionResult> GetCartByForLayout()
+        {
+			// Lấy userId từ Claims
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized();
+            }
+
+            // Lấy giỏ hàng
+            var cart = await _cartRepo.GetCartByUserId(userGuid);
+            if (cart == null)
+            {
+                return Ok(new { Items = new List<object>(), Total = 0 });
+            }
+
+            // Tạo kết quả trả về
+            var result = new
+            {
+                Items = cart.CartDetails.Select(ci => new
+                {
+                    ci.Product.Name,
+                    ImageUrl = ci.Product.Images.FirstOrDefault()?.URL ?? "default-image-url",
+                    ci.Quatity,
+                    Price = ci.Product.Price * ci.Quatity
+                }),
+                Total = cart.CartDetails.Sum(ci => ci.Product.Price * ci.Quatity)
+            };
+
+            return Ok(result);
+        }
+
+
     }
 }

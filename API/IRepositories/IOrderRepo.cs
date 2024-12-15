@@ -20,10 +20,14 @@ namespace API.IRepositories
         Task CancelOrder(Guid orderId, string? note);
         Task DeliveryOrder(Guid orderId, string? note);
         Task ConplateOrder(Guid orderId, string? note);
+        Task PaidOrder(Guid orderId, string? note);
         Task RefundOrder(Guid orderId, string? note);
         Task ShippingError(Guid orderId, string? note);
         Task MissingInformation(Guid orderId, string? note);  
-        Task LoseOrder(Guid orderId, string? note);   
+        Task LoseOrder(Guid orderId, string? note);
+        Task Accident(Guid orderId, string? note);
 
+        Task AcceptRefund(Guid orderId, string? note);
+        Task RefundByCustomer(Guid orderId, Guid customerId, string note);
     }
 }

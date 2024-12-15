@@ -146,7 +146,6 @@
                         <div class="size-209">
                             <span class="mtext-110 cl2" id="subtotal">
                                 0đ
-                                <input type="hidden" id="total-weight" />
                             </span>
                         </div>
                     </div>
@@ -198,11 +197,13 @@
                             
                                 <div>
                                     <label for="weight">Trọng lượng hàng (gram):</label>
-                                    <input type="number" id="weight" class="form-control" disabled />
+                                    <input type="hidden" id="weight" class="form-control" disabled />
+                                    <input type="number" id="total-weight" class="form-control" disabled />
                                 </div>
                             
                                 <div>
                                     <label for="serviceId">Dịch vụ giao hàng:</label>
+                                    <label > <p> Hàng nhẹ <= 20000  Hàng nặng > 20000</></p>    </label>
                                     <select id="serviceId" class="form-control">
                                         <option value="">Chọn gói dịch vụ</option> <!-- Mặc định có một lựa chọn ban đầu -->
                                     </select>
@@ -512,8 +513,6 @@
 
 
     </script>
-
-
     <!--Phần select checkbox-->
     <script>
         // Lắng nghe sự kiện click của checkbox "select-all"
@@ -556,11 +555,8 @@
                     console.log(quantity, pricePerUnit, weight, quantity)
                     // Kiểm tra nếu các giá trị là hợp lệ (không phải NaN)
                     if (!isNaN(quantity) && !isNaN(pricePerUnit) && !isNaN(weight)) {
-                        // Tính tổng tiền và tổng khối lượng
                         totalPrice += pricePerUnit * quantity;
                         totalWeight += weight * quantity;
-                        console.log(totalPrice, totalWeight);
-                        // Đánh dấu rằng có thay đổi
                         isUpdated = true;
 
                         // Cập nhật giá trị tổng tiền cho từng sản phẩm
@@ -580,24 +576,9 @@
 
             // Cập nhật tổng khối lượng vào phần tử "total-weight"
             if (!isNaN(totalWeight)) {
-                $("#total-weight").val(totalWeight.toFixed(2)); // Ví dụ 2 chữ số thập phân cho trọng lượng
+                $("#total-weight").val(totalWeight.toFixed(0)); // Ví dụ 2 chữ số thập phân cho trọng lượng
             } else {
                 $("#total-weight").val("0");
-            }
-
-            // Tính phí ship giả lập
-            let shippingFee = 0;
-            if (totalWeight > 5) {
-                shippingFee = 50000; // 50,000 VND nếu trọng lượng > 5kg
-            } else if (totalWeight > 2) {
-                shippingFee = 30000; // 30,000 VND nếu trọng lượng > 2kg và <= 5kg
-            } else {
-                shippingFee = 15000; // 15,000 VND nếu trọng lượng <= 2kg
-            }
-
-            // Nếu giá trị giỏ hàng lớn hơn 1 triệu, miễn phí ship
-            if (totalPrice > 1000000) {
-                shippingFee = 0; // Phí ship miễn phí nếu giá trị giỏ hàng > 1 triệu
             }
 
             // Cập nhật phí ship vào phần tử "shipping-fee"

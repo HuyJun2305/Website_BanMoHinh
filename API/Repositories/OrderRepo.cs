@@ -234,8 +234,8 @@ namespace API.Repositories
         public async Task AcceptOrder(Guid orderId)
         {
             var order = await _context.Orders
-                .Include(o => o.OrderDetails)  
-                .ThenInclude(od => od.Product) 
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -245,12 +245,12 @@ namespace API.Repositories
             if (order.Status == OrderStatus.ChoXacNhan)
             {
                 order.Status = OrderStatus.ChuanBiDonHang;
-                
 
                 foreach (var orderDetail in order.OrderDetails)
                 {
                     var product = orderDetail.Product;
 
+                    // Kiểm tra số lượng tồn kho sản phẩm
                     if (product.Stock >= orderDetail.Quatity)
                     {
                         product.Stock -= orderDetail.Quatity;
@@ -261,39 +261,40 @@ namespace API.Repositories
                     }
 
                     var productSize = await _context.ProductSizes
+                        .Include(ps => ps.Size) // Include thông tin Size
                         .FirstOrDefaultAsync(ps => ps.ProductId == product.Id && ps.SizeId == orderDetail.SizeId);
 
                     if (productSize != null)
                     {
-                        // Trừ số lượng trong bảng ProductSize
+                        // Kiểm tra tồn kho của ProductSize
                         if (productSize.Stock >= orderDetail.Quatity)
                         {
                             productSize.Stock -= orderDetail.Quatity;
                         }
+                        else if (productSize.Stock == 0)
+                        {
+                            // Thông báo nếu không có hàng trong kho
+                            throw new Exception($"Product size {product.Name} - {productSize.Size?.Value ?? "Unknown"} is out of stock. Please wait for restocking.");
+                        }
                         else
                         {
-                            throw new Exception($"Not enough stock for product size {product.Name} - {productSize.Size.Value}");
+                            throw new Exception($"Not enough stock for product size {product.Name} - {productSize.Size?.Value ?? "Unknown"}.");
                         }
-                    }
 
-                    // Đảm bảo rằng sản phẩm và ProductSize được theo dõi và cập nhật
-                    _context.Products.Update(product);  // Cập nhật lại sản phẩm sau khi trừ số lượng
-                    if (productSize != null)
-                    {
-                        _context.ProductSizes.Update(productSize);  // Cập nhật lại thông tin ProductSize nếu có
+                        _context.ProductSizes.Update(productSize); // Cập nhật ProductSize
                     }
                 }
 
-                // Cập nhật lại trạng thái của đơn hàng
-                _context.Orders.Update(order);  // Cập nhật đơn hàng với trạng thái mới
+                _context.Products.UpdateRange(order.OrderDetails.Select(od => od.Product)); // Cập nhật danh sách sản phẩm
+                _context.Orders.Update(order); // Cập nhật trạng thái đơn hàng
 
-                // Lưu các thay đổi vào cơ sở dữ liệu
-                await _context.SaveChangesAsync();
             }
             else
             {
                 throw new Exception("Order cannot be accepted because it's already processed.");
             }
+            await _context.SaveChangesAsync(); // Lưu thay đổi vào cơ sở dữ liệu
+
         }
         public async Task CancelOrder(Guid orderId, string? note)
         {
@@ -317,9 +318,9 @@ namespace API.Repositories
         public async Task DeliveryOrder(Guid orderId, string?note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if(order.Status == OrderStatus.ChuanBiDonHang)
+            if(order.Status == OrderStatus.DangGiaoHang)
             {
-                order.Status = OrderStatus.DangGiaoHang;
+                order.Status = OrderStatus.DaGiaoHang;
                 order.PaymentStatus = PaymentStatus.Advance;
                 _context.Orders.Update(order);
             }
@@ -335,7 +336,7 @@ namespace API.Repositories
             var order = await _context.Orders.FindAsync(orderId);
             if (order.Status == OrderStatus.DangGiaoHang)
             {
-                order.Status = OrderStatus.DangGiaoHang;
+                order.Status = OrderStatus.DaGiaoHang;
                 order.PaymentStatus = PaymentStatus.Paid;
                 _context.Orders.Update(order);
             }
@@ -366,7 +367,7 @@ namespace API.Repositories
                 throw new Exception("Order not found");
             }
 
-            if (order.Status == OrderStatus.SaiThongTinDiaChi)
+            if (order.Status == OrderStatus.DangGiaoHang)
             {
                 foreach (var detail in order.OrderDetails)
                 {
@@ -385,8 +386,8 @@ namespace API.Repositories
                     }
                 }
 
-                order.Status = OrderStatus.DaHuy;
-                order.PaymentStatus = PaymentStatus.Failed;
+                order.Status = OrderStatus.SaiThongTinDiaChi;
+                order.PaymentStatus = PaymentStatus.Advance;
                 order.Note = note;
 
                 _context.Orders.Update(order);
@@ -405,20 +406,18 @@ namespace API.Repositories
                 await _context.SaveChangesAsync(); // Lưu toàn bộ thay đổi
             }
         }
-
         public async Task MissingInformation(Guid orderId , string? note)
         {
             var order =  await _context.Orders.FindAsync(orderId);
-            if(order.Status == OrderStatus.SaiThongTinDiaChi)
+            if(order.Status == OrderStatus.DangGiaoHang)
             {
-                order.Status = OrderStatus.DaHuy;
-                order.PaymentStatus = PaymentStatus.Failed;
+                order.Status = OrderStatus.ChoXacNhan;
+                order.PaymentStatus = PaymentStatus.Pending;
                 order.Note = note;
                 _context.Orders.Update(order);
             }
             await _context.SaveChangesAsync();
         }
-
         public async Task LoseOrder(Guid orderId, string? note)
         {
             // Tìm đơn hàng cũ
@@ -434,6 +433,7 @@ namespace API.Repositories
 
             // Cập nhật trạng thái của đơn hàng cũ
             oldOrder.Status = OrderStatus.MatHang; // Thêm trạng thái "Mất đơn hàng"
+            oldOrder.PaymentStatus = PaymentStatus.Paid;
             oldOrder.Note = note ?? "Order marked as lost and recreated.";
 
             // Tạo một đơn hàng mới với thông tin từ đơn hàng cũ
@@ -443,7 +443,7 @@ namespace API.Repositories
                 CustomerName = oldOrder.CustomerName,
                 Price = oldOrder.Price,
                 PaymentMethods = oldOrder.PaymentMethods,
-                PaymentStatus = oldOrder.PaymentStatus,
+                PaymentStatus = PaymentStatus.Pending,
                 DayCreate = DateTime.Now, // Đặt lại ngày tạo mới
                 Status = OrderStatus.ChoXacNhan, // Đặt trạng thái mới là "Chờ xác nhận"
                 Note = "Order recreated due to loss.",
@@ -466,5 +466,84 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public Task AcceptRefund(Guid orderId, string? note)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RefundByCustomer(Guid orderId, Guid customerId, string note)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task PaidOrder(Guid orderId, string? note)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if(order.Status == OrderStatus.DaGiaoHang)
+            {
+                order.Status = OrderStatus.HoanThanh;
+                order.PaymentStatus = PaymentStatus.Paid;
+                _context.Orders.Update(order);
+            }
+            else
+            {
+                throw new Exception("??? Can't be");
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Accident(Guid orderId, string? note)
+        {
+            var order = await _context.Orders
+                 .Include(o => o.OrderDetails)
+                     .ThenInclude(od => od.Product)
+                 .Include(o => o.OrderDetails)
+                     .ThenInclude(od => od.ProductSize)
+                 .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                throw new Exception("Order not found");
+            }
+
+            if (order.Status == OrderStatus.DangGiaoHang)
+            {
+                foreach (var detail in order.OrderDetails)
+                {
+                    // Cập nhật lại Product stock
+                    var product = detail.Product;
+                    if (product != null)
+                    {
+                        product.Stock += detail.Quatity;
+                    }
+
+                    // Cập nhật lại ProductSize stock
+                    var productSize = detail.ProductSize;
+                    if (productSize != null)
+                    {
+                        productSize.Stock += detail.Quatity;
+                    }
+                }
+
+                order.Status = OrderStatus.TaiNanGiaoThong;
+                order.PaymentStatus = PaymentStatus.Advance;
+                order.Note = note;
+
+                _context.Orders.Update(order);
+                foreach (var detail in order.OrderDetails)
+                {
+                    if (detail.Product != null)
+                    {
+                        _context.Products.Update(detail.Product);
+                    }
+                    if (detail.ProductSize != null)
+                    {
+                        _context.ProductSizes.Update(detail.ProductSize);
+                    }
+                }
+
+                await _context.SaveChangesAsync(); // Lưu toàn bộ thay đổi
+            }
+        }
     }
 }

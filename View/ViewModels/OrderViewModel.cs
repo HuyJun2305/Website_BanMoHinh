@@ -12,7 +12,7 @@ namespace View.ViewModels
         public PaymentStatus PaymentStatus { get; set; }
         public DateTime DayCreate { get; set; }
         public OrderStatus Status { get; set; }
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
     }
     public class OrderIndexViewModel
     {

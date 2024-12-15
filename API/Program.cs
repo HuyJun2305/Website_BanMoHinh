@@ -111,9 +111,10 @@ builder.Services.AddCors(options =>
     {
         p.AllowAnyHeader();
         p.AllowAnyMethod();
-        p.AllowAnyHeader();
         p.AllowAnyOrigin();
-    });
+		p.AllowCredentials(); // Đảm bảo cho phép thông tin xác thực
+		p.WithOrigins("https://localhost:7221");
+	});
 });
 
 var app = builder.Build();

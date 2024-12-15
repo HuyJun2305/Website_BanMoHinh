@@ -14,10 +14,10 @@ namespace Data.Models
         public DateTime DayCreate { get; set; }
         public decimal Price { get; set; }
 		public PaymentMethod PaymentMethods { get; set; } = PaymentMethod.Cash;
-		public OrderStatus Status { get; set; } = OrderStatus.ChoXacNhan;
+		public OrderStatus Status { get; set; } = OrderStatus.TaoDonHang;
 		public PaymentStatus PaymentStatus {  get; set; }	
 
-		public string Note { get; set; }
+		public string? Note { get; set; }
 
 		public Guid CreateBy { get; set; }
         public DateTime? DayPayment { get; set; }
@@ -53,6 +53,8 @@ namespace Data.Models
 
 	public enum OrderStatus
 	{
+        [Display(Name = "Tạo đơn hàng")]
+        TaoDonHang = 0,
 		[Display(Name = "Chờ xác nhận")]	
 		ChoXacNhan = 1,
 		[Display(Name = "Chuẩn bị đơn hàng")]

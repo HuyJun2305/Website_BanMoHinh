@@ -59,7 +59,7 @@ namespace View.Controllers
                     DayCreate = o.DayCreate,
                     Status = o.Status,
                     Note = o.Note,
-                    PhoneNumber = o.Account.PhoneNumber
+                    PhoneNumber = o.Account?.PhoneNumber
                     
                     
                 });

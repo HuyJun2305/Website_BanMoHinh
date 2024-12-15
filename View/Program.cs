@@ -6,25 +6,30 @@ using View.Handlers;
 using View.IServices;
 using View.Servicecs;
 using View.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Cấu hình Session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+	options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian hết hạn session
+	options.Cookie.HttpOnly = true;
+	options.Cookie.IsEssential = true;
 });
 
+// Đăng ký các services
 builder.Services.AddTransient<AuthenticationHandler>();
 
 builder.Services.AddHttpClient("ServerApi")
-                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7280" ?? ""))
-                .AddHttpMessageHandler<AuthenticationHandler>();
+	.ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7280" ?? ""))
+	.AddHttpMessageHandler<AuthenticationHandler>();
 
 builder.Services.AddAuthorizationCore();
-//
+
+// Các dịch vụ cho ứng dụng của bạn
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IAddresServices, AddresServices>();
@@ -38,18 +43,14 @@ builder.Services.AddHttpClient<IMaterialServices, MaterialServices>();
 builder.Services.AddHttpClient<ICartServices, CartServices>();
 builder.Services.AddHttpClient<ICategoryServices, CategoryServices>();
 
-//order
+// Các dịch vụ liên quan đến order
 builder.Services.AddHttpClient<IOrderServices, OrderServices>();
-//orderDetail
 builder.Services.AddHttpClient<IOrderDetailServices, OrderDetailServices>();
 
-
-
-
-var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo ");
+// Cấu hình JWT
+var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Khóa bí mật chưa đc tạo");
 builder.Services.AddAuthentication(options =>
 {
-	// Đặt cookie cho giao diện web
 	options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Mặc định cho MVC
 	options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 	options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -68,47 +69,49 @@ builder.Services.AddAuthentication(options =>
 		ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
 		ValidAudience = builder.Configuration["Jwt:ValidAudience"],
 		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-		ClockSkew = new TimeSpan(0, 0, 5)
+		ClockSkew = TimeSpan.Zero
 	};
-
 });
 
-
-
-//
-builder.Services.AddAuthorization();
+// Cấu hình CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowMVC",
-    builder =>
-    {
-        builder.WithOrigins("https://localhost:7075")
-               .AllowAnyHeader()
-               .AllowAnyMethod();
-    });
+	options.AddPolicy("AllowSpecificOrigins", policy =>
+	{
+		policy.WithOrigins("https://localhost:7221") // Thay bằng domain Frontend của bạn
+			  .AllowAnyHeader()
+			  .AllowAnyMethod()
+			  .AllowCredentials(); // Cho phép gửi cookie/session
+	});
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Cấu hình HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+	app.UseExceptionHandler("/Home/Error");
+	app.UseHsts(); // HSTS cho môi trường sản xuất
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors("AllowMVC");
+
+// Cấu hình CORS
+app.UseCors("AllowSpecificOrigins");
+
 app.UseRouting();
-app.UseSession();
-app.UseAuthorization();
+
+// Các middleware bảo mật
+app.UseSession(); // Đảm bảo session hoạt động trước authorization
 app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Authentication}/{action=Login}/{id?}");
+	endpoints.MapControllerRoute(
+		name: "default",
+		pattern: "{controller=Authentication}/{action=Login}/{id?}");
 });
+
 app.Run();

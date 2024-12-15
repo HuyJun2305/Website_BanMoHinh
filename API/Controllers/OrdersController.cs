@@ -128,58 +128,138 @@ namespace API.Controllers
             try
             {
                 await _orderRepo.AcceptOrder(orderId);
-                return Ok();
+                return Ok(new { success = true, message = "Order accepted successfully" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return Problem(detail: ex.Message, title: "Order Acceptance Failed");
             }
         }
-
 		[HttpPost("CancelOrder")]
 		public async Task<ActionResult> CancelOrder(Guid orderId, string? note)
 		{
-			await _orderRepo.CancelOrder(orderId, note);
-			return Ok();
-		}
+			try
+			{
+                await _orderRepo.CancelOrder(orderId, note);
+                return Ok(new { success = true, message = "Order canceled" });
+
+            }
+            catch (Exception ex)
+			{
+
+                return Problem(detail: ex.Message, title: "Order Cancel Failed");
+            }
+        }
 		[HttpPost("DeliveryOrder")]
 		public async Task<ActionResult> DeliveryOrder(Guid orderId, string? note)
 		{
-			await _orderRepo.DeliveryOrder(orderId, note);
-			return Ok();
-		}
+			try
+			{
+                await _orderRepo.DeliveryOrder(orderId, note);
+                return Ok(new {success = true, message = "Order deliveried susscesfully" });
 
-		[HttpPost("ConplateOrder")]
+            }
+            catch (Exception ex)
+			{
+                return Problem(detail: ex.Message, title: "Order Delivery Failed");
+            }
+        }
+		[HttpPost("ComplateOrder")]
 		public async Task<ActionResult> ConplateOrder(Guid orderId, string? note)	
 		{
-			await _orderRepo.ConplateOrder(orderId, note);
-			return Ok();
-		}
-
+			try
+			{
+                await _orderRepo.ConplateOrder(orderId, note);
+                return Ok(new { success = true, message = "Order completed successfully" });
+            }
+            catch (Exception ex)
+			{
+                return Problem(detail: ex.Message, title: "Order Complate Failed");
+            }
+        }
+        [HttpPost("PaidOrder")]
+		public async Task<ActionResult> PaidOrder(Guid orderId, string? note)	
+		{
+			try
+			{
+                await _orderRepo.PaidOrder(orderId, note);
+                return Ok(new { success = true, message = "Order paid successfully" });
+            }
+            catch (Exception ex)
+			{
+                return Problem(detail: ex.Message, title: "Order Paid Failed");
+            }
+        }
 		[HttpPost("RefundOrder")]
 		public async Task<ActionResult> RefundOrder(Guid orderId, string? note)
 		{
-			await _orderRepo.RefundOrder(orderId, note);
-			return Ok();
-		}
+            try
+            {
+                await _orderRepo.RefundOrder(orderId, note);
+                return Ok(new { success = true, message = "Refund order succesfully" });
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Order Refund Failed");
+            }
+        }
 		[HttpPost("ShippingError")]
 		public async Task<ActionResult> ShippingError(Guid orderId, string? note)
 		{
-			await _orderRepo.ShippingError(orderId, note);
-			return Ok();
-		}
+            try
+            {
+                await _orderRepo.ShippingError(orderId, note);
+                return Ok(new {success =true, message = "Shipper on waiting" });
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Order Shipping Failed");
+            }
+        }
 		[HttpPost("MissingInformation")]
 		public async Task<ActionResult> MissingInformation(Guid orderId, string? note)
 		{
-			await _orderRepo.MissingInformation(orderId, note);
-			return Ok();
-		}
-		[HttpPost("LoseOrder")]
+            try
+            {
+                await _orderRepo.MissingInformation(orderId, note);
+                return Ok(new { success = true, message = "On waiting to new Infomation" });
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Order MissingInformation Failed");
+            }
+        }
+		[HttpPost("LostOrder")]
 		public async Task<ActionResult> LoseOrder(Guid orderId, string? note)
 		{
-			await _orderRepo.LoseOrder(orderId, note);
-			return Ok();
-		}
+            try
+            {
+                await _orderRepo.LoseOrder(orderId, note);
+                return Ok(new {success =true, message = "Lost order" });
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Order Complate Failed");
+            }
+        }
+        [HttpPost("Accident")]
+		public async Task<ActionResult> Accident(Guid orderId, string? note)
+		{
+            try
+            {
+                await _orderRepo.Accident(orderId, note);
+                return Ok(new {success =true, message = "Lost order" });
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Order Complate Failed");
+            }
+        }
 
 
 

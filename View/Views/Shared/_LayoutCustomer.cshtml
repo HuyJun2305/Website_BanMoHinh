@@ -55,7 +55,7 @@
 						</div>
 						<div class="flex-c-m h-full p-l-18 p-r-25 bor5">
 							<div class="icon-header-item cl2 hov-cl1 trans-04 p-lr-11 icon-header-noti js-show-cart" data-notify="2">
-								<i  class="zmdi zmdi-shopping-cart"></i>	
+								<i class="zmdi zmdi-shopping-cart"></i>	
 							</div>
 						</div>
 						<div class="flex-c-m h-full p-lr-19">
@@ -170,84 +170,30 @@
 
 		<div class="header-cart flex-col-l p-l-65 p-r-25">
 			<div class="header-cart-title flex-w flex-sb-m p-b-8">
-				<span class="mtext-103 cl2">
-					Your Cart
-				</span>
-
+				<span class="mtext-103 cl2">Your Cart</span>
 				<div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
 					<i class="zmdi zmdi-close"></i>
 				</div>
 			</div>
-			
+
 			<div class="header-cart-content flex-w js-pscroll">
-				<ul class="header-cart-wrapitem w-full">
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="Customer/images/item-cart-01.jpg" alt="IMG">
-						</div>
+				<ul id="header-cart-wrapitem" class="header-cart-wrapitem w-full"></ul>
 
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								White Shirt Pleat
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $19.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="Customer/images/item-cart-02.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Converse All Star
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $39.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="Customer/images/item-cart-03.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Nixon Porter Leather
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $17.00
-							</span>
-						</div>
-					</li>
-				</ul>
-				
 				<div class="w-full">
-					<div class="header-cart-total w-full p-tb-40">
-						Total: $75.00
+					<div id="header-cart-total" class="header-cart-total w-full p-tb-40">
+						Total: $0.00
 					</div>
 
 					<div class="header-cart-buttons flex-w w-full">
 						<a asp-action="Index" asp-controller="CartDetails" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
 							View Cart
 						</a>
-
-						<a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
-							Check Out
-						</a>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 
 
 	<!------------------------>
@@ -397,14 +343,84 @@
 		</div>
 	</footer>
 
+	@if (Context.Session.GetString("jwtToken") != null)
+	{
+		<script>
+			// Lấy token từ session
+			const jwtToken = '@Context.Session.GetString("jwtToken")';
+			// Gửi yêu cầu với token để lấy giỏ hàng
+			fetch('https://localhost:7280/api/Cart/GetCartForLayout', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${jwtToken}`
+				}
+			})
+				.then(response => response.json())
+				.then(data => {
+					console.log('Giỏ hàng:', data);
+					// Cập nhật giao diện giỏ hàng
+					updateCartUI(data);
+				})
+				.catch(error => {
+					console.error('Lỗi khi lấy giỏ hàng:', error);
+				});
+
+			// Định nghĩa hàm updateCartUI để cập nhật giao diện giỏ hàng
+			function updateCartUI(cartData) {
+				const cartItemsContainer = document.getElementById("header-cart-wrapitem");
+				const cartTotalContainer = document.getElementById("header-cart-total");
+
+				// Xóa các item cũ
+				cartItemsContainer.innerHTML = "";
+
+				// Kiểm tra nếu cartData và cartData.items hợp lệ
+				if (!cartData || !cartData.items || cartData.items.length === 0) {
+					cartItemsContainer.innerHTML = "<li>Giỏ hàng của bạn đang trống.</li>";
+					cartTotalContainer.textContent = "Tổng cộng: 0 VND";
+					return;
+				}
+
+				// Định dạng tiền theo kiểu Việt Nam (1,000,000 VND)
+				const currencyFormatter = new Intl.NumberFormat('vi-VN', {
+					style: 'currency',
+					currency: 'VND'
+				});
+
+				// Render các item trong giỏ hàng
+				cartData.items.forEach((item) => {
+					const formattedPrice = currencyFormatter.format(item.price); // Giả sử item.price là số nguyên (đồng)
+					const cartItemHtml = `
+						<li class="header-cart-item flex-w flex-t m-b-12">
+							<div class="header-cart-item-img">
+								<img src="${item.imageUrl || '/images/default.jpg'}" alt="${item.name}">
+							</div>
+							<div class="header-cart-item-txt p-t-8">
+								<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+									${item.name}
+								</a>
+								<span class="header-cart-item-info">
+									${item.quatity} x ${formattedPrice}
+								</span>
+							</div>
+						</li>
+					`;
+					cartItemsContainer.insertAdjacentHTML("beforeend", cartItemHtml);
+				});
+
+				// Cập nhật tổng giá tiền
+				const formattedTotal = currencyFormatter.format(cartData.total ); // Giả sử total là đơn vị tiền tệ nhỏ (đồng)
+				cartTotalContainer.textContent = `Tổng cộng: ${formattedTotal}`;
+			}
 
 
-
-
-
-
-
-
+		</script>
+	}
+	else
+	{
+		<script>
+			console.log('Không có token trong session');
+		</script>
+	}
 
 	<script src="@Url.Content("~/Customer/vendor/jquery/jquery-3.2.1.min.js")"></script>
 	<script src="@Url.Content("~/Customer/vendor/animsition/js/animsition.min.js")"></script>
@@ -426,9 +442,11 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 
 	@await RenderSectionAsync("Scripts", required: false)
 	@await RenderSectionAsync("Styles", required: false)
+
 </body>
 </html>

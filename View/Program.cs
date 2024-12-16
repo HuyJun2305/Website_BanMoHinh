@@ -76,7 +76,7 @@ builder.Services.AddAuthentication(options =>
 // Cấu hình CORS
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy("AllowSpecificOrigins", policy =>
+	options.AddPolicy("AllowAll", policy =>
 	{
 		policy.WithOrigins("https://localhost:7221") // Thay bằng domain Frontend của bạn
 			  .AllowAnyHeader()
@@ -98,7 +98,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Cấu hình CORS
-app.UseCors("AllowSpecificOrigins");
+app.UseCors("AllowAll");
 
 app.UseRouting();
 

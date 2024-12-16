@@ -100,8 +100,8 @@ namespace API.Repositories
                     throw new Exception("Product not found.");
                 }
                 // Cập nhật số lượng và tính lại tổng giá
-                cartDetail.Quatity = quantity;
-                cartDetail.TotalPrice = cartDetail.Quatity * product.Price; // Tính lại tổng giá dựa trên giá sản phẩm
+                cartDetail.Quantity = quantity;
+                cartDetail.TotalPrice = cartDetail.Quantity * product.Price; // Tính lại tổng giá dựa trên giá sản phẩm
                 _context.CartDetails.Update(cartDetail);
             }
 
@@ -141,8 +141,8 @@ namespace API.Repositories
 			if (existingCartDetail != null)
 			{
 				// Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng thêm số lượng
-				existingCartDetail.Quatity += quantity;
-				existingCartDetail.TotalPrice = existingCartDetail.Quatity * existingCartDetail.Product.Price;
+				existingCartDetail.Quantity += quantity;
+				existingCartDetail.TotalPrice = existingCartDetail.Quantity * existingCartDetail.Product.Price;
 				_context.CartDetails.Update(existingCartDetail);
 			}
 			else
@@ -171,7 +171,7 @@ namespace API.Repositories
 					CartId = cartId,
 					ProductId = productId,
 					SizeId = sizeId,
-					Quatity = quantity,
+					Quantity = quantity,
 					TotalPrice = product.Price * quantity
 				};
 
@@ -221,7 +221,7 @@ namespace API.Repositories
             if (cart == null)
                 throw new KeyNotFoundException("Cart not found for the selected cart details");
 
-            decimal totalPrice = cartDetails.Sum(cd => cd.Quatity * cd.Product.Price);
+            decimal totalPrice = cartDetails.Sum(cd => cd.Quantity * cd.Product.Price);
 
 
             decimal finalTotalPrice = totalPrice + shippingFee;
@@ -248,8 +248,8 @@ namespace API.Repositories
                 OrderId = newOrder.Id,
                 ProductId = cd.Product.Id, // Sử dụng Product.Id thay vì ProductId
                 SizeId = cd.SizeId,
-                Quatity = cd.Quatity,
-                TotalPrice = cd.Quatity * cd.Product.Price
+                Quantity = cd.Quantity,
+                TotalPrice = cd.Quantity * cd.Product.Price
             }).ToList();
 
             await _context.OrderDetails.AddRangeAsync(orderDetails);
@@ -269,14 +269,6 @@ namespace API.Repositories
 
             await _context.SaveChangesAsync();
         }
-
-
-
-
-
-
-
-
 
 
 

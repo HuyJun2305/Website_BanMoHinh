@@ -33,15 +33,15 @@ namespace View.Services
 
 			if (cartDetailsItem != null)
 			{
-				cartDetailsItem.Quatity += cartDetail.Quatity;
+				cartDetailsItem.Quantity += cartDetail.Quantity;
 
 				// Kiểm tra nếu số lượng vượt quá tồn kho thì giới hạn lại bằng số lượng tồn kho
-				if (cartDetailsItem.Quatity > cartDetail.Product.Stock)
+				if (cartDetailsItem.Quantity > cartDetail.Product.Stock)
 				{
-					cartDetailsItem.Quatity = cartDetail.Product.Stock;
+					cartDetailsItem.Quantity = cartDetail.Product.Stock;
 				}
 
-				cartDetailsItem.TotalPrice = cartDetail.Product.Price * cartDetailsItem.Quatity;
+				cartDetailsItem.TotalPrice = cartDetail.Product.Price * cartDetailsItem.Quantity;
 				cartDetailsItem.Product = null;
 				await _client.PutAsJsonAsync($"https://localhost:7280/api/CartDetail/Update?id={cartDetailsItem.Id}", cartDetailsItem);
 			}

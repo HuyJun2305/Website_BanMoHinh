@@ -91,7 +91,7 @@ namespace View.Controllers
                             var cartDetailVM = new CartDetailVM
                             {
                                 Id = cartDetail.Id, // Đảm bảo giữ đúng CartDetail.Id từ cơ sở dữ liệu
-                                Quantity = cartDetail.Quatity,
+                                Quantity = cartDetail.Quantity,
                                 TotalPrice = cartDetail.TotalPrice,
                                 CartId = cartDetail.CartId,
                                 ProductName = product.Name,

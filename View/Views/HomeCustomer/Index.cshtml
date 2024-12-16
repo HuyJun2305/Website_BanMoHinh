@@ -9,7 +9,30 @@
 <section class="section-slide" style="max-height: 650px; overflow: hidden;">
 	<div class="wrap-slick1 rs1-slick1">
 		<div class="slick1">
-			<div class="item-slick1" style="background-image: url(/images/banner-03.jpg); ">
+			<div class="item-slick1" style="background-image: url(/UXUI/slide-7.jpg); ">
+				<div class="container h-full">
+					<div class="flex-col-l-m h-full p-t-100 p-b-30">
+						<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
+							<span class="ltext-202 cl0 respon2">
+								Gundam MG Series
+							</span>
+						</div>
+
+						<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn" data-delay="800">
+							<h2 class="ltext-104 cl0 p-t-19 p-b-43 respon1">
+								High Quality
+							</h2>
+						</div>
+
+						<div class="layer-slick1 animated visible-false" data-appear="slideInUp" data-delay="1600">
+							<a href="product.html" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+								Shop Now
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="item-slick1" style="background-image: url('/UXUI/slide-12.jpg');">
 				<div class="container h-full">
 					<div class="flex-col-l-m h-full p-t-100 p-b-30">
 						<div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
@@ -33,7 +56,7 @@
 				</div>
 			</div>
 
-			<div class="item-slick1" style="background-image: url(/images/slider-02.jpg); ">
+			<div class="item-slick1" style="background-image: url(/UXUI/slide-8.jpg); ">
 				<div class="container h-full">
 					<div class="flex-col-l-m h-full p-t-100 p-b-30">
 						<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
@@ -56,30 +79,6 @@
 					</div>
 				</div>
 			</div>
-
-			<div class="item-slick1" style="background-image: url(/images/slider-03.jpg);">
-				<div class="container h-full">
-					<div class="flex-col-l-m h-full p-t-100 p-b-30">
-						<div class="layer-slick1 animated visible-false" data-appear="rotateInDownLeft" data-delay="0">
-							<span class="ltext-202 cl0 respon2">
-								Gundam PG Kits
-							</span>
-						</div>
-
-						<div class="layer-slick1 animated visible-false" data-appear="rotateInUpRight" data-delay="800">
-							<h2 class="ltext-104 cl0 p-t-19 p-b-43 respon1">
-								Premium Collectibles
-							</h2>
-						</div>
-
-						<div class="layer-slick1 animated visible-false" data-appear="rotateIn" data-delay="1600">
-							<a href="product.html" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-								Shop Now
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
 	</div>
 </section>
@@ -90,7 +89,7 @@
 		<div class="size-202 m-lr-auto respon4">
 			<!-- Block1 -->
 			<div class="block1 wrap-pic-w">
-				<img src="/images/banner-gundam-01.jpg" alt="IMG-BANNER">
+				<img src="/UXUI/banner-10.jpg" alt="IMG-BANNER">
 
 				<a href="product.html" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
 					<div class="block1-txt-child1 flex-col-l">
@@ -115,7 +114,7 @@
 		<div class="size-202 m-lr-auto respon4">
 			<!-- Block1 -->
 			<div class="block1 wrap-pic-w">
-				<img src="/images/banner-gundam-01.jpg" alt="IMG-BANNER">
+				<img src="/UXUI/banner-8.jpg" alt="IMG-BANNER">
 
 				<a href="product.html" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
 					<div class="block1-txt-child1 flex-col-l">
@@ -140,7 +139,7 @@
 		<div class="size-202 m-lr-auto respon4">
 			<!-- Block1 -->
 			<div class="block1 wrap-pic-w">
-				<img src="/images/banner-gundam-02.jpg" alt="IMG-BANNER">
+				<img src="/UXUI/banner-9.jpg" alt="IMG-BANNER">
 
 				<a href="product.html" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
 					<div class="block1-txt-child1 flex-col-l">
@@ -164,3 +163,69 @@
 	</div>
 </div>
 
+<style>
+	/* Đảm bảo flex container căn giữa */
+	.sec-banner .flex-w {
+		display: flex;
+		justify-content: center;
+		flex-wrap: nowrap;
+	}
+
+	/* Căn chỉnh hình ảnh */
+	.sec-banner .block1 img {
+		width: 100%; /* Chiếm toàn bộ chiều rộng container */
+		height: 650px; /* Giới hạn chiều cao */
+		object-fit: cover; /* Cắt hình ảnh để giữ tỷ lệ */
+		display: block;
+	}
+
+	/* Đảm bảo các phần tử khác căn chỉnh hợp lý */
+	.sec-banner .block1 {
+		position: relative;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	/* Văn bản và liên kết trên banner */
+	.sec-banner .block1-txt {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 20px;
+		background: rgba(0, 0, 0, 0.5); /* Nền mờ */
+		color: #fff;
+		text-align: left;
+		z-index: 1;
+	}
+
+	/* Điều chỉnh text */
+	.sec-banner .block1-name {
+		font-size: 24px;
+		font-weight: bold;
+	}
+
+	.sec-banner .block1-info {
+		font-size: 16px;
+		margin-top: 5px;
+	}
+
+	.sec-banner .block1-link {
+		font-size: 14px;
+		text-transform: uppercase;
+		padding: 10px 20px;
+		background: #ff5722;
+		color: #fff;
+		border-radius: 5px;
+		transition: background 0.3s;
+	}
+
+		.sec-banner .block1-link:hover {
+			background: #e64a19;
+		}
+
+</style>

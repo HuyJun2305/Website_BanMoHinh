@@ -1,5 +1,6 @@
 ﻿using API.Data;
 using API.IRepositories;
+using Data.DTO;
 using Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -80,7 +81,7 @@ namespace API.Repositories
                 DayCreate = DateTime.Now,
                 Price = 0,
                 PaymentMethods = PaymentMethod.Cash,
-                Status = OrderStatus.ChoXacNhan,
+                Status = OrderStatus.TaoDonHang,
                 CustomerName = customerAccount?.Name ?? "Guest",
                 VoucherId = voucherId
             };
@@ -136,6 +137,7 @@ namespace API.Repositories
                 .Include(o => o.Account)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
+                    .ThenInclude(p => p.ProductSizes) // Bao gồm thông tin về ProductSizes
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -165,14 +167,27 @@ namespace API.Repositories
                     throw new KeyNotFoundException($"Sản phẩm với ID {orderDetail.ProductId} không tồn tại.");
                 }
 
-                // Kiểm tra tồn kho
-                if (orderDetail.Quatity > orderDetail.Product.Stock)
+                // Kiểm tra tồn kho trong ProductSize
+                var productSize = orderDetail.Product.ProductSizes
+                    .FirstOrDefault(ps => ps.SizeId == orderDetail.SizeId); // Lấy thông tin size tương ứng
+
+                if (productSize == null)
                 {
-                    throw new InvalidOperationException($"Sản phẩm {orderDetail.Product.Name} không đủ hàng. Số lượng yêu cầu: {orderDetail.Quatity}, Tồn kho hiện tại: {orderDetail.Product.Stock}.");
+                    throw new KeyNotFoundException($"Không tìm thấy thông tin kích thước cho sản phẩm {orderDetail.Product.Name}.");
+                }
+
+                // Kiểm tra tồn kho trong ProductSize
+                if (orderDetail.Quantity > productSize.Stock)
+                {
+                    throw new InvalidOperationException($"Sản phẩm {orderDetail.Product.Name} (Size: {productSize.Size.Value}) không đủ hàng. Số lượng yêu cầu: {orderDetail.Quantity}, Tồn kho hiện tại: {productSize.Stock}.");
                 }
 
                 // Cộng tổng tiền cho đơn hàng
-                totalPrice += orderDetail.Quatity * orderDetail.Product.Price;
+                totalPrice += orderDetail.Quantity * orderDetail.Product.Price;
+
+                // Giảm số lượng tồn kho trong ProductSize
+                productSize.Stock -= orderDetail.Quantity;
+                _context.Entry(productSize).State = EntityState.Modified; // Đánh dấu ProductSize đã thay đổi
             }
 
             // Kiểm tra xem khách hàng có đủ tiền để thanh toán không
@@ -187,25 +202,28 @@ namespace API.Repositories
             // Cập nhật trạng thái đơn hàng
             order.Status = OrderStatus.HoanThanh;
             order.PaymentMethods = paymentMethod;
+            order.PaymentStatus = PaymentStatus.Paid;
+            order.Note = "Checkout in store";
             order.DayPayment = DateTime.Now;
             order.CreateBy = staffId;
             order.AmountPaid = amountGiven;
             order.Change = change;
 
-            // Cập nhật số lượng kho của từng sản phẩm trong đơn hàng
+            // Cập nhật số lượng kho tổng của sản phẩm trong bảng Product
             foreach (var orderDetail in order.OrderDetails)
             {
                 if (orderDetail.Product != null)
                 {
-                    // Giảm số lượng tồn kho của sản phẩm
-                    orderDetail.Product.Stock -= orderDetail.Quatity;
-                    _context.Entry(orderDetail.Product).State = EntityState.Modified; // Đánh dấu sản phẩm đã được thay đổi
+                    // Giảm số lượng tồn kho của sản phẩm chính trong bảng Product
+                    orderDetail.Product.Stock -= orderDetail.Quantity;
+                    _context.Entry(orderDetail.Product).State = EntityState.Modified; // Đánh dấu Product đã thay đổi
                 }
             }
 
             _context.Entry(order).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
+
         public async Task<List<Order>> GetOrderStatus()
         {
             return await _context.Orders.Include(p => p.Account).Where(o => o.Status == 0).ToListAsync();
@@ -251,9 +269,9 @@ namespace API.Repositories
                     var product = orderDetail.Product;
 
                     // Kiểm tra số lượng tồn kho sản phẩm
-                    if (product.Stock >= orderDetail.Quatity)
+                    if (product.Stock >= orderDetail.Quantity)
                     {
-                        product.Stock -= orderDetail.Quatity;
+                        product.Stock -= orderDetail.Quantity;
                     }
                     else
                     {
@@ -267,9 +285,9 @@ namespace API.Repositories
                     if (productSize != null)
                     {
                         // Kiểm tra tồn kho của ProductSize
-                        if (productSize.Stock >= orderDetail.Quatity)
+                        if (productSize.Stock >= orderDetail.Quantity)
                         {
-                            productSize.Stock -= orderDetail.Quatity;
+                            productSize.Stock -= orderDetail.Quantity;
                         }
                         else if (productSize.Stock == 0)
                         {
@@ -306,7 +324,7 @@ namespace API.Repositories
                 order.PaymentStatus = PaymentStatus.Failed;
                 order.Note = note;
                 _context.Orders.Update(order);
-                
+
             }
             else
             {
@@ -315,13 +333,14 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
 
         }
-        public async Task DeliveryOrder(Guid orderId, string?note)
+        public async Task DeliveryOrder(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if(order.Status == OrderStatus.DangGiaoHang)
+            if (order.Status == OrderStatus.ChuanBiDonHang)
             {
-                order.Status = OrderStatus.DaGiaoHang;
+                order.Status = OrderStatus.DangGiaoHang;
                 order.PaymentStatus = PaymentStatus.Advance;
+                order.Note = note;
                 _context.Orders.Update(order);
             }
             else
@@ -348,18 +367,60 @@ namespace API.Repositories
 
         }
         // Refund vẫn chưa làm
-        public Task RefundOrder(Guid orderId, string? note)
+        public async Task ReOrder(Guid orderId, string? note)
         {
-            throw new NotImplementedException();
-        }
+            // Tìm đơn hàng cũ
+            var oldOrder = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
 
+            if (oldOrder == null)
+            {
+                throw new Exception("Order not found");
+            }
+
+            // Cập nhật trạng thái của đơn hàng cũ
+            oldOrder.Status = OrderStatus.DaHuy; // Thêm trạng thái "Mất đơn hàng"
+            oldOrder.PaymentStatus = PaymentStatus.Paid;
+            oldOrder.Note = note;
+
+            // Tạo một đơn hàng mới với thông tin từ đơn hàng cũ
+            var newOrder = new Order
+            {
+                Id = Guid.NewGuid(), // Tạo ID mới
+                CustomerName = oldOrder.CustomerName,
+                Price = oldOrder.Price,
+                PaymentMethods = oldOrder.PaymentMethods,
+                PaymentStatus = PaymentStatus.Pending,
+                DayCreate = DateTime.Now, // Đặt lại ngày tạo mới
+                Status = OrderStatus.ChoXacNhan, // Đặt trạng thái mới là "Chờ xác nhận"
+                Note = "Reorder.",
+
+                // Sao chép chi tiết đơn hàng
+                OrderDetails = oldOrder.OrderDetails.Select(od => new OrderDetail
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = od.ProductId,
+                    SizeId = od.SizeId,
+                    Quantity = od.Quantity,
+                    TotalPrice = od.TotalPrice,
+                }).ToList()
+            };
+
+            // Thêm đơn hàng mới vào cơ sở dữ liệu
+            _context.Orders.Add(newOrder);
+
+            // Lưu các thay đổi vào cơ sở dữ liệu
+            await _context.SaveChangesAsync();
+        }
         public async Task ShippingError(Guid orderId, string? note)
         {
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product) 
+                    .ThenInclude(od => od.Product)
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.ProductSize) 
+                    .ThenInclude(od => od.ProductSize)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -371,45 +432,22 @@ namespace API.Repositories
             {
                 foreach (var detail in order.OrderDetails)
                 {
-                    // Cập nhật lại Product stock
-                    var product = detail.Product;
-                    if (product != null)
-                    {
-                        product.Stock += detail.Quatity; 
-                    }
 
-                    // Cập nhật lại ProductSize stock
-                    var productSize = detail.ProductSize;
-                    if (productSize != null)
-                    {
-                        productSize.Stock += detail.Quatity;
-                    }
+                    order.Status = OrderStatus.SaiThongTinDiaChi;
+                    order.PaymentStatus = PaymentStatus.Advance;
+                    order.Note = note;
+
+                    _context.Orders.Update(order);
+
                 }
-
-                order.Status = OrderStatus.SaiThongTinDiaChi;
-                order.PaymentStatus = PaymentStatus.Advance;
-                order.Note = note;
-
-                _context.Orders.Update(order);
-                foreach (var detail in order.OrderDetails)
-                {
-                    if (detail.Product != null)
-                    {
-                        _context.Products.Update(detail.Product);
-                    }
-                    if (detail.ProductSize != null)
-                    {
-                        _context.ProductSizes.Update(detail.ProductSize);
-                    }
-                }
-
                 await _context.SaveChangesAsync(); // Lưu toàn bộ thay đổi
+
             }
         }
-        public async Task MissingInformation(Guid orderId , string? note)
+        public async Task MissingInformation(Guid orderId, string? note)
         {
-            var order =  await _context.Orders.FindAsync(orderId);
-            if(order.Status == OrderStatus.DangGiaoHang)
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order.Status == OrderStatus.DangGiaoHang)
             {
                 order.Status = OrderStatus.ChoXacNhan;
                 order.PaymentStatus = PaymentStatus.Pending;
@@ -454,7 +492,7 @@ namespace API.Repositories
                     Id = Guid.NewGuid(),
                     ProductId = od.ProductId,
                     SizeId = od.SizeId,
-                    Quatity = od.Quatity,
+                    Quantity = od.Quantity,
                     TotalPrice = od.TotalPrice,
                 }).ToList()
             };
@@ -466,20 +504,63 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public Task AcceptRefund(Guid orderId, string? note)
+        public async Task AcceptRefund(Guid orderId, string? note)
         {
-            throw new NotImplementedException();
-        }
+            // Tìm đơn hàng yêu cầu hoàn tiền
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order.Status == OrderStatus.HoanTra)
+            {
+                order.Status = OrderStatus.ChapNhanHoanTra;
+                order.PaymentStatus = PaymentStatus.Refunded;
+                order.Note = note;
+            }
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
 
-        public Task RefundByCustomer(Guid orderId, Guid customerId, string note)
+        }
+        public async Task CancelRefund(Guid orderId, string? note)
         {
-            throw new NotImplementedException();
+            var order = await _context.Orders.FindAsync(orderId);
+
+
+            if (order.Status == OrderStatus.HoanTra)
+            {
+                order.Status = OrderStatus.HoanThanh;
+                order.PaymentStatus = PaymentStatus.Paid;
+                order.Status = OrderStatus.HoanThanh;
+                order.Note = "The product does not meet return requirements";  // Optional: Ghi chú lý do hủy bỏ
+            }
+
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
+
+        }
+        public async Task RefundByCustomer(Guid orderId, string note)
+        {
+            var order = await _context.Orders
+                .FindAsync(orderId);
+
+
+            if (order.Status == OrderStatus.HoanThanh)
+            {
+                order.Status = OrderStatus.HoanTra;
+                order.PaymentStatus = PaymentStatus.Pending;
+                order.Note = note;
+                _context.Orders.Update(order);
+            }
+            else
+            {
+                throw new Exception("Information not correct");
+            }
+            await _context.SaveChangesAsync();
         }
 
         public async Task PaidOrder(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if(order.Status == OrderStatus.DaGiaoHang)
+            if (order.Status == OrderStatus.DaGiaoHang)
             {
                 order.Status = OrderStatus.HoanThanh;
                 order.PaymentStatus = PaymentStatus.Paid;
@@ -514,14 +595,14 @@ namespace API.Repositories
                     var product = detail.Product;
                     if (product != null)
                     {
-                        product.Stock += detail.Quatity;
+                        product.Stock += detail.Quantity;
                     }
 
                     // Cập nhật lại ProductSize stock
                     var productSize = detail.ProductSize;
                     if (productSize != null)
                     {
-                        productSize.Stock += detail.Quatity;
+                        productSize.Stock += detail.Quantity;
                     }
                 }
 
@@ -544,6 +625,31 @@ namespace API.Repositories
 
                 await _context.SaveChangesAsync(); // Lưu toàn bộ thay đổi
             }
+        }
+
+        public async Task ReShip(Guid orderId, string? note)
+        {
+            var order = await _context.Orders.FindAsync(orderId);   
+            if(order.Status == OrderStatus.TaiNanGiaoThong || order.Status == OrderStatus.SaiThongTinDiaChi)
+            {
+                order.Status = OrderStatus.DangGiaoHang;
+                order.PaymentStatus= PaymentStatus.Advance;
+                order.Note = note;
+                _context.Orders.Update(order);
+            }
+            else
+            {
+                throw new Exception("Not found");
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Order> GetOrderDetails(Guid orderId)
+        {
+            return await _context.Orders
+           .Include(o => o.OrderAddresses)
+           .FirstOrDefaultAsync(o => o.Id == orderId);
+
         }
     }
 }

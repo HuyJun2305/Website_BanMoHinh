@@ -45,10 +45,19 @@ namespace API.Controllers
 		[HttpPost("CheckOutInStore")]
 		public async Task<ActionResult> CheckOutInStore([FromQuery] Guid orderId, [FromQuery] Guid staffId, [FromQuery]  decimal amountGiven,  PaymentMethod paymentMethod)
 		{
-				var result =  _orderRepo.CheckOutInStore(orderId, staffId, amountGiven, paymentMethod);
-				return Ok(result);
-			
-		}
+            try
+            {
+                await _orderRepo.CheckOutInStore(orderId, staffId, amountGiven, paymentMethod);
+                return Ok(new { success = true, message = "Checkout in store successfully" });
+
+            }
+            catch (Exception ex)
+            {
+
+                return Problem(detail: ex.Message, title: "Checkout in store failed");
+            }
+
+        }
 		[HttpGet("GetOrderStatus0")]
         public async Task<ActionResult<List<Order>>> GetOrderStatus0()
 		{
@@ -191,12 +200,12 @@ namespace API.Controllers
             }
         }
 		[HttpPost("RefundOrder")]
-		public async Task<ActionResult> RefundOrder(Guid orderId, string? note)
+		public async Task<ActionResult> RefundOrder(Guid orderId, string note)
 		{
             try
             {
-                await _orderRepo.RefundOrder(orderId, note);
-                return Ok(new { success = true, message = "Refund order succesfully" });
+                await _orderRepo.RefundByCustomer(orderId, note);
+                return Ok(new { success = true, message = "Refund order waiting admin " });
 
             }
             catch (Exception ex)
@@ -260,8 +269,75 @@ namespace API.Controllers
                 return Problem(detail: ex.Message, title: "Order Complate Failed");
             }
         }
+        [HttpPost("AcceptRefund")]
+		public async Task<ActionResult> AcceptRefund(Guid orderId, string? note)
+		{
+            try
+            {
+                await _orderRepo.AcceptRefund(orderId, note);
+                return Ok(new {success =true, message = "Refund Order success" });
 
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Refund Order Failed");
+            }
+        }
+        [HttpPost("CancelRefund")]
+		public async Task<ActionResult> CancelRefund(Guid orderId, string? note)
+		{
+            try
+            {
+                await _orderRepo.CancelRefund(orderId, note);
+                return Ok(new {success =true, message = "Cancel refund order success" });
 
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Cancel refund order failed\"");
+            }
+        }
+        [HttpPost("ReOrder")]
+		public async Task<ActionResult> ReOrder(Guid orderId, string? note)
+		{
+            try
+            {
+                await _orderRepo.ReOrder(orderId, note);
+                return Ok(new {success =true, message = "Reorder order success" });
 
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Cancel refund order failed\"");
+            }
+        }
+        [HttpPost("ReShip")]
+		public async Task<ActionResult> ReShip(Guid orderId, string? note)
+		{
+            try
+            {
+                await _orderRepo.ReShip(orderId, note);
+                return Ok(new {success =true, message = "Cancel refund order success" });
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, title: "Cancel refund order failed\"");
+            }
+        }
+        [HttpGet("GetOrderDetails")]
+        public async Task<ActionResult> GetOrderDetails(Guid orderId)
+        {
+            try
+            {
+                var order = await _orderRepo.GetOrderDetails(orderId);
+                return Ok(order);
+            }   
+            catch (Exception ex)
+            {
+
+                return Problem(detail: ex.Message, title: "failed");
+            }
+        }
     }
 }

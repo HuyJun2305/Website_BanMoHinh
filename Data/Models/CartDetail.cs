@@ -11,7 +11,7 @@ namespace Data.Models
     {
         public Guid Id { get; set; }
         public decimal TotalPrice { get; set; }
-        public int Quatity { get; set; }
+        public int Quantity { get; set; }
 
         public Guid CartId { get; set; }
         [JsonIgnore]

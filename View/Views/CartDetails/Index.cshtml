@@ -457,53 +457,61 @@
             };
         }
         async function checkout() {
-            // Lấy danh sách các cartDetailId được chọn
-            const checkedItems = Array.from(document.querySelectorAll('.checkbox-item:checked'));
-            const cartDetailIds = checkedItems.map(item => item.getAttribute('data-cart-detail-id'));
+    // Lấy danh sách các cartDetailId được chọn
+    const checkedItems = Array.from(document.querySelectorAll('.checkbox-item:checked'));
+    const cartDetailIds = checkedItems.map(item => item.getAttribute('data-cart-detail-id'));
 
-            if (cartDetailIds.length === 0) {
-                alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
-                return;
+    if (cartDetailIds.length === 0) {
+        alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
+        return;
+    }
+
+    // Lấy phí giao hàng và thông tin địa chỉ
+    const shippingFee = parseFloat(document.getElementById('shippingFee')?.value) || 0;
+    const { city, district, ward, addressDetail } = getAddressInfo();
+
+    if (!city || !district || !ward || !addressDetail) {
+        alert('Vui lòng nhập đầy đủ thông tin địa chỉ.');
+        return;
+    }
+
+    // Tạo URL với các tham số cần thiết
+    const url = `https://localhost:7280/api/CartDetail/CheckOut?shippingFee=${shippingFee}&city=${encodeURIComponent(city)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}&addressDetail=${encodeURIComponent(addressDetail)}`;
+
+    // Tạo body JSON cho cartDetailIds
+    const jsonBody = JSON.stringify(cartDetailIds);
+    console.log(jsonBody);
+
+    // Gửi yêu cầu đến server
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: jsonBody // Gửi cartDetailIds dưới dạng body
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            // Kiểm tra thêm các thông báo từ server nếu có
+            if (result.success) {
+                alert('Thanh toán thành công!');
+                location.reload(); // Tải lại trang hoặc điều hướng đến trang khác
+            } else {
+                // Nếu có lỗi trong thân trả về
+                alert(`Lỗi thanh toán: ${result.message || 'Unknown error'}`);
             }
-
-            // Lấy phí giao hàng và thông tin địa chỉ
-            const shippingFee = parseFloat(document.getElementById('shippingFee')?.value) || 0;
-            const { city, district, ward, addressDetail } = getAddressInfo();
-
-            if (!city || !district || !ward || !addressDetail) {
-                alert('Vui lòng nhập đầy đủ thông tin địa chỉ.');
-                return;
-            }
-
-            // Tạo URL với các tham số cần thiết
-            const url = `https://localhost:7280/api/CartDetail/CheckOut?shippingFee=${shippingFee}&city=${encodeURIComponent(city)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}&addressDetail=${encodeURIComponent(addressDetail)}`;
-
-            // Tạo body JSON cho cartDetailIds
-            const jsonBody = JSON.stringify(cartDetailIds);
-            console.log(jsonBody);
-
-            // Gửi yêu cầu đến server
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: jsonBody // Gửi cartDetailIds dưới dạng body
-                });
-
-                if (response.ok) {
-                    alert('Thanh toán thành công!');
-                    location.reload(); // Tải lại trang hoặc điều hướng đến trang khác
-                } else {
-                    const error = await response.json();
-                    alert(`Lỗi thanh toán: ${error.message}`);
-                }
-            } catch (error) {
-                console.error('Lỗi khi thanh toán:', error);
-                alert('Có lỗi xảy ra, vui lòng thử lại sau.');
-            }
+        } else {
+            // Trường hợp mã lỗi HTTP (404, 500, ...)
+            const error = await response.json();
+            alert(`Lỗi thanh toán: ${error.message || 'Không thể xử lý yêu cầu.'}`);
         }
+    } catch (error) {
+        console.error('Lỗi khi thanh toán:', error);
+        alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+    }
+}
 
 
         // Gán sự kiện onclick cho nút thanh toán
@@ -582,12 +590,12 @@
             }
 
             // Cập nhật phí ship vào phần tử "shipping-fee"
-            const formattedShippingFee = shippingFee.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
+            const formattedShippingFee = shippingFee;//.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
             $("#shipping-fee").text(formattedShippingFee);
 
             // Cập nhật tổng giá sau khi cộng phí ship
             const totalWithShipping = totalPrice + shippingFee;
-            const formattedTotalWithShipping = totalWithShipping.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
+            const formattedTotalWithShipping = totalWithShipping;//.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
             $("#total-with-shipping").text(formattedTotalWithShipping);
 
             // Kiểm tra nếu có thay đổi và thông báo cho người dùng
@@ -989,12 +997,17 @@ function updateCartDetail(itemId, newQuantity) {
                         console.error("Không tìm thấy phần tử 'shippingFee'.");
                     }
 
-                    // Tính tổng tiền và cập nhật
+                    // Lấy giá trị từ trường subtotal
+                    const subtotalElement = document.getElementById('subtotal');
                     let productPrice = 0;
-                    document.querySelectorAll('.column-5').forEach(totalPriceCell => {
-                        const priceText = totalPriceCell.textContent.replace(/\D/g, '');
-                        productPrice += parseInt(priceText) || 0;
-                    });
+                    if (subtotalElement) {
+                        const subtotalText = subtotalElement.textContent.replace(/\D/g, '');
+                        productPrice = parseInt(subtotalText) || 0;
+                    } else {
+                        console.error("Không tìm thấy phần tử 'subtotal'.");
+                    }
+
+                    // Tính tổng tiền và cập nhật
                     const totalPrice = productPrice + shippingFee;
 
                     const shipfeeAndTotalSpan = document.getElementById('shipfeeAndTotal');
@@ -1009,6 +1022,7 @@ function updateCartDetail(itemId, newQuantity) {
             } catch (error) {
                 console.error("Chi tiết lỗi từ API:", error.response?.data || error.message);
             }
+
         };
     </script>
 

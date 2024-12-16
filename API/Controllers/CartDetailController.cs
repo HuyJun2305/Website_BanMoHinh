@@ -105,12 +105,12 @@ namespace API.Controllers
             {
                 // Gọi phương thức xử lý checkout từ repository (repo)
                 await _cartRepo.CheckOut(cartDetailIds, shippingFee, city,district,ward,addressDetail);
-                return Ok(new { message = "Checkout successful!" });
+                return Ok(new { success = true, message = "Checkout successful!" });
             }
             catch (Exception ex)
             {
                 // Trả về lỗi 500 nếu có sự cố trong quá trình xử lý
-                return StatusCode(500, new { message = "An error occurred during checkout.", details = ex.InnerException?.Message });
+                return StatusCode(500, new { success = false, message = "An error occurred during checkout.", details = ex.InnerException?.Message });
             }
         }
 

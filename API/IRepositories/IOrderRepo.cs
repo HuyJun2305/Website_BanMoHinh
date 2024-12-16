@@ -6,6 +6,7 @@ namespace API.IRepositories
     {
         Task<List<Order>> GetAllOrder();
         Task<List<Order>> GetOrderStatus();
+        Task<Order> GetOrderDetails(Guid orderId);
         Task<List<Order>> GetOrderByStatus(OrderStatus status);
         Task<List<Order>> GetOrdersByCustomerIdAndStatus(Guid customerId, OrderStatus status);
         Task<Order> GetOrderById(Guid id);  
@@ -21,13 +22,16 @@ namespace API.IRepositories
         Task DeliveryOrder(Guid orderId, string? note);
         Task ConplateOrder(Guid orderId, string? note);
         Task PaidOrder(Guid orderId, string? note);
-        Task RefundOrder(Guid orderId, string? note);
+        Task ReOrder(Guid orderId, string? note);
         Task ShippingError(Guid orderId, string? note);
         Task MissingInformation(Guid orderId, string? note);  
         Task LoseOrder(Guid orderId, string? note);
         Task Accident(Guid orderId, string? note);
 
         Task AcceptRefund(Guid orderId, string? note);
-        Task RefundByCustomer(Guid orderId, Guid customerId, string note);
+        Task CancelRefund(Guid orderId, string? note);
+
+		Task RefundByCustomer(Guid orderId, string note);
+		Task ReShip(Guid orderId, string? note);
     }
 }

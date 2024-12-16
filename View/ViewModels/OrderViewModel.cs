@@ -7,7 +7,7 @@ namespace View.ViewModels
         public Guid OrderId { get; set; }
         public string CustomerName { get; set; }
         public decimal? Price { get; set; }
-        public string Note { get; set; }
+        public string? Note { get; set; }
         public PaymentMethod PaymentMethods { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
         public DateTime DayCreate { get; set; }

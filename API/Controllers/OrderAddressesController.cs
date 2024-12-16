@@ -37,11 +37,10 @@ namespace API.Controllers
             return await _repo.GetOrderAddressById(id);
             
         }
-        [HttpGet("{orderId}")]
+        [HttpGet("GetAddressByOrderId")]
         public async Task<ActionResult<OrderAddress>> GetOrderAddressByOrderId(Guid orderId)
         {
-            await _repo.GetOrderAddressByOrderId(orderId);
-            return Ok();
+            return await _repo.GetOrderAddressByOrderId(orderId);
         }
 
         [HttpPut("{id}")]

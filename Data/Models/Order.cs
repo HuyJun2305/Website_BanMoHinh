@@ -76,7 +76,10 @@ namespace Data.Models
         [Display(Name = "Sai thông tin địa chỉ")]
         SaiThongTinDiaChi = 9,
         [Display(Name = "Nhân viên giao hàng bị tai nạn giao thông")]
-        TaiNanGiaoThong = 10
+        TaiNanGiaoThong = 10,
+		[Display(Name = "Sản phẩm được chấp nhận hoàn trả")]
+		ChapNhanHoanTra = 11
+
 
     }
 

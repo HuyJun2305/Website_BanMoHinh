@@ -17,12 +17,13 @@
         OrderStatus.DangGiaoHang,
         OrderStatus.DaGiaoHang,
         OrderStatus.HoanThanh,
-        OrderStatus.DaHuy
+        OrderStatus.DaHuy,
+        OrderStatus.HoanTra
     };
 }
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Track Your Orders</h2>
+    <h2 class="text-center mb-4">Your Orders</h2>
 
     <!-- Nav Bar for Order Status -->
     <ul class="nav nav-tabs" id="orderTabs">
@@ -52,11 +53,29 @@
                                     <strong>Order ID:</strong> @order.Id <br />
                                     <strong>Order Date:</strong> @order.DayCreate.ToString("dd/MM/yyyy") <br />
                                     <strong>Total:</strong> @order.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))
-                                    <div class="d-flex gap-2 mt-3">
-                                        <button class="btn btn-info btn-sm" onclick="viewOrderDetails(@order.Id)">View Details</button>
+                                    <div class="d-flex gap-3 mt-3">
+                                        <button class="btn btn-info btn-sm" onclick="viewOrderDetails('@order.Id')">View Details</button>
                                         @if (order.Status == OrderStatus.ChoXacNhan || order.Status == OrderStatus.ChuanBiDonHang)
                                         {
-                                            <button class="btn btn-danger btn-sm" onclick="cancelOrder(@order.Id)">Cancel Order</button>
+                                            <button class="btn btn-danger btn-sm" onclick="showCancelOrderModal('@order.Id')">Cancel Order</button>
+
+                                        }
+                                        else if (order.Status == OrderStatus.DaHuy)
+                                        {
+                                            <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
+                                        }
+                                        else if (order.Status == OrderStatus.HoanThanh)
+                                        {
+                                            if(order.Status == OrderStatus.HoanTra)
+                                            {
+                                                <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
+                                            }
+                                            else
+                                            {
+                                             <button class="btn btn-warning btn-sm" onclick="refundOrder('@order.Id')">Refund</button>
+                                            <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
+
+                                            }
                                         }
                                     </div>
                                 </div>
@@ -77,10 +96,54 @@
     </div>
 </div>
 
+
+<!-- Modal hiển thị chi tiết đơn hàng -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Nội dung chi tiết đơn hàng sẽ được nạp vào đây -->
+                <div id="orderDetailsContent">
+                    Loading order details...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal nhập lý do hủy -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please provide a reason for canceling the order:</p>
+                <textarea id="cancelReason" class="form-control" rows="3" placeholder="Enter reason"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitCancelOrder()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .d-flex .btn {
         margin-right: 10px; /* Thêm khoảng cách giữa các nút */
     }
+
     .order-card {
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -99,5 +162,167 @@
         // Khởi tạo Bootstrap tab chuyển đổi (nếu chưa tự động chạy)
         var myTab = new bootstrap.Tab(document.querySelector('.nav-tabs .active'));
         myTab.show();
+    </script>
+
+    <script>
+        let currentOrderId = null;
+
+        function showCancelOrderModal(orderId) {
+            currentOrderId = orderId; // Lưu lại orderId hiện tại
+            const modal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
+            modal.show(); // Hiển thị modal
+        }
+        async function submitCancelOrder() {
+            const note = document.getElementById('cancelReason').value.trim();
+
+            if (!note) {
+                alert("Please provide a reason for canceling the order.");
+                return;
+            }
+
+            const encodedNote = encodeURIComponent(note);
+            const url = `https://localhost:7280/api/Orders/CancelOrder?orderId=${currentOrderId}&note=${encodedNote}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Order canceled successfully.");
+                    location.reload(); // Reload lại trang sau khi hủy thành công
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to cancel the order: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("Error occurred while canceling the order.");
+            }
+        }
+        async function viewOrderDetails(orderId) {
+            // Hiển thị modal
+            const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            modal.show();
+
+            // Cập nhật nội dung modal trong khi đợi API
+            const orderDetailsContent = document.getElementById('orderDetailsContent');
+            orderDetailsContent.innerHTML = "Loading order details...";
+
+            try {
+                // Gọi API để lấy chi tiết đơn hàng
+                const response = await fetch(`https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId=${orderId}`);
+
+                if (response.ok) {
+                    const orderDetails = await response.json();
+
+                    const sizeResponse = await fetch('https://localhost:7280/api/Sizes'); // API để lấy kích thước
+                    const sizes = await sizeResponse.json();
+
+                    // Tạo một đối tượng tra cứu để nhanh chóng lấy value của sizeId
+                    const sizeMap = sizes.reduce((map, size) => {
+                        map[size.id] = size.value;
+                        return map;
+                    }, {});
+
+                    // Hiển thị thông tin chi tiết đơn hàng
+                    if (orderDetails.length === 0) {
+                        orderDetailsContent.innerHTML = "<p>No items found for this order.</p>";
+                    } else {
+                        orderDetailsContent.innerHTML = `
+                            <h5>Order ID: ${orderId}</h5>
+                            <table class="table table-bordered mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>Size</th>
+                                        <th>Quantity</th>
+                                        <th>Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${orderDetails.map((item, index) => {
+                            // Log item để kiểm tra dữ liệu
+                            console.log('Item:', item);
+                            const sizeValue = sizeMap[item.sizeId] || 'Unknown Size';
+                            return `
+                                            <tr>
+                                                <td>${index + 1}</td>
+                                                <td>
+                                                    <a href="/HomeCustomer/ViewProductDetails/${item.productId}" target="_blank">
+                                                        <image src="${item.product.images[0].url}" style="width: 150px; height:auto" />
+                                                    </a>
+                                                </td>
+                                                <td>${sizeValue}</td>
+                                                <td>${item.quantity}</td>
+                                                <td>${item.totalPrice.toLocaleString()} VND</td>
+                                            </tr>
+                                        `;
+                        }).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                } else {
+                    orderDetailsContent.innerHTML = "<p>Failed to load order details.</p>";
+                }
+            } catch (error) {
+                console.error('Error fetching order details:', error);
+                orderDetailsContent.innerHTML = "<p>An error occurred while loading order details.</p>";
+            }
+        }
+
+    </script>
+    <script>
+        function reorderOrder(orderId) {
+    const confirmReorder = confirm("Do you want to reorder this order?");
+    if (confirmReorder) {
+        const note = prompt("Enter any note for the new order (optional):", "Reorder with no special instructions");
+        fetch(`https://localhost:7280/api/Orders/ReOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`Reorder Successful! Order ${orderId} has been reordered. Note: ${note}`);
+            // Optional: You can update UI here
+        })
+        .catch(error => {
+            alert('Failed to reorder the order.');
+        });
+    } else {
+        alert('Reorder request was canceled.');
+    }
+}
+function refundOrder(orderId) {
+    const confirmRefund = confirm("Do you want to refund this order?");
+    if (confirmRefund) {
+        const note = prompt("Please attach a drive link that displays the product image :", "Refund with no special instructions");
+        fetch(`https://localhost:7280/api/Orders/RefundOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`Refund Initiated! Order ${orderId} is being refunded. Note: ${note}`);
+            // Optional: You can update UI here
+        })
+        .catch(error => {
+            alert('Failed to process the refund.');
+        });
+    } else {
+        alert('Refund request was canceled.');
+    }
+}
+
     </script>
 }

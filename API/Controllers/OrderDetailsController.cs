@@ -2,6 +2,7 @@
 using API.Repositories;
 using Data.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Data.SqlTypes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -42,49 +43,45 @@ namespace API.Controllers
 			}
 		}
 		[HttpPost("AddOrUpdateOrderDetail")]
-		public async Task<IActionResult> AddOrUpdateOrderDetail(Guid orderId, Guid productId, int quantity)
+		public async Task<IActionResult> AddOrUpdateOrderDetail(Guid orderId, Guid productId, Guid sizeId, int quantity)
 		{
 			try
 			{
-                var orderDetail =  await _orderDetailRepo.AddOrUpdateOrderDetail(orderId, productId, quantity);
-				return Ok(orderDetail);
+                await _orderDetailRepo.AddOrUpdateOrderDetail(orderId, productId, sizeId, quantity);
+				return Ok(new {success = true, message ="Successfully"});
 			}
-			catch (KeyNotFoundException ex)
-			{
-				return NotFound(ex.Message);
-			}
+
 			catch (Exception ex)
 			{
-				return Problem(ex.Message);
-			}
+                return Problem(detail: ex.Message, title: "Add to order failed");
+            }
 		}
 		[HttpPut("UpdateOrderDetail")]
-		public async Task<IActionResult> UpdateOrderDetail(Guid orderId, Guid productId, int quantity)
+		public async Task<IActionResult> UpdateOrderDetail(Guid orderId, Guid productId,Guid sizeId, int quantity)
 		{
-            // Cập nhật order detail logic
-            var orderDetail = await _orderDetailRepo.UpdateOrderDetail(orderId, productId, quantity);
+			try
+			{
+                await _orderDetailRepo.UpdateOrderDetail(orderId, productId, sizeId, quantity);
+                return Ok(new { success = true, message = "Update success" });
 
-            if (orderDetail != null)
-            {
-                return Ok(orderDetail); // Trả về JSON
             }
-            else
-            {
-                return NoContent(); // Trả về 204 nếu không có nội dung
+            catch (Exception ex)
+			{
+                return Problem(detail: ex.Message, title: "update failed");
             }
         }
 
 		[HttpPost("RemoveOrderDetail")]
-		public async Task<ActionResult> RemoveOrderDetail(Guid orderId, Guid productId, int quantity)
+		public async Task<ActionResult> RemoveOrderDetail(Guid orderId, Guid productId, Guid sizeId)
 		{
 			try
 			{
-				var result = await _orderDetailRepo.RemoveOrderDetail(orderId, productId, quantity);
-				return Ok(result); 
+				await _orderDetailRepo.RemoveOrderDetail(orderId, productId, sizeId);
+				return Ok(new { success = true, message ="Remove success" }); 
 			}
 			catch (KeyNotFoundException ex)
 			{
-				return Problem(ex.Message); 
+				return Problem(detail: ex.Message, title: "remove failed"); 
 			}
 			
 		}

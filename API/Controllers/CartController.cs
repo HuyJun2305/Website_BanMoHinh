@@ -125,10 +125,10 @@ namespace API.Controllers
                 {
                     ci.Product.Name,
                     ImageUrl = ci.Product.Images.FirstOrDefault()?.URL ?? "default-image-url",
-                    ci.Quatity,
-                    Price = ci.Product.Price * ci.Quatity
+                    ci.Quantity,
+                    Price = ci.Product.Price * ci.Quantity
                 }),
-                Total = cart.CartDetails.Sum(ci => ci.Product.Price * ci.Quatity)
+                Total = cart.CartDetails.Sum(ci => ci.Product.Price * ci.Quantity)
             };
 
             return Ok(result);

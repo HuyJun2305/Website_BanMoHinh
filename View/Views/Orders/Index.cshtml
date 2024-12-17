@@ -317,6 +317,7 @@ function cancelOrder(orderId) {
                     `Order ${orderId} has been canceled. Reason: ${note}`,
                     'error'
                 );
+                location.reload();
                 // Cập nhật nội dung ghi chú
                 document.getElementById(`note-${orderId}`).textContent = note;
             })

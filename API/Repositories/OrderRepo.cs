@@ -254,13 +254,14 @@ namespace API.Repositories
         {
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
+                .ThenInclude(od => od.Product).AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
             {
                 throw new Exception("Order not found");
             }
+
             if (order.Status == OrderStatus.ChoXacNhan)
             {
                 order.Status = OrderStatus.ChuanBiDonHang;
@@ -280,7 +281,7 @@ namespace API.Repositories
                     }
 
                     var productSize = await _context.ProductSizes
-                        .Include(ps => ps.Size) // Include thông tin Size
+                        .Include(ps => ps.Size).AsNoTracking() // Include thông tin Size
                         .FirstOrDefaultAsync(ps => ps.ProductId == product.Id && ps.SizeId == orderDetail.SizeId);
 
                     if (productSize != null)
@@ -373,7 +374,7 @@ namespace API.Repositories
             // Tìm đơn hàng cũ
             var oldOrder = await _context.Orders
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
+                .ThenInclude(od => od.Product).AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (oldOrder == null)

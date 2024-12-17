@@ -34,7 +34,7 @@ namespace API.Repositories
             await _context.Products.AddAsync(sp);
             await _context.SaveChangesAsync();
         }
-        public async Task Delete(Guid productId, Guid? sizeId)
+        public async Task Delete(Guid productId)
         {
             // Lấy sản phẩm theo productId và bao gồm cả ProductSizes
             var product = await _context.Products
@@ -47,45 +47,18 @@ namespace API.Repositories
                 throw new KeyNotFoundException("Sản phẩm không tồn tại.");
             }
 
-            if (sizeId == null)
+            // Xóa các bản ghi trong bảng ProductSizes liên quan đến sản phẩm
+            if (product.ProductSizes != null)
             {
-                // Nếu không có sizeId, xóa sản phẩm bình thường
-                _context.Products.Remove(product);
+                _context.ProductSizes.RemoveRange(product.ProductSizes);
                 await _context.SaveChangesAsync();
             }
-            else
-            {
-                // Nếu có sizeId, xóa bản ghi trong bảng ProductSize
-                var productSize = await _context.ProductSizes
-                    .FirstOrDefaultAsync(ps => ps.ProductId == productId && ps.SizeId == sizeId);
 
-                if (productSize != null)
-                {
-                    _context.ProductSizes.Remove(productSize);
-                    await _context.SaveChangesAsync();
-                }
-
-                // Kiểm tra xem sản phẩm có còn size này không và nếu không thì xóa size khỏi sản phẩm
-                var size = await _context.Sizes.FirstOrDefaultAsync(s => s.Id == sizeId);
-                if (size != null)
-                {
-                    // Kiểm tra số lượng sản phẩm còn lại với sizeId này
-                    var productSizeCount = await _context.ProductSizes
-                        .CountAsync(ps => ps.SizeId == sizeId);
-
-                    // Nếu không còn sản phẩm nào sử dụng size này, xóa size
-                    if (productSizeCount == 0)
-                    {
-                        _context.Sizes.Remove(size);
-                        await _context.SaveChangesAsync();
-                    }
-                }
-            }
-
-            // Sau khi xóa ProductSize và Size (nếu có), xóa luôn sản phẩm
+            // Xóa sản phẩm
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
+
         public async Task<List<Product>> GetAllProduct()
         {
             var result = await _context.Products

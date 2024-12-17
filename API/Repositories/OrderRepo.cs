@@ -232,6 +232,7 @@ namespace API.Repositories
         {
             return await _context.Orders.Include(o => o.Account)
                                  .Where(o => o.Status == status)
+                                 .OrderByDescending(o => o.DayCreate)
                                  .ToListAsync();
         }
         public async Task<List<Order>> GetOrderByCustomerId(Guid customerId)

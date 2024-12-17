@@ -77,7 +77,7 @@
                 <td>
                     <button class="btn btn-primary btn-sm" onclick="openStockEditModal('@item.Id', @item.Stock)">Edit Stock</button>
                     <button class="btn btn-warning btn-sm" onclick="openEditModal('@item.Id')">Edit</button>
-                    <button class="btn btn-danger btn-sm" data-id="@item.Id" onclick="deleteProduct(this)">Delete</button>
+                    <button class="btn btn-danger btn-sm" data-product-id="@item.Id" onclick="deleteProduct(this)">Delete</button>
                 </td>
             </tr>
         }
@@ -220,23 +220,18 @@
 
 @section Scripts{
     <script>
-
         function deleteProduct(button) {
-            var productId = $(button).data('id');
-            console.log("Product ID to delete:", productId);
+            var productId = $(button).data('product-id'); // Lấy ID sản phẩm
 
-            // Kiểm tra ID trong URL và xác nhận
+            // Xác nhận xóa sản phẩm
             if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+                // Gửi yêu cầu DELETE tới API
                 $.ajax({
-                    url: `/Products/Delete/${productId}`, // Đảm bảo URL có chứa ID đúng
+                    url: `https://localhost:7280/api/Products?productId=${productId}`,
                     type: 'DELETE',
-                    success: function (response) {
-                        if (response.success) {
-                            toastr.success('Sản phẩm đã được xóa thành công!');
-                            location.reload(); // Tải lại trang sau khi xóa
-                        } else {
-                            toastr.error('Có lỗi xảy ra. Vui lòng thử lại.');
-                        }
+                    success: function () {
+                        toastr.success('Sản phẩm đã được xóa thành công!');
+                        location.reload(); // Tải lại trang
                     },
                     error: function () {
                         toastr.error('Không thể xóa sản phẩm. Vui lòng kiểm tra lại.');
@@ -244,10 +239,8 @@
                 });
             }
         }
-
-
-
     </script>
+
 
     <script>
     // Hàm hiển thị modal chỉnh sửa sản phẩm

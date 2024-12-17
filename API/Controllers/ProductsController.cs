@@ -95,18 +95,17 @@ namespace API.Controllers
         }
         //Delete Product
         [HttpDelete]
-        public async Task<IActionResult> DeleteProduct(Guid productId, Guid? sizeId)
+        public async Task<IActionResult> DeleteProduct(Guid productId)
         {
             try
             {
-                await _productRepo.Delete( productId,sizeId);
-                await _productRepo.SaveChanges();
+                await _productRepo.Delete( productId);
+                return Ok(new { success = true, message = "Delete comlplate" });
             }
             catch (Exception ex)
             {
                 return Problem(ex.Message);
             }
-            return NoContent();
         }
 
         [HttpPost("AddSize")]

@@ -577,7 +577,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(response => {
                         if (response.ok) {
                             // Thành công, hiển thị thông báo
+
                             alert('Sản phẩm đã được thêm vào giỏ hàng!');
+									location.reload();
                         } else {
                             // Lỗi HTTP khác ngoài 2xx
                             throw new Error(`Request failed with status ${response.status}`);

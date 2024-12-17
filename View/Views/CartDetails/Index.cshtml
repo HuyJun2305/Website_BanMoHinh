@@ -456,73 +456,63 @@
                 addressDetail: addressDetail // Chi tiết địa chỉ
             };
         }
+
         async function checkout() {
-    // Lấy danh sách các cartDetailId được chọn
-    const checkedItems = Array.from(document.querySelectorAll('.checkbox-item:checked'));
-    const cartDetailIds = checkedItems.map(item => item.getAttribute('data-cart-detail-id'));
+            // Lấy danh sách các cartDetailId được chọn
+            const checkedItems = Array.from(document.querySelectorAll('.checkbox-item:checked'));
+            const cartDetailIds = checkedItems.map(item => item.getAttribute('data-cart-detail-id'));
 
-    if (cartDetailIds.length === 0) {
-        alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
-        return;
-    }
-
-    // Lấy phí giao hàng và thông tin địa chỉ
-    const shippingFee = parseFloat(document.getElementById('shippingFee')?.value) || 0;
-    const { city, district, ward, addressDetail } = getAddressInfo();
-
-    if (!city || !district || !ward || !addressDetail) {
-        alert('Vui lòng nhập đầy đủ thông tin địa chỉ.');
-        return;
-    }
-
-    // Tạo URL với các tham số cần thiết
-    const url = `https://localhost:7280/api/CartDetail/CheckOut?shippingFee=${shippingFee}&city=${encodeURIComponent(city)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}&addressDetail=${encodeURIComponent(addressDetail)}`;
-
-    // Tạo body JSON cho cartDetailIds
-    const jsonBody = JSON.stringify(cartDetailIds);
-    console.log(jsonBody);
-
-    // Gửi yêu cầu đến server
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: jsonBody // Gửi cartDetailIds dưới dạng body
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            // Kiểm tra thêm các thông báo từ server nếu có
-            if (result.success) {
-                alert('Thanh toán thành công!');
-                location.reload(); // Tải lại trang hoặc điều hướng đến trang khác
-            } else {
-                // Nếu có lỗi trong thân trả về
-                alert(`Lỗi thanh toán: ${result.message || 'Unknown error'}`);
+            if (cartDetailIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
+                return;
             }
-        } else {
-            // Trường hợp mã lỗi HTTP (404, 500, ...)
-            const error = await response.json();
-            alert(`Lỗi thanh toán: ${error.message || 'Không thể xử lý yêu cầu.'}`);
+
+            // Lấy phí giao hàng và thông tin địa chỉ
+            const shippingFee = parseFloat(document.getElementById('shippingFee')?.value) || 0;
+            const { city, district, ward, addressDetail } = getAddressInfo();
+
+            if (!city || !district || !ward || !addressDetail) {
+                alert('Vui lòng nhập đầy đủ thông tin địa chỉ.');
+                return;
+            }
+
+            // Tạo URL với các tham số cần thiết
+            const url = `https://localhost:7280/api/CartDetail/CheckOut?shippingFee=${shippingFee}&city=${encodeURIComponent(city)}&district=${encodeURIComponent(district)}&ward=${encodeURIComponent(ward)}&addressDetail=${encodeURIComponent(addressDetail)}`;
+
+            // Tạo body JSON cho cartDetailIds
+            const jsonBody = JSON.stringify(cartDetailIds);
+            console.log(jsonBody);
+
+            // Gửi yêu cầu đến server
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: jsonBody // Gửi cartDetailIds dưới dạng body
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    // Kiểm tra thêm các thông báo từ server nếu có
+                    if (result.success) {
+                        alert('Thanh toán thành công!');
+                    } else {
+                        // Nếu có lỗi trong thân trả về
+                        alert(`Lỗi thanh toán: ${result.message || 'Unknown error'}`);
+                    }
+                } else {
+                    // Trường hợp mã lỗi HTTP (404, 500, ...)
+                    const error = await response.json();
+                    alert(`Lỗi thanh toán: ${error.message || 'Không thể xử lý yêu cầu.'}`);
+                }
+            } catch (error) {
+                console.error('Lỗi khi thanh toán:', error);
+                alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+            }
         }
-    } catch (error) {
-        console.error('Lỗi khi thanh toán:', error);
-        alert('Có lỗi xảy ra, vui lòng thử lại sau.');
-    }
-}
 
-
-        // Gán sự kiện onclick cho nút thanh toán
-        document.getElementById('checkoutButton').addEventListener('click', async function () {
-            await checkout();
-        });
-
-
-    </script>
-    <!--Phần select checkbox-->
-    <script>
         // Lắng nghe sự kiện click của checkbox "select-all"
         document.getElementById('select-all').addEventListener('change', function () {
             // Lấy tất cả checkbox có class là 'checkbox-item'
@@ -537,7 +527,12 @@
             updateCartSummary();
         });
 
+        // Gán sự kiện onclick cho nút thanh toán
+        document.getElementById('checkoutButton').addEventListener('click', async function () {
+            await checkout();
+        });
     </script>
+
     <!--Phần tính tổng tiền và tổng số lượng-->
     <script>
         // Cập nhật giỏ hàng, tính toán tổng tiền, tổng trọng lượng và phí ship
@@ -631,6 +626,7 @@
             if (newQuantity === 0) {
                 if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
                     showDeleteConfirmation(itemId);
+                    location.reload();
                 } else {
                     // Nếu người dùng chọn No, quay lại giá trị ban đầu
                     quantityInput.value = 1;

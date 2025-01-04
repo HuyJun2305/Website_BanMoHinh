@@ -13,7 +13,7 @@
         @foreach (var status in Model.OrdersByStatus.Keys)
         {
             <li class="nav-item">
-                <a class="nav-link @((status == OrderStatus.ChoXacNhan) ? "active" : "")" id="tab-@status" data-bs-toggle="tab" href="#status-@status">
+                <a class="nav-link @((status == OrderStatus.WaitingForConfirmation) ? "active" : "")" id="tab-@status" data-bs-toggle="tab" href="#status-@status">
                     @Enum.GetName(typeof(OrderStatus), status)
                 </a>
             </li>
@@ -23,7 +23,7 @@
     <div class="tab-content">
         @foreach (var status in Model.OrdersByStatus.Keys)
         {
-            <div class="tab-pane fade @((status == OrderStatus.ChoXacNhan) ? "show active" : "")" id="status-@status">
+            <div class="tab-pane fade @((status == OrderStatus.WaitingForConfirmation) ? "show active" : "")" id="status-@status">
                 <table class="table">
                     <thead>
                         <tr>
@@ -53,7 +53,7 @@
                                     <td>@order.DayCreate</td>
                                     <td>
                                         <div class="d-flex justify-content-start">
-    @if (status == OrderStatus.ChoXacNhan) // "Chờ xác nhận"
+                                            @if (status == OrderStatus.WaitingForConfirmation) // "Chờ xác nhận"
     {
         <button class="btn btn-success btn-sm me-2" onclick="acceptOrder('@order.OrderId')" title="Accept">
             <i class="bi bi-check-circle"></i>
@@ -65,7 +65,7 @@
             <i class="bi bi-geo-alt"></i>
         </button>
     }
-    else if (status == OrderStatus.ChuanBiDonHang) // "Đang chuẩn bị"
+    else if (status == OrderStatus.PrepareOrder) // "Đang chuẩn bị"
     {
         <button class="btn btn-primary btn-sm me-2" onclick="deliverOrder('@order.OrderId')" title="Delivery">
             <i class="bi bi-truck"></i>
@@ -78,7 +78,7 @@
         </button>
 
     }
-    else if (status == OrderStatus.DangGiaoHang) // "Đang giao hàng"
+    else if (status == OrderStatus.OnDelivery) // "Đang giao hàng"
     {
         <button class="btn btn-primary btn-sm me-2" onclick="completeOrder('@order.OrderId')" title="Complete">
             <i class="bi bi-truck"></i>
@@ -97,13 +97,13 @@
          </button>
 
     }
-    else if (status == OrderStatus.DaGiaoHang) // "Đã giao"
+    else if (status == OrderStatus.Delivered) // "Đã giao"
     {
         <button class="btn btn-success btn-sm me-2" onclick="paidOrder('@order.OrderId')" title="Paid">
             <i class="bi bi-check"></i>
         </button>
     }
-    else if (status == OrderStatus.HoanThanh) // "Hoàn thành"
+    else if (status == OrderStatus.Complete) // "Hoàn thành"
     {
             <button class="btn btn-info btn-sm me-2" onclick="reorderOrder('@order.OrderId')" title="Reorder">
                 <i class="bi bi-arrow-repeat"></i>
@@ -113,7 +113,7 @@
             </button>
 
     }
-    else if (status == OrderStatus.HoanTra) // "Hoàn trả"
+    else if (status == OrderStatus.Refund) // "Hoàn trả"
     {
         <button class="btn btn-info btn-sm me-2" onclick="acceptRefund('@order.OrderId')" title="Accept Refund">
             <i class="bi bi-check"></i>
@@ -122,19 +122,19 @@
             <i class="bi bi-x-circle"></i>
         </button>
     }
-    else if (status == OrderStatus.DaHuy) // "Đã hủy"
+    else if (status == OrderStatus.Canceled) // "Đã hủy"
     {
         <button class="btn btn-info btn-sm me-2" onclick="reorderOrder('@order.OrderId')" title="Reorder">
             <i class="bi bi-arrow-repeat"></i>
         </button>
     }
-    else if (status == OrderStatus.TaiNanGiaoThong) // "Tai nạn giao thông"
+    else if (status == OrderStatus.Accident) // "Tai nạn giao thông"
     {
         <button class="btn btn-success btn-sm me-2" onclick="reshipOrder('@order.OrderId')" title="ReShip">
             <i class="bi bi-arrow-repeat"></i>
         </button>
     }
-    else if (status == OrderStatus.SaiThongTinDiaChi) // "Sai thông tin địa chỉ"
+    else if (status == OrderStatus.IncorrectAddress) // "Sai thông tin địa chỉ"
     {
         <button class="btn btn-success btn-sm me-2" onclick="reshipOrder('@order.OrderId')" title="ReShip">
             <i class="bi bi-arrow-repeat"></i>

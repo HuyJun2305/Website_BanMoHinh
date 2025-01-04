@@ -36,11 +36,6 @@ namespace View.Controllers
                 vouchers = vouchers.Where(v => v.DayEnd <= toDate.Value).ToList();
             }
 
-            if (!string.IsNullOrEmpty(status))
-            {
-                bool isActive = status == "true";
-                vouchers = vouchers.Where(v => v.Status == isActive).ToList();
-            }
 
             // Phân trang
             int totalRecords = vouchers.Count();

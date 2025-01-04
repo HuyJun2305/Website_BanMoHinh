@@ -159,7 +159,7 @@
 
                         <div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
                             <p class="stext-111 cl6 p-t-2">
-                                Đơn vị giao hàng toàn quốc. Thời gian giao hàng có thể mất khá lâu tầm 1 đến 2 tuần.
+                                Nationwide delivery unit. Delivery time may take quite a while, about 1 to 2 weeks.
                             </p>
                             <!-- Shipping Calculation Fields -->
                             <div class="p-t-15">
@@ -168,7 +168,7 @@
                                 </span>
                                 <hr />
                                 <div>
-                                    <label for="city">Chọn Thành Phố</label>
+                                    <label for="city">Select City</label>
                                     <select id="city" class="form-control">
                                         <option disabled selected>------</option>
                                         <!-- Các thành phố sẽ được thêm vào đây qua JavaScript -->
@@ -176,7 +176,7 @@
                                 </div>
                             
                                 <div>
-                                    <label for="district">Chọn Quận/Huyện</label>
+                                    <label for="district">Select Districtn</label>
                                     <select id="district" class="form-control" onchange="loadAvailableServices()">
                                         <option disabled selected>------</option>
                                         <!-- Các quận huyện sẽ được thêm vào đây qua JavaScript -->
@@ -184,36 +184,36 @@
                                 </div>
                             
                                 <div>
-                                    <label for="ward">Chọn Phường/Xã</label>
+                                    <label for="ward">Select Ward</label>
                                     <select id="ward" class="form-control">
                                         <option disabled selected>------</option>
                                         <!-- Các phường xã sẽ được thêm vào đây qua JavaScript -->
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="addressDetail">Chọn Phường/Xã</label>
+                                    <label for="addressDetail">Address Deitail</label>
                                     <textarea id="addressDetail" style="border: 1px solid #ccc" placeholder="Địa chỉ chi tiết" class="form-control"></textarea>
                                 </div>
                             
                                 <div>
-                                    <label for="weight">Trọng lượng hàng (gram):</label>
+                                    <label for="weight">Item weight (grams):</label>
                                     <input type="hidden" id="weight" class="form-control" disabled />
                                     <input type="number" id="total-weight" class="form-control" disabled />
                                 </div>
                             
                                 <div>
-                                    <label for="serviceId">Dịch vụ giao hàng:</label>
-                                    <label > <p> Hàng nhẹ <= 20000  Hàng nặng > 20000</></p>    </label>
+                                    <label for="serviceId">Delivery service:</label>
+                                    <label> <p> Light goods <= 20000  Heavy goods > 20000</></p>    </label>
                                     <select id="serviceId" class="form-control">
-                                        <option value="">Chọn gói dịch vụ</option> <!-- Mặc định có một lựa chọn ban đầu -->
+                                        <option value="">Select service package</option> <!-- Mặc định có một lựa chọn ban đầu -->
                                     </select>
                                 </div>
                             
                                 <div>
-                                    <button id="calculateShippingButton" class="btn btn-primary mt-3" type="button" onclick="calculateShippingFee()">Tính phí giao hàng</button>
+                                    <button id="calculateShippingButton" class="btn btn-primary mt-3" type="button" onclick="calculateShippingFee()">Calculate shipping costs</button>
                                 </div>
                                 <div>
-                                    <label for="shippingFee">Phí giao hàng:</label>
+                                    <label for="shippingFee">Shipping fee:</label>
                                     <input type="text" id="shippingFee" class="form-control" readonly />
                                 </div>
                             </div>

@@ -12,7 +12,6 @@ namespace API.Repositories
 		{
 			_context = context;
 		}
-		//sửa
 		public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(Guid? orderId)
 		{
 			return await _context.OrderDetails
@@ -31,7 +30,6 @@ namespace API.Repositories
         .Where(od => od.OrderId == orderId)
 		.ToListAsync();
 		}
-        //sửa
         public async Task<OrderDetail> GetOrderDetailByIdAsync(Guid id)
         {
             return await _context.OrderDetails
@@ -50,8 +48,6 @@ namespace API.Repositories
                         .ThenInclude(ps => ps.Size)
                 .FirstOrDefaultAsync(od => od.Id == id);
         }
-
-
         public async Task CreateAsync(OrderDetail orderDetail)
 		{
 			if (orderDetail == null)
@@ -59,7 +55,6 @@ namespace API.Repositories
 
 			await _context.OrderDetails.AddAsync(orderDetail);
 		}
-
 		public async Task UpdateAsync(OrderDetail orderDetail)
 		{
 			if (orderDetail == null)
@@ -71,7 +66,6 @@ namespace API.Repositories
 
 			_context.Entry(existingOrderDetail).CurrentValues.SetValues(orderDetail);
 		}
-
 		public async Task DeleteAsync(Guid id)
 		{
 			var orderDetail = await GetOrderDetailByIdAsync(id);
@@ -80,28 +74,23 @@ namespace API.Repositories
 
 			_context.OrderDetails.Remove(orderDetail);
 		}
-
 		public async Task SaveChangesAsync()
 		{
 			await _context.SaveChangesAsync();
 		}
-
 		public async Task<OrderDetail?> GetOrderDetailByOrderAndProductIdAsync(Guid orderId, Guid productId)
 		{
 			return await _context.OrderDetails
 				.FirstOrDefaultAsync(od => od.OrderId == orderId && od.ProductId == productId);
 		}
-
 		public async Task AddOrderDetailAsync(OrderDetail orderDetail)
 		{
 			await _context.OrderDetails.AddAsync(orderDetail);
 		}
-
 		public async Task UpdateOrderDetailAsync(OrderDetail orderDetail)
 		{
 			_context.OrderDetails.Update(orderDetail);
 		}
-
 		public async Task<decimal> GetTotalPriceByOrderIdAsync(Guid orderId)
 		{
 			var orderDetails = await _context.OrderDetails
@@ -110,7 +99,6 @@ namespace API.Repositories
 
 			return orderDetails.Sum(od => od.TotalPrice);
 		}
-
         public async Task<OrderDetail?> AddOrUpdateOrderDetail(Guid orderId, Guid productId, Guid sizeId, int quantity)
         {
             var order = await _context.Orders
@@ -186,8 +174,6 @@ namespace API.Repositories
             // Trả về OrderDetail vừa được thêm hoặc cập nhật
             return existingOrderDetail ?? newOrderDetail;
         }
-
-
         public async Task<bool> RemoveOrderDetail(Guid orderId, Guid productId, Guid sizeId)
         {
             // Kiểm tra Order tồn tại
@@ -223,8 +209,6 @@ namespace API.Repositories
             // Trả về true nếu thao tác thành công
             return true;
         }
-
-
         public async Task<OrderDetail> UpdateOrderDetail(Guid orderId, Guid productId, Guid sizeId, int quantity)
         {
             // Kiểm tra Order tồn tại

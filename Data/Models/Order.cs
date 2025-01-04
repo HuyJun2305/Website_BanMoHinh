@@ -14,7 +14,7 @@ namespace Data.Models
         public DateTime DayCreate { get; set; }
         public decimal Price { get; set; }
 		public PaymentMethod PaymentMethods { get; set; } = PaymentMethod.Cash;
-		public OrderStatus Status { get; set; } = OrderStatus.TaoDonHang;
+		public OrderStatus Status { get; set; } = OrderStatus.CreateOrder;
 		public PaymentStatus PaymentStatus {  get; set; }	
 
 		public string? Note { get; set; }
@@ -53,49 +53,49 @@ namespace Data.Models
 
 	public enum OrderStatus
 	{
-        [Display(Name = "Tạo đơn hàng")]
-        TaoDonHang = 0,
-		[Display(Name = "Chờ xác nhận")]	
-		ChoXacNhan = 1,
-		[Display(Name = "Chuẩn bị đơn hàng")]
-		ChuanBiDonHang = 2,
-		[Display(Name = "Đang giao hàng")]
-		DangGiaoHang = 3,
-		[Display(Name = "Đã giao hàng")]
-		DaGiaoHang = 4,
-		[Display(Name = "Hoàn thành")]
-		HoanThanh = 5,
+        [Display(Name = "Create Order")]
+        CreateOrder = 0,
+		[Display(Name = "Waiting for confirmation")]	
+		WaitingForConfirmation = 1,
+		[Display(Name = "Prepare order")]
+        PrepareOrder = 2,
+		[Display(Name = "On Delivery")]
+        OnDelivery = 3,
+		[Display(Name = "Delivered")]
+        Delivered = 4,
+		[Display(Name = "Complete")]
+        Complete = 5,
 
 		// Trong trường hợp xảy ra thất thoát
-		[Display(Name = "Đã huỷ")]
-		DaHuy = 6,
-		[Display(Name = "Mất hàng")]
-		MatHang = 7,
-		[Display(Name = "Hoàn trả")]
-		HoanTra = 8,
-        [Display(Name = "Sai thông tin địa chỉ")]
-        SaiThongTinDiaChi = 9,
-        [Display(Name = "Nhân viên giao hàng bị tai nạn giao thông")]
-        TaiNanGiaoThong = 10,
-		[Display(Name = "Sản phẩm được chấp nhận hoàn trả")]
-		ChapNhanHoanTra = 11
+		[Display(Name = "Canceled")]
+        Canceled = 6,
+		[Display(Name = "Lost goods")]
+        LostGoods = 7,
+		[Display(Name = "Refund")]
+        Refund = 8,
+        [Display(Name = "Incorrect address information")]
+        IncorrectAddress = 9,
+        [Display(Name = "Delivery man had a traffic accident")]
+        Accident = 10,
+		[Display(Name = "Products accepted for return")]
+		AcceptRefund = 11
 
 
     }
 
 	public enum PaymentStatus
 	{
-		[Display(Name = "Chờ thanh toán")]
+		[Display(Name = "Pending")]
 		Pending,
-        [Display(Name = "Bên giao hàng đang tạm ứng")]
+        [Display(Name = "Advance")]
         Advance,
-        [Display(Name = "Đã thanh toán")]
+        [Display(Name = "Paid")]
         Paid,
-        [Display(Name = "Thanh toán thất bại")]
+        [Display(Name = "Failed")]
         Failed,
-        [Display(Name = "Thanh toán đang xử lý")]
+        [Display(Name = "Processing")]
         Processing,
-        [Display(Name = "Hoàn tiền")]
+        [Display(Name = "Refunded")]
         Refunded
     }
 }

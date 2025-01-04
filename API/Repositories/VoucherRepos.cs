@@ -14,43 +14,34 @@ namespace API.Repositories
             _context = context;
         }
 
-        public async Task create(Voucher voucher)
+        public Task Create(Voucher voucher)
         {
-            if (await GetById(voucher.Id) != null) throw new DuplicateWaitObjectException($"Voucher : {voucher.Id} is existed!");
-            await _context.Vouchers.AddAsync(voucher);
-            await _context.SaveChangesAsync();
+            throw new NotImplementedException();
         }
 
-        public async Task delete(Guid id)
+        public Task Delete(Guid id)
         {
-            var voucher = await GetById(id);
-            if (voucher == null) throw new KeyNotFoundException("Not found this voucher!");
-            if (_context.Orders.Any(o => o.VoucherId == id))
-                throw new Exception("This voucher is applied to one or more invoices and cannot be deleted!");
-            _context.Vouchers.Remove(voucher);
-            await _context.SaveChangesAsync();
+            throw new NotImplementedException();
         }
 
-        public async Task<List<Voucher>> GetAll()
+        public Task<List<Voucher>> GetAll()
         {
-            return _context.Vouchers.ToList();
+            throw new NotImplementedException();
         }
 
-        public async Task<Voucher> GetById(Guid id)
+        public Task<Voucher> GetById(Guid id)
         {
-            return await _context.Vouchers.FindAsync(id);
+            throw new NotImplementedException();
         }
 
-        public async Task SaveChanges()
+        public Task SaveChanges()
         {
-            await _context.SaveChangesAsync();
+            throw new NotImplementedException();
         }
-        public async Task update(Voucher voucher)
+
+        public Task Update(Voucher voucher)
         {
-            if (await GetById(voucher.Id) == null)
-                throw new KeyNotFoundException("Not found this voucher!");
-            _context.Entry(voucher).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            throw new NotImplementedException();
         }
     }
 }

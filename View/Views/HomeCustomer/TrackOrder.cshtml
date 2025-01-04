@@ -12,13 +12,13 @@
 
     // Danh sách các trạng thái chính
     var mainStatuses = new[] {
-        OrderStatus.ChoXacNhan,
-        OrderStatus.ChuanBiDonHang,
-        OrderStatus.DangGiaoHang,
-        OrderStatus.DaGiaoHang,
-        OrderStatus.HoanThanh,
-        OrderStatus.DaHuy,
-        OrderStatus.HoanTra
+        OrderStatus.WaitingForConfirmation,
+        OrderStatus.PrepareOrder,
+        OrderStatus.OnDelivery,
+        OrderStatus.Delivered,
+        OrderStatus.Complete,
+        OrderStatus.Canceled,
+        OrderStatus.Refund
     };
 }
 
@@ -30,51 +30,62 @@
         @foreach (var status in mainStatuses)
         {
             <li class="nav-item" role="presentation">
-                <a class="nav-link @((status == OrderStatus.ChoXacNhan) ? "active" : "")" id="status-@status-tab" data-bs-toggle="tab" href="#status-@status" role="tab" aria-controls="status-@status" aria-selected="@(status == OrderStatus.ChoXacNhan ? "true" : "false")">
+                <a class="nav-link @((status == OrderStatus.WaitingForConfirmation) ? "active" : "")" id="status-@status-tab" data-bs-toggle="tab" href="#status-@status" role="tab" aria-controls="status-@status" aria-selected="@(status == OrderStatus.WaitingForConfirmation ? "true" : "false")">
                     @status
                 </a>
             </li>
         }
     </ul>
 
-    <div class="tab-content mt-3" id="orderTabsContent" style="max-height:500px">
+    <div class="tab-content mt-3" id="orderTabsContent" style="max-height:500px; overflow-y:auto;">
         @foreach (var status in mainStatuses)
         {
             var ordersInStatus = Model.OrdersByStatus.ContainsKey(status) ? Model.OrdersByStatus[status] : new List<Order>();
 
-            <div class="tab-pane fade @((status == OrderStatus.ChoXacNhan && ordersInStatus.Any()) ? "show active" : "")" id="status-@status" role="tabpanel" aria-labelledby="status-@status-tab">
+            <div class="tab-pane fade @((status == OrderStatus.WaitingForConfirmation && ordersInStatus.Any()) ? "show active" : "")" id="status-@status" role="tabpanel" aria-labelledby="status-@status-tab">
                 @if (ordersInStatus.Any())
                 {
                     <div class="d-flex flex-wrap gap-3 justify-content-start">
                         @foreach (var order in ordersInStatus)
                         {
-                            <div class="order-card card shadow-sm" style="width: 300px; margin-bottom: 15px;">
+                            <div class="order-card card shadow-sm" style="width: 350px; margin-bottom: 15px;">
                                 <div class="card-body">
-                                    <strong>Order ID:</strong> @order.Id <br />
-                                    <strong>Order Date:</strong> @order.DayCreate.ToString("dd/MM/yyyy") <br />
-                                    <strong>Total:</strong> @order.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))
-                                    <div class="d-flex gap-3 mt-3">
-                                        <button class="btn btn-info btn-sm" onclick="viewOrderDetails('@order.Id')">View Details</button>
-                                        @if (order.Status == OrderStatus.ChoXacNhan || order.Status == OrderStatus.ChuanBiDonHang)
-                                        {
-                                            <button class="btn btn-danger btn-sm" onclick="showCancelOrderModal('@order.Id')">Cancel Order</button>
+                                    <h6 class="card-title"><strong>Order Date:</strong> @order.DayCreate.ToString("dd/MM/yyyy")</h6>
+                                    <p><strong>Total:</strong> @order.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))</p>
 
+                                    <div class="mt-3">
+                                        <h6><strong>Products:</strong></h6>
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (var detail in order.OrderDetails)
+                                            {
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    @detail.Product.Name
+                                                    <span class="badge bg-secondary">@detail.Quantity x</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+
+                                    <div class="d-flex gap-3 mt-3 justify-content-end">
+                                        <button class="btn btn-info btn-sm" onclick="viewOrderDetails('@order.Id')">Details</button>
+                                        @if (order.Status == OrderStatus.WaitingForConfirmation || order.Status == OrderStatus.PrepareOrder)
+                                        {
+                                            <button class="btn btn-danger btn-sm" onclick="showCancelOrderModal('@order.Id')">Cancel</button>
                                         }
-                                        else if (order.Status == OrderStatus.DaHuy)
+                                        else if (order.Status == OrderStatus.Canceled)
                                         {
                                             <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
                                         }
-                                        else if (order.Status == OrderStatus.HoanThanh)
+                                        else if (order.Status == OrderStatus.Complete)
                                         {
-                                            if(order.Status == OrderStatus.HoanTra)
+                                            if (order.Status == OrderStatus.Refund)
                                             {
                                                 <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
                                             }
                                             else
                                             {
-                                             <button class="btn btn-warning btn-sm" onclick="refundOrder('@order.Id')">Refund</button>
-                                            <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
-
+                                                <button class="btn btn-warning btn-sm" onclick="refundOrder('@order.Id')">Refund</button>
+                                                <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
                                             }
                                         }
                                     </div>
@@ -88,52 +99,52 @@
                     <!-- Hiển thị hình ảnh và thông báo "No orders found for this status" -->
                     <div class="text-center">
                         <img src="/path/404.png" alt="No Orders" class="img-fluid" style="max-width: 200px;" />
-                        <p class="mt-3">No orders found for this status.</p>
+                        <p class="mt-3 text-muted">No orders found for this status.</p>
                     </div>
                 }
             </div>
         }
     </div>
 </div>
-
-
 <!-- Modal hiển thị chi tiết đơn hàng -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow-lg">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title fw-bold" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Nội dung chi tiết đơn hàng sẽ được nạp vào đây -->
-                <div id="orderDetailsContent">
-                    Loading order details...
+                <!-- Nội dung chi tiết đơn hàng sẽ được tải động -->
+                <div id="orderDetailsContent" class="py-3 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="cancelOrderButton" onclick="showCancelOrderModal(currentOrderId)">Cancel Order</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- Modal nhập lý do hủy -->
+<!-- Modal hủy đơn hàng -->
 <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="cancelOrderModalLabel">Cancel Order</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Please provide a reason for canceling the order:</p>
-                <textarea id="cancelReason" class="form-control" rows="3" placeholder="Enter reason"></textarea>
+                <textarea id="cancelReason" class="form-control" rows="3" placeholder="Enter reason..."></textarea>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="submitCancelOrder()">Submit</button>
+                <button type="button" class="btn btn-danger" onclick="submitCancelOrder()">Submit</button>
             </div>
         </div>
     </div>
@@ -155,6 +166,15 @@
     .container {
         max-width: 1200px;
     }
+
+    .order-card {
+        margin-right: 15px;
+    }
+
+    .d-flex.flex-wrap {
+        gap: 20px; /* Tăng khoảng cách giữa các item */
+    }
+
 </style>
 
 @section Scripts {
@@ -163,15 +183,17 @@
         var myTab = new bootstrap.Tab(document.querySelector('.nav-tabs .active'));
         myTab.show();
     </script>
-
     <script>
         let currentOrderId = null;
 
+        // Hiển thị modal hủy đơn hàng
         function showCancelOrderModal(orderId) {
             currentOrderId = orderId; // Lưu lại orderId hiện tại
             const modal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
             modal.show(); // Hiển thị modal
         }
+
+        // Gửi yêu cầu hủy đơn hàng
         async function submitCancelOrder() {
             const note = document.getElementById('cancelReason').value.trim();
 
@@ -204,69 +226,72 @@
                 alert("Error occurred while canceling the order.");
             }
         }
+
+        // Xem chi tiết đơn hàng
         async function viewOrderDetails(orderId) {
-            // Hiển thị modal
+            currentOrderId = orderId; // Lưu orderId hiện tại
             const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
             modal.show();
 
-            // Cập nhật nội dung modal trong khi đợi API
             const orderDetailsContent = document.getElementById('orderDetailsContent');
-            orderDetailsContent.innerHTML = "Loading order details...";
+            orderDetailsContent.innerHTML = `
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                `;
 
             try {
-                // Gọi API để lấy chi tiết đơn hàng
+                // Lấy chi tiết đơn hàng
                 const response = await fetch(`https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId=${orderId}`);
 
                 if (response.ok) {
                     const orderDetails = await response.json();
 
-                    const sizeResponse = await fetch('https://localhost:7280/api/Sizes'); // API để lấy kích thước
+                    // Lấy dữ liệu kích thước
+                    const sizeResponse = await fetch('https://localhost:7280/api/Sizes');
                     const sizes = await sizeResponse.json();
 
-                    // Tạo một đối tượng tra cứu để nhanh chóng lấy value của sizeId
                     const sizeMap = sizes.reduce((map, size) => {
                         map[size.id] = size.value;
                         return map;
                     }, {});
 
-                    // Hiển thị thông tin chi tiết đơn hàng
                     if (orderDetails.length === 0) {
                         orderDetailsContent.innerHTML = "<p>No items found for this order.</p>";
                     } else {
                         orderDetailsContent.innerHTML = `
-                            <h5>Order ID: ${orderId}</h5>
-                            <table class="table table-bordered mt-3">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th>Size</th>
-                                        <th>Quantity</th>
-                                        <th>Total Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${orderDetails.map((item, index) => {
-                            // Log item để kiểm tra dữ liệu
-                            console.log('Item:', item);
+                                <h5 class="text-start fw-bold mb-3">Order ID: ${orderId}</h5>
+                                <table class="table table-bordered mt-3 text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Product</th>
+                                            <th>Size</th>
+                                            <th>Quantity</th>
+                                            <th>Total Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${orderDetails.map((item, index) => {
                             const sizeValue = sizeMap[item.sizeId] || 'Unknown Size';
                             return `
-                                            <tr>
-                                                <td>${index + 1}</td>
-                                                <td>
-                                                    <a href="/HomeCustomer/ViewProductDetails/${item.productId}" target="_blank">
-                                                        <image src="${item.product.images[0].url}" style="width: 150px; height:auto" />
-                                                    </a>
-                                                </td>
-                                                <td>${sizeValue}</td>
-                                                <td>${item.quantity}</td>
-                                                <td>${item.totalPrice.toLocaleString()} VND</td>
-                                            </tr>
-                                        `;
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <a href="/HomeCustomer/ViewProductDetails/${item.productId}" target="_blank">
+                                                            <img src="${item.product.images[0].url}" class="img-thumbnail" style="width: 120px; height: auto;" alt="${item.product.name}">
+                                                            <div>${item.product.name}</div>
+                                                        </a>
+                                                    </td>
+                                                    <td>${sizeValue}</td>
+                                                    <td>${item.quantity}</td>
+                                                    <td>${item.totalPrice.toLocaleString()} VND</td>
+                                                </tr>
+                                            `;
                         }).join('')}
-                                </tbody>
-                            </table>
-                        `;
+                                    </tbody>
+                                </table>
+                            `;
                     }
                 } else {
                     orderDetailsContent.innerHTML = "<p>Failed to load order details.</p>";
@@ -276,7 +301,6 @@
                 orderDetailsContent.innerHTML = "<p>An error occurred while loading order details.</p>";
             }
         }
-
     </script>
     <script>
         function reorderOrder(orderId) {

@@ -6,9 +6,9 @@ namespace API.IRepositories
     {
         Task<List<Voucher>> GetAll();
         Task<Voucher> GetById(Guid id);
-        Task create(Voucher voucher);
-        Task update(Voucher voucher);
-        Task delete(Guid id);
+        Task Create(Voucher voucher);
+        Task Update(Voucher voucher);
+        Task Delete(Guid id);
         Task SaveChanges();
     }
 }

@@ -81,7 +81,7 @@ namespace API.Repositories
                 DayCreate = DateTime.Now,
                 Price = 0,
                 PaymentMethods = PaymentMethod.Cash,
-                Status = OrderStatus.TaoDonHang,
+                Status = OrderStatus.CreateOrder,
                 CustomerName = customerAccount?.Name ?? "Guest",
                 VoucherId = voucherId
             };
@@ -152,7 +152,7 @@ namespace API.Repositories
             }
 
             // Kiểm tra trạng thái đơn hàng (đảm bảo không thay đổi đơn hàng đã hoàn thành)
-            if (order.Status == OrderStatus.HoanThanh)
+            if (order.Status == OrderStatus.Complete)
             {
                 throw new InvalidOperationException("Đơn hàng đã hoàn thành, không thể thanh toán lại.");
             }
@@ -200,7 +200,7 @@ namespace API.Repositories
             decimal change = amountGiven - totalPrice;
 
             // Cập nhật trạng thái đơn hàng
-            order.Status = OrderStatus.HoanThanh;
+            order.Status = OrderStatus.Complete;
             order.PaymentMethods = paymentMethod;
             order.PaymentStatus = PaymentStatus.Paid;
             order.Note = "Checkout in store";
@@ -262,9 +262,9 @@ namespace API.Repositories
                 throw new Exception("Order not found");
             }
 
-            if (order.Status == OrderStatus.ChoXacNhan)
+            if (order.Status == OrderStatus.WaitingForConfirmation)
             {
-                order.Status = OrderStatus.ChuanBiDonHang;
+                order.Status = OrderStatus.PrepareOrder;
 
                 foreach (var orderDetail in order.OrderDetails)
                 {
@@ -319,10 +319,10 @@ namespace API.Repositories
         public async Task CancelOrder(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order.Status == OrderStatus.ChoXacNhan || order.Status == OrderStatus.ChuanBiDonHang)
+            if (order.Status == OrderStatus.WaitingForConfirmation || order.Status == OrderStatus.PrepareOrder)
             {
                 // Cập nhật trạng thái đơn hàng
-                order.Status = OrderStatus.DaHuy;
+                order.Status = OrderStatus.Canceled;
                 order.PaymentStatus = PaymentStatus.Failed;
                 order.Note = note;
                 _context.Orders.Update(order);
@@ -338,9 +338,9 @@ namespace API.Repositories
         public async Task DeliveryOrder(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order.Status == OrderStatus.ChuanBiDonHang)
+            if (order.Status == OrderStatus.PrepareOrder)
             {
-                order.Status = OrderStatus.DangGiaoHang;
+                order.Status = OrderStatus.OnDelivery;
                 order.PaymentStatus = PaymentStatus.Advance;
                 order.Note = note;
                 _context.Orders.Update(order);
@@ -355,9 +355,9 @@ namespace API.Repositories
         public async Task ConplateOrder(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order.Status == OrderStatus.DangGiaoHang)
+            if (order.Status == OrderStatus.OnDelivery)
             {
-                order.Status = OrderStatus.DaGiaoHang;
+                order.Status = OrderStatus.Delivered;
                 order.PaymentStatus = PaymentStatus.Paid;
                 _context.Orders.Update(order);
             }
@@ -383,7 +383,7 @@ namespace API.Repositories
             }
 
             // Cập nhật trạng thái của đơn hàng cũ
-            oldOrder.Status = OrderStatus.DaHuy; // Thêm trạng thái "Mất đơn hàng"
+            oldOrder.Status = OrderStatus.Canceled; // Thêm trạng thái "Mất đơn hàng"
             oldOrder.PaymentStatus = PaymentStatus.Paid;
             oldOrder.Note = note;
 
@@ -396,7 +396,7 @@ namespace API.Repositories
                 PaymentMethods = oldOrder.PaymentMethods,
                 PaymentStatus = PaymentStatus.Pending,
                 DayCreate = DateTime.Now, // Đặt lại ngày tạo mới
-                Status = OrderStatus.ChoXacNhan, // Đặt trạng thái mới là "Chờ xác nhận"
+                Status = OrderStatus.WaitingForConfirmation, // Đặt trạng thái mới là "Chờ xác nhận"
                 Note = "Reorder.",
 
                 // Sao chép chi tiết đơn hàng
@@ -430,12 +430,12 @@ namespace API.Repositories
                 throw new Exception("Order not found");
             }
 
-            if (order.Status == OrderStatus.DangGiaoHang)
+            if (order.Status == OrderStatus.OnDelivery)
             {
                 foreach (var detail in order.OrderDetails)
                 {
 
-                    order.Status = OrderStatus.SaiThongTinDiaChi;
+                    order.Status = OrderStatus.IncorrectAddress;
                     order.PaymentStatus = PaymentStatus.Advance;
                     order.Note = note;
 
@@ -449,9 +449,9 @@ namespace API.Repositories
         public async Task MissingInformation(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order.Status == OrderStatus.DangGiaoHang)
+            if (order.Status == OrderStatus.OnDelivery)
             {
-                order.Status = OrderStatus.ChoXacNhan;
+                order.Status = OrderStatus.WaitingForConfirmation;
                 order.PaymentStatus = PaymentStatus.Pending;
                 order.Note = note;
                 _context.Orders.Update(order);
@@ -472,7 +472,7 @@ namespace API.Repositories
             }
 
             // Cập nhật trạng thái của đơn hàng cũ
-            oldOrder.Status = OrderStatus.MatHang; // Thêm trạng thái "Mất đơn hàng"
+            oldOrder.Status = OrderStatus.LostGoods; // Thêm trạng thái "Mất đơn hàng"
             oldOrder.PaymentStatus = PaymentStatus.Paid;
             oldOrder.Note = note ?? "Order marked as lost and recreated.";
 
@@ -485,7 +485,7 @@ namespace API.Repositories
                 PaymentMethods = oldOrder.PaymentMethods,
                 PaymentStatus = PaymentStatus.Pending,
                 DayCreate = DateTime.Now, // Đặt lại ngày tạo mới
-                Status = OrderStatus.ChoXacNhan, // Đặt trạng thái mới là "Chờ xác nhận"
+                Status = OrderStatus.WaitingForConfirmation, // Đặt trạng thái mới là "Chờ xác nhận"
                 Note = "Order recreated due to loss.",
 
                 // Sao chép chi tiết đơn hàng
@@ -510,9 +510,9 @@ namespace API.Repositories
         {
             // Tìm đơn hàng yêu cầu hoàn tiền
             var order = await _context.Orders.FindAsync(orderId);
-            if (order.Status == OrderStatus.HoanTra)
+            if (order.Status == OrderStatus.Refund)
             {
-                order.Status = OrderStatus.ChapNhanHoanTra;
+                order.Status = OrderStatus.AcceptRefund;
                 order.PaymentStatus = PaymentStatus.Refunded;
                 order.Note = note;
             }
@@ -525,11 +525,11 @@ namespace API.Repositories
             var order = await _context.Orders.FindAsync(orderId);
 
 
-            if (order.Status == OrderStatus.HoanTra)
+            if (order.Status == OrderStatus.Refund)
             {
-                order.Status = OrderStatus.HoanThanh;
+                order.Status = OrderStatus.Complete;
                 order.PaymentStatus = PaymentStatus.Paid;
-                order.Status = OrderStatus.HoanThanh;
+                order.Status = OrderStatus.Complete;
                 order.Note = "The product does not meet return requirements";  // Optional: Ghi chú lý do hủy bỏ
             }
 
@@ -545,9 +545,9 @@ namespace API.Repositories
                 .FindAsync(orderId);
 
 
-            if (order.Status == OrderStatus.HoanThanh)
+            if (order.Status == OrderStatus.Complete)
             {
-                order.Status = OrderStatus.HoanTra;
+                order.Status = OrderStatus.Refund;
                 order.PaymentStatus = PaymentStatus.Pending;
                 order.Note = note;
                 _context.Orders.Update(order);
@@ -562,9 +562,9 @@ namespace API.Repositories
         public async Task PaidOrder(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order.Status == OrderStatus.DaGiaoHang)
+            if (order.Status == OrderStatus.Delivered)
             {
-                order.Status = OrderStatus.HoanThanh;
+                order.Status = OrderStatus.Complete;
                 order.PaymentStatus = PaymentStatus.Paid;
                 _context.Orders.Update(order);
             }
@@ -589,7 +589,7 @@ namespace API.Repositories
                 throw new Exception("Order not found");
             }
 
-            if (order.Status == OrderStatus.DangGiaoHang)
+            if (order.Status == OrderStatus.OnDelivery)
             {
                 foreach (var detail in order.OrderDetails)
                 {
@@ -608,7 +608,7 @@ namespace API.Repositories
                     }
                 }
 
-                order.Status = OrderStatus.TaiNanGiaoThong;
+                order.Status = OrderStatus.Accident;
                 order.PaymentStatus = PaymentStatus.Advance;
                 order.Note = note;
 
@@ -632,9 +632,9 @@ namespace API.Repositories
         public async Task ReShip(Guid orderId, string? note)
         {
             var order = await _context.Orders.FindAsync(orderId);   
-            if(order.Status == OrderStatus.TaiNanGiaoThong || order.Status == OrderStatus.SaiThongTinDiaChi)
+            if(order.Status == OrderStatus.Accident || order.Status == OrderStatus.IncorrectAddress)
             {
-                order.Status = OrderStatus.DangGiaoHang;
+                order.Status = OrderStatus.OnDelivery;
                 order.PaymentStatus= PaymentStatus.Advance;
                 order.Note = note;
                 _context.Orders.Update(order);

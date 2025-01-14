@@ -14,11 +14,12 @@
         {
             <li class="nav-item">
                 <a class="nav-link @((status == OrderStatus.WaitingForConfirmation) ? "active" : "")" id="tab-@status" data-bs-toggle="tab" href="#status-@status">
-                    @Enum.GetName(typeof(OrderStatus), status)
+                    @status.GetDisplayName()
                 </a>
             </li>
         }
     </ul>
+
 
     <div class="tab-content">
         @foreach (var status in Model.OrdersByStatus.Keys)
@@ -27,15 +28,15 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">Customer Name</th>
-                            <th scope="col">Customer PhoneNumber</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Payment Method</th>
-                            <th scope="col">Payment Status</th>
-                            <th scope="col">Created On</th>
-                            <th scope="col">Action</th>
-                            <th scope="col">Note</th>
+                            <th scope="col">Mã đơn hàng</th>
+                            <th scope="col">Tên khách hàng</th>
+                            <th scope="col">Số điện thoại </th>
+                            <th scope="col">Giá</th>
+                            <th scope="col">Phương thức thanh toán</th>
+                            <th scope="col">Trạng thái thanh toán</th>
+                            <th scope="col">Được tạo bởi</th>
+                            <th scope="col">Thao tác</th>
+                            <th scope="col">Ghi chú</th>
                         </tr>
                     </thead>
                         <tbody id="orderTableBody">
@@ -47,100 +48,124 @@
                                     <td>@order.OrderId</td>
                                     <td>@order.CustomerName</td>
                                     <td>@order.PhoneNumber</td>
-                                    <td>@order.Price</td>
-                                    <td>@Enum.GetName(typeof(PaymentMethod), order.PaymentMethods)</td>
-                                    <td>@Enum.GetName(typeof(PaymentStatus), order.PaymentStatus)</td>
+                                    <td>@order.Price?.ToString("#,0₫", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                    <td>@order.PaymentMethods.GetDisplayName()</td>
+                                    <td>@order.PaymentStatus.GetDisplayName()</td>
                                     <td>@order.DayCreate</td>
                                     <td>
                                         <div class="d-flex justify-content-start">
                                             @if (status == OrderStatus.WaitingForConfirmation) // "Chờ xác nhận"
-    {
-        <button class="btn btn-success btn-sm me-2" onclick="acceptOrder('@order.OrderId')" title="Accept">
-            <i class="bi bi-check-circle"></i>
-        </button>
-        <button class="btn btn-danger btn-sm" onclick="cancelOrder('@order.OrderId')" title="Cancel">
-            <i class="bi bi-x-circle"></i>
-        </button>
-        <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
-            <i class="bi bi-geo-alt"></i>
-        </button>
-    }
-    else if (status == OrderStatus.PrepareOrder) // "Đang chuẩn bị"
-    {
-        <button class="btn btn-primary btn-sm me-2" onclick="deliverOrder('@order.OrderId')" title="Delivery">
-            <i class="bi bi-truck"></i>
-        </button>
-        <button class="btn btn-danger btn-sm" onclick="cancelOrder('@order.OrderId')" title="Cancel">
-            <i class="bi bi-x-circle"></i>
-        </button>
-        <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
-            <i class="bi bi-geo-alt"></i>
-        </button>
-
-    }
-    else if (status == OrderStatus.OnDelivery) // "Đang giao hàng"
-    {
-        <button class="btn btn-primary btn-sm me-2" onclick="completeOrder('@order.OrderId')" title="Complete">
-            <i class="bi bi-truck"></i>
-        </button>
-        <button class="btn btn-warning btn-sm me-2" onclick="shippingError('@order.OrderId')" title="ShippingError">
-            <i class="bi bi-geo-fill"></i>
-        </button>
-        <button class="btn btn-danger btn-sm me-2" onclick="lostOrder('@order.OrderId')" title="LostOrder">
-            <i class="bi bi-box-seam"></i>
-        </button>
-        <button class="btn btn-danger btn-sm me-2" onclick="accident('@order.OrderId')" title="Accident">
-            <i class="bi bi-emoji-dizzy"></i>
-        </button>
-         <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
-               <i class="bi bi-geo-alt"></i>
-         </button>
-
-    }
-    else if (status == OrderStatus.Delivered) // "Đã giao"
-    {
-        <button class="btn btn-success btn-sm me-2" onclick="paidOrder('@order.OrderId')" title="Paid">
-            <i class="bi bi-check"></i>
-        </button>
-    }
-    else if (status == OrderStatus.Complete) // "Hoàn thành"
-    {
-            <button class="btn btn-info btn-sm me-2" onclick="reorderOrder('@order.OrderId')" title="Reorder">
-                <i class="bi bi-arrow-repeat"></i>
-            </button>
-            <button class="btn btn-success btn-sm me-2" onclick="printInvoice('@order.OrderId')" title="Print Invoice">
-                <i class="bi bi-printer"></i>
-            </button>
-
-    }
-    else if (status == OrderStatus.Refund) // "Hoàn trả"
-    {
-        <button class="btn btn-info btn-sm me-2" onclick="acceptRefund('@order.OrderId')" title="Accept Refund">
-            <i class="bi bi-check"></i>
-        </button>
-        <button class="btn btn-danger btn-sm me-2" onclick="cancelRefund('@order.OrderId')" title="Cancel Refund">
-            <i class="bi bi-x-circle"></i>
-        </button>
-    }
-    else if (status == OrderStatus.Canceled) // "Đã hủy"
-    {
-        <button class="btn btn-info btn-sm me-2" onclick="reorderOrder('@order.OrderId')" title="Reorder">
-            <i class="bi bi-arrow-repeat"></i>
-        </button>
-    }
-    else if (status == OrderStatus.Accident) // "Tai nạn giao thông"
-    {
-        <button class="btn btn-success btn-sm me-2" onclick="reshipOrder('@order.OrderId')" title="ReShip">
-            <i class="bi bi-arrow-repeat"></i>
-        </button>
-    }
-    else if (status == OrderStatus.IncorrectAddress) // "Sai thông tin địa chỉ"
-    {
-        <button class="btn btn-success btn-sm me-2" onclick="reshipOrder('@order.OrderId')" title="ReShip">
-            <i class="bi bi-arrow-repeat"></i>
-        </button>
-    }
-</div>
+                                            {
+                                                <button class="btn btn-success btn-sm me-2" onclick="acceptOrder('@order.OrderId')" title="Accept">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" onclick="cancelOrder('@order.OrderId')" title="Cancel">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.PrepareOrder) // "Đang chuẩn bị"
+                                            {
+                                                <button class="btn btn-primary btn-sm me-2" onclick="deliverOrder('@order.OrderId')" title="Delivery">
+                                                    <i class="bi bi-truck"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" onclick="cancelOrder('@order.OrderId')" title="Cancel">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.OnDelivery) // "Đang giao hàng"
+                                            {
+                                                <button class="btn btn-primary btn-sm me-2" onclick="completeOrder('@order.OrderId')" title="Complete">
+                                                    <i class="bi bi-truck"></i>
+                                                </button>
+                                                <button class="btn btn-warning btn-sm me-2" onclick="shippingError('@order.OrderId')" title="ShippingError">
+                                                    <i class="bi bi-geo-fill"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm me-2" onclick="lostOrder('@order.OrderId')" title="LostOrder">
+                                                    <i class="bi bi-box-seam"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm me-2" onclick="accident('@order.OrderId')" title="Accident">
+                                                    <i class="bi bi-emoji-dizzy"></i>
+                                                </button>
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.Delivered) // "Đã giao"
+                                            {
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm me-2" onclick="paidOrder('@order.OrderId')" title="Paid">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.Complete) // "Hoàn thành"
+                                            {
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm me-2" onclick="reorderOrder('@order.OrderId')" title="Reorder">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm me-2" onclick="printInvoice('@order.OrderId')" title="Print Invoice">
+                                                    <i class="bi bi-printer"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.Refund) // "Hoàn trả"
+                                            {
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm me-2" onclick="acceptRefund('@order.OrderId')" title="Accept Refund">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm me-2" onclick="cancelRefund('@order.OrderId')" title="Cancel Refund">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.Canceled) // "Đã hủy"
+                                            {
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm me-2" onclick="reorderOrder('@order.OrderId')" title="Reorder">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.Accident) // "Tai nạn giao thông"
+                                            {
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm me-2" onclick="reshipOrder('@order.OrderId')" title="ReShip">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </button>
+                                            }
+                                            else if (status == OrderStatus.IncorrectAddress) // "Sai thông tin địa chỉ"
+                                            {
+                                                <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm me-2" onclick="reshipOrder('@order.OrderId')" title="ReShip">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </button>
+                                            }
+                                        </div>
 
                                     </td>
                                     <td>
@@ -162,28 +187,33 @@
     </div>
 </div>
 
-
 <!-- Modal -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <h5 class="modal-title" id="orderDetailsModalLabel">Thông tin đơn hàng</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Order Details Content -->
-                <p><strong>Customer Name:</strong> <span id="modalCustomerName"></span></p>
-                <p><strong>Shipping Fee:</strong> <span id="modalShippingFee"></span></p>
-                <p><strong>Status:</strong> <span id="modalOrderStatus"></span></p>
-                <h5>Address:</h5>
-                <p><strong>City:</strong> <span id="modalCity"></span></p>
-                <p><strong>District:</strong> <span id="modalDistrict"></span></p>
-                <p><strong>Ward:</strong> <span id="modalWard"></span></p>
-                <p><strong>Details:</strong> <span id="modalAddressDetail"></span></p>
+                <p><strong>Tên khách hàng:</strong> <span id="modalCustomerName"></span></p>
+                <p><strong>Trạng thái đơn hàng:</strong> <span id="modalOrderStatus"></span></p>
+                <p><strong>Ngày tạo đơn hàng:</strong> <span id="modalDayCreate"></span></p>
+                <p><strong>Ghi chú:</strong> <span id="modalNote"></span></p>
+                <p><strong>Phí giao hàng:</strong> <span id="modalShippingFee"></span></p>
+                <hr />
+                <h5>Danh sách chi tiết đơn hàng:</h5>
+                <ul id="orderDetailsList"></ul>
+                <hr />
+                <h5>Địa chỉ giao hàng:</h5>
+                <p><strong>Thành phố:</strong> <span id="modalCity"></span></p>
+                <p><strong>Quận/Huyện:</strong> <span id="modalDistrict"></span></p>
+                <p><strong>Phường/Xã:</strong> <span id="modalWard"></span></p>
+                <p><strong>Địa chỉ chi tiết:</strong> <span id="modalAddressDetail"></span></p>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -191,503 +221,530 @@
 
 @section Scripts{
     <script>
-        function addressInfo(orderId) {
-            // Định nghĩa URL API
+        function orderInfo(orderId) {
             const apiUrl = `https://localhost:7280/api/Orders/GetOrderDetails?orderId=${orderId}`;
 
-            // Gọi API và xử lý kết quả
             fetch(apiUrl)
                 .then(response => {
-                    if (!response.ok) {     
-                        throw new Error("Unable to fetch order details.");
+                    if (!response.ok) {
+                        throw new Error("Không thể lấy thông tin chi tiết về đơn hàng.");
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data);
-                    // Cập nhật modal với thông tin trả về từ API
+                    // Cập nhật thông tin trong modal
                     document.getElementById("modalCustomerName").innerText = data.customerName || "N/A";
-                    document.getElementById("modalShippingFee").innerText = data.shippingFee ? `$${data.shippingFee}` : "N/A";
-                    document.getElementById("modalOrderStatus").innerText = data.status || "N/A";
-
+                    document.getElementById("modalOrderStatus").innerText = getStatusText(data.status);
+                    document.getElementById("modalDayCreate").innerText = new Date(data.dayCreate).toLocaleString() || "N/A";
+                    document.getElementById("modalNote").innerText = data.note || "N/A";
+                    document.getElementById("modalShippingFee").innerText = data.shippingFee ? `${data.shippingFee.toLocaleString()} ₫` : "N/A";
                     document.getElementById("modalCity").innerText = data.orderAddresses.city || "N/A";
                     document.getElementById("modalDistrict").innerText = data.orderAddresses.district || "N/A";
                     document.getElementById("modalWard").innerText = data.orderAddresses.ward || "N/A";
                     document.getElementById("modalAddressDetail").innerText = data.orderAddresses.addressDetail || "N/A";
+
+                    // Hiển thị danh sách chi tiết đơn hàng (1 sản phẩm)
+                    const orderDetailsList = document.getElementById("orderDetailsList");
+                    orderDetailsList.innerHTML = ""; // Xóa danh sách cũ
+                    data.orderDetails.forEach(detail => {
+                        const listItem = document.createElement("li");
+
+                        // Lấy thông tin size
+                        const size = detail.product.productSizes.find(size => size.sizeId === detail.sizeId);
+
+                        // Hiển thị thông tin sản phẩm và size
+                        listItem.innerHTML = `
+                            <strong>Sản phẩm:</strong> ${detail.product.name} -
+                            <strong>Số lượng:</strong> ${detail.quantity} -
+                            <strong>Giá:</strong> ${detail.totalPrice.toLocaleString()} ₫ -
+                            <strong>Size:</strong> ${size ? size.size.value : "N/A"}`;
+
+                        orderDetailsList.appendChild(listItem);
+                    });
 
                     // Hiển thị modal
                     const modal = new bootstrap.Modal(document.getElementById("orderDetailsModal"));
                     modal.show();
                 })
                 .catch(error => {
-                    console.error("Error fetching order details:", error);
-                    alert("Unable to fetch order details.");
+                    console.error("Lỗi khi tìm kiếm thông tin chi tiết đơn hàng:", error);
+                    alert("Không thể lấy thông tin chi tiết về đơn hàng.");
                 });
         }
+
+        function getStatusText(status) {
+            // Tạo một đối tượng map trạng thái từ OrderStatus enum
+            const statusMap = {
+                0: "Tạo đơn hàng",
+                1: "Chờ xác nhận",
+                2: "Chuẩn bị đơn hàng",
+                3: "Giao hàng",
+                4: "Đã giao",
+                5: "Hoàn thành",
+                6: "Đã Hủy",
+                7: "Mất đơn",
+                8: "Hoàn trả",
+                9: "Sai thông tin địa chỉ",
+                10: "Tai nạn giao thông",
+                11: "Xác nhận hoàn trả"
+            };
+
+            // Trả về trạng thái tương ứng hoặc "Chưa xác định" nếu không có trong map
+            return statusMap[status] || "Chưa xác định";
+        }
+
 
     </script>
 
 <script>
-    // Chấp nhận đơn hàng
-    function acceptOrder(orderId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to accept this order?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, accept it!',
-            cancelButtonText: 'No, cancel it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`https://localhost:7280/api/Orders/AcceptOrder?orderId=${orderId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(async (response) => {
-                    if (response.ok) {
-                        const data = await response.json();
-                        Swal.fire(
-                            'Accepted!',
-                            data.message || `Order ${orderId} has been accepted.`,
-                            'success'
-                        );
-                    location.reload();
-                    } else {
-                        // Parse the error message from the server
-                        const error = await response.json();
-                        Swal.fire(
-                            'Error!',
-                            error.detail || 'Failed to accept the order.',
-                            'error'
-                        );
-                    }
-                })
-                .catch((error) => {
-                    // Handle unexpected errors (e.g., network issues)
+        // Chấp nhận đơn hàng
+        function acceptOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn có muốn chấp nhận đơn hàng này không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, chấp nhận!',
+                cancelButtonText: 'Không, hủy!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`https://localhost:7280/api/Orders/AcceptOrder?orderId=${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(async (response) => {
+                            if (response.ok) {
+                                const data = await response.json();
+                                Swal.fire(
+                                    'Đã chấp nhận!',
+                                    data.message || `Đơn hàng ${orderId} đã được chấp nhận.`,
+                                    'success'
+                                );
+                                location.reload();
+                            } else {
+                                const error = await response.json();
+                                Swal.fire(
+                                    'Lỗi!',
+                                    error.detail || 'Chấp nhận đơn hàng thất bại.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch((error) => {
+                            Swal.fire(
+                                'Lỗi!',
+                                'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.',
+                                'error'
+                            );
+                        });
+                } else {
                     Swal.fire(
-                        'Error!',
-                        'An unexpected error occurred. Please try again later.',
-                        'error'
+                        'Đã hủy',
+                        'Chấp nhận đơn hàng đã bị hủy.',
+                        'info'
                     );
-                });
-            } else {
-                Swal.fire(
-                    'Cancelled',
-                    'Order acceptance was canceled.',
-                    'info'
-                );
-            }
-        });
-    }
-
-    // Hủy đơn hàng
-function cancelOrder(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to cancel this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, cancel it!',
-        cancelButtonText: 'No, keep it!',
-        input: 'textarea',
-        inputLabel: 'Note (Optional)',
-        inputPlaceholder: 'Enter a reason for cancellation (optional)',
-        inputAttributes: {
-            'aria-label': 'Type your reason here'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            return note || "No reason provided";
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const note = result.value;
-            fetch(`https://localhost:7280/api/Orders/CancelOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire(
-                    'Canceled!',
-                    `Order ${orderId} has been canceled. Reason: ${note}`,
-                    'error'
-                );
-                location.reload();
-                // Cập nhật nội dung ghi chú
-                document.getElementById(`note-${orderId}`).textContent = note;
-            })
-            .catch(error => {
-                Swal.fire(
-                    'Error!',
-                    'Failed to cancel the order.',
-                    'error'
-                );
             });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Order cancellation was canceled.',
-                'info'
-            );
         }
-    });
-}
 
-function deliverOrder(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to deliver this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, deliver it!',
-        cancelButtonText: 'No, cancel delivery!',
-        input: 'textarea',
-        inputLabel: 'Note (Optional)',
-        inputPlaceholder: 'Enter a note for the delivery (optional)',
-        inputAttributes: {
-            'aria-label': 'Type your note here'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            // Kiểm tra xem người dùng có nhập ghi chú không, nếu không thì trả về "No special instructions"
-            return note.trim() || "No special instructions";
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const note = result.value;
-            fetch(`https://localhost:7280/api/Orders/DeliveryOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+        // Hủy đơn hàng
+        function cancelOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn có muốn hủy đơn hàng này không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, hủy!',
+                cancelButtonText: 'Không, giữ lại!',
+                input: 'textarea',
+                inputLabel: 'Ghi chú (Tùy chọn)',
+                inputPlaceholder: 'Nhập lý do hủy (tùy chọn)',
+                inputAttributes: {
+                    'aria-label': 'Nhập lý do tại đây'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return note || "Không có lý do";
                 }
-            })
-            .then(response => {
-                // Kiểm tra nếu response trả về mã lỗi
-                if (!response.ok) {
-                    throw new Error('Failed to deliver the order');
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const note = result.value;
+                    fetch(`https://localhost:7280/api/Orders/CancelOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.fire(
+                                'Đã hủy!',
+                                `Đơn hàng ${orderId} đã bị hủy. Lý do: ${note}`,
+                                'error'
+                            );
+                            location.reload();
+                            document.getElementById(`note-${orderId}`).textContent = note;
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi!',
+                                'Hủy đơn hàng không thành công.',
+                                'error'
+                            );
+                        });
+                } else {
+                    Swal.fire(
+                        'Đã hủy',
+                        'Hủy đơn hàng đã bị hủy.',
+                        'info'
+                    );
                 }
-                return response.json();
-            })
-            .then(data => {
-                Swal.fire(
-                    'Delivering!',
-                    `Order ${orderId} is being delivered. Note: ${note}`,
-                    'success'
-                );
-                // Cập nhật nội dung ghi chú
-                document.getElementById(`note-${orderId}`).textContent = note;
-                location.reload();
-
-            })
-            .catch(error => {
-                Swal.fire(
-                    'Error!',
-                    error.message || 'Failed to deliver the order.',
-                    'error'
-                );
             });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Order delivery was canceled.',
-                'info'
-            );
         }
-    });
-}
 
-    // Đã giao hàng
-    function completeOrder(orderId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to complete this order?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, complete it!',
-            cancelButtonText: 'No, cancel it!',
-            input: 'textarea',
-            inputPlaceholder: 'Enter a note here...',
-            inputAttributes: {
-                'aria-label': 'Enter a note'
-            },
-            showLoaderOnConfirm: true,
-            preConfirm: (note) => {
+        function deliverOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn có muốn giao đơn hàng này không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, giao!',
+                cancelButtonText: 'Không, hủy giao hàng!',
+                input: 'textarea',
+                inputLabel: 'Ghi chú (Tùy chọn)',
+                inputPlaceholder: 'Nhập ghi chú cho giao hàng (tùy chọn)',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú tại đây'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return note.trim() || "Không có hướng dẫn đặc biệt";
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const note = result.value;
+                    fetch(`https://localhost:7280/api/Orders/DeliveryOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Giao hàng không thành công');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            Swal.fire(
+                                'Đang giao!',
+                                `Đơn hàng ${orderId} đang được giao. Ghi chú: ${note}`,
+                                'success'
+                            );
+                            document.getElementById(`note-${orderId}`).textContent = note;
+                            location.reload();
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi!',
+                                error.message || 'Giao hàng không thành công.',
+                                'error'
+                            );
+                        });
+                } else {
+                    Swal.fire(
+                        'Đã hủy',
+                        'Giao hàng đã bị hủy.',
+                        'info'
+                    );
+                }
+            });
+        }
+
+        // Đã giao hàng
+        function completeOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn có muốn hoàn tất đơn hàng này không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, hoàn tất!',
+                cancelButtonText: 'Không, hủy!',
+                input: 'textarea',
+                inputPlaceholder: 'Nhập ghi chú ở đây...',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
                     return fetch(`https://localhost:7280/api/Orders/ComplateOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(async (response) => {
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data;
-                    } else {
-                        const error = await response.json();    
-                        throw new Error(error.detail || 'Failed to complete the order.');
-                    }
-                })
-                .catch((error) => {
-                    Swal.showValidationMessage(`Request failed: ${error.message}`);
-                });
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire(
-                    'Completed!',
-                    `Order ${orderId} has been completed.`,
-                    'success'
-                );
-                // Reload lại bảng sau khi hoàn thành đơn hàng
-           location.reload();
-            }
-        });
-    }
-
-    // Lỗi vận chuyển
-    function shippingError(orderId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to mark this order as a shipping error?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, mark it!',
-            cancelButtonText: 'No, cancel it!',
-            input: 'textarea',
-            inputPlaceholder: 'Enter a note here...',
-            inputAttributes: {
-                'aria-label': 'Enter a note'
-            },
-            showLoaderOnConfirm: true,
-            preConfirm: (note) => {
-                return fetch(`https://localhost:7280/api/Orders/ShippingError?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error('Failed to mark the order as a shipping error.');
-                    }
-                    return data;
-                })
-                .catch(error => {
-                    Swal.showValidationMessage(`Request failed: ${error}`);
-                });
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire(
-                    'Marked as Error!',
-                    `Order ${orderId} has been marked as a shipping error.`,
-                    'success'
-                );
-                // Reload lại bảng sau khi đánh dấu đơn hàng có lỗi vận chuyển
-           location.reload();
-            }
-        });
-    }
-
-    // Lỗi vận chuyển
-function shippingError(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to mark this order as a shipping error?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, mark it!',
-        cancelButtonText: 'No, cancel it!',
-        input: 'textarea',
-        inputPlaceholder: 'Enter a note here...',
-        inputAttributes: {
-            'aria-label': 'Enter a note'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            return fetch(`https://localhost:7280/api/Orders/ShippingError?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(async (response) => {
+                            if (response.ok) {
+                                const data = await response.json();
+                                return data;
+                            } else {
+                                const error = await response.json();
+                                throw new Error(error.detail || 'Hoàn tất đơn hàng không thành công.');
+                            }
+                        })
+                        .catch((error) => {
+                            Swal.showValidationMessage(`Yêu cầu thất bại: ${error.message}`);
+                        });
                 }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error('Failed to mark the order as a shipping error.');
-                    }
-                    return data;
-                })
-                .catch(error => {
-                    Swal.showValidationMessage(`Request failed: ${error}`);
-                });
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire(
-                'Marked as Error!',
-                `Order ${orderId} has been marked as a shipping error.`,
-                'success'
-            );
-                location.reload();
-        }
-    });
-}
-
-// Đơn hàng bị mất
-function lostOrder(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to mark this order as lost?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, mark it!',
-        cancelButtonText: 'No, cancel it!',
-        showLoaderOnConfirm: true,
-        preConfirm: () => {
-            return fetch(`https://localhost:7280/api/Orders/LostOrder?orderId=${orderId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Hoàn tất!',
+                        `Đơn hàng ${orderId} đã được hoàn tất.`,
+                        'success'
+                    );
+                    location.reload();
                 }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error('Failed to mark the order as lost.');
-                    }
-                    return data;
-                })
-                .catch(error => {
-                    Swal.showValidationMessage(`Request failed: ${error}`);
-                });
+            });
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire(
-                'Marked as Lost!',
-                `Order ${orderId} has been marked as lost.`,
-                'success'
-            );
-           location.reload();
-        }
-    });
-}
 
-// Tai nạn
-function accident(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to mark this order as an accident?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, mark it!',
-        cancelButtonText: 'No, cancel it!',
-        input: 'textarea',
-        inputPlaceholder: 'Enter a note here...',
-        inputAttributes: {
-            'aria-label': 'Enter a note'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            return fetch(`https://localhost:7280/api/Orders/Accident?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+        // Lỗi vận chuyển
+        function shippingError(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn có muốn đánh dấu đơn hàng này là lỗi vận chuyển không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, đánh dấu lỗi!',
+                cancelButtonText: 'Không, hủy!',
+                input: 'textarea',
+                inputPlaceholder: 'Nhập ghi chú ở đây...',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return fetch(`https://localhost:7280/api/Orders/ShippingError?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error('Đánh dấu lỗi vận chuyển không thành công.');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Yêu cầu thất bại: ${error}`);
+                        });
                 }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error('Failed to mark the order as an accident.');
-                    }
-                    return data;
-                })
-                .catch(error => {
-                    Swal.showValidationMessage(`Request failed: ${error}`);
-                });
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire(
-                'Marked as Accident!',
-                `Order ${orderId} has been marked as an accident.`,
-                'success'
-            );
-           location.reload();
-        }
-    });
-}
-
-// Đã thanh toán
-function paidOrder(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to mark this order as paid?",
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, mark it!',
-        cancelButtonText: 'No, cancel it!',
-        showLoaderOnConfirm: true,
-        preConfirm: () => {
-            return fetch(`https://localhost:7280/api/Orders/PaidOrder?orderId=${orderId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Đánh dấu lỗi!',
+                        `Đơn hàng ${orderId} đã được đánh dấu là lỗi vận chuyển.`,
+                        'success'
+                    );
+                    location.reload();
                 }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error('Failed to mark the order as paid.');
-                    }
-                    return data;
-                })
-                .catch(error => {
-                    Swal.showValidationMessage(`Request failed: ${error}`);
-                });
+            });
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire(
-                'Marked as Paid!',
-                `Order ${orderId} has been marked as paid.`,
-                'success'
-            );
-           location.reload();
+        // Lỗi vận chuyển
+        function shippingError(orderId) {
+            Swal.fire({
+                title: 'Bạn có chắc không?',
+                text: "Bạn muốn đánh dấu đơn hàng này là lỗi vận chuyển?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, đánh dấu lỗi!',
+                cancelButtonText: 'Không, hủy bỏ!',
+                input: 'textarea',
+                inputPlaceholder: 'Nhập ghi chú ở đây...',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return fetch(`https://localhost:7280/api/Orders/ShippingError?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error('Không thể đánh dấu đơn hàng là lỗi vận chuyển.');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Yêu cầu thất bại: ${error}`);
+                        });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Đã đánh dấu là lỗi!',
+                        `Đơn hàng ${orderId} đã được đánh dấu là lỗi vận chuyển.`,
+                        'success'
+                    );
+                    location.reload();
+                }
+            });
         }
-    });
-}
 
+        // Đơn hàng bị mất
+        function lostOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn có chắc không?',
+                text: "Bạn muốn đánh dấu đơn hàng này là bị mất?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, đánh dấu mất!',
+                cancelButtonText: 'Không, hủy bỏ!',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch(`https://localhost:7280/api/Orders/LostOrder?orderId=${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error('Không thể đánh dấu đơn hàng là bị mất.');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Yêu cầu thất bại: ${error}`);
+                        });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Đã đánh dấu là mất!',
+                        `Đơn hàng ${orderId} đã được đánh dấu là bị mất.`,
+                        'success'
+                    );
+                    location.reload();
+                }
+            });
+        }
+
+        // Tai nạn
+        function accident(orderId) {
+            Swal.fire({
+                title: 'Bạn có chắc không?',
+                text: "Bạn muốn đánh dấu đơn hàng này là tai nạn?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, đánh dấu tai nạn!',
+                cancelButtonText: 'Không, hủy bỏ!',
+                input: 'textarea',
+                inputPlaceholder: 'Nhập ghi chú ở đây...',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return fetch(`https://localhost:7280/api/Orders/Accident?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error('Không thể đánh dấu đơn hàng là tai nạn.');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Yêu cầu thất bại: ${error}`);
+                        });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Đã đánh dấu là tai nạn!',
+                        `Đơn hàng ${orderId} đã được đánh dấu là tai nạn.`,
+                        'success'
+                    );
+                    location.reload();
+                }
+            });
+        }
+
+        // Đã thanh toán
+        function paidOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn có chắc không?',
+                text: "Bạn muốn đánh dấu đơn hàng này là đã thanh toán?",
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonText: 'Có, đánh dấu đã thanh toán!',
+                cancelButtonText: 'Không, hủy bỏ!',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch(`https://localhost:7280/api/Orders/PaidOrder?orderId=${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error('Không thể đánh dấu đơn hàng là đã thanh toán.');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Yêu cầu thất bại: ${error}`);
+                        });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Đã đánh dấu là đã thanh toán!',
+                        `Đơn hàng ${orderId} đã được đánh dấu là đã thanh toán.`,
+                        'success'
+                    );
+                    location.reload();
+                }
+            });
+        }
 
         // In hóa đơn
         function printInvoice(orderId) {
             Swal.fire({
-                title: 'Do you want to print the invoice for this order?',
+                title: 'Bạn có muốn in hóa đơn cho đơn hàng này không?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, print it!',
-                cancelButtonText: 'No, cancel!',
+                confirmButtonText: 'Có, in ngay!',
+                cancelButtonText: 'Không, hủy bỏ!',
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = `https://localhost:7280/api/Orders/PrintInvoice?orderId=${orderId}`;
                     Swal.fire(
-                        'Printing!',
-                        `Invoice for order ${orderId} is being printed.`,
+                        'Đang in!',
+                        `Hóa đơn cho đơn hàng ${orderId} đang được in.`,
                         'success'
                     );
-                               location.reload();
-
+                    location.reload();
                 } else {
                     Swal.fire(
-                        'Cancelled',
-                        'Printing was canceled.',
+                        'Đã hủy',
+                        'In hóa đơn đã bị hủy.',
                         'info'
                     );
                 }
@@ -695,228 +752,225 @@ function paidOrder(orderId) {
         }
 
         function acceptRefund(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to accept the refund for this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, accept refund!',
-        cancelButtonText: 'No, cancel!',
-        input: 'textarea',
-        inputLabel: 'Note (Optional)',
-        inputPlaceholder: 'Enter any note (optional)',
-        inputAttributes: {
-            'aria-label': 'Type your note here'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            return note.trim() || "Refund accepted with no special instructions";
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const note = result.value;
-            fetch(`https://localhost:7280/api/Orders/AcceptRefund?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            Swal.fire({
+                title: 'Bạn có chắc không?',
+                text: "Bạn muốn chấp nhận hoàn tiền cho đơn hàng này?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, chấp nhận hoàn tiền!',
+                cancelButtonText: 'Không, hủy bỏ!',
+                input: 'textarea',
+                inputLabel: 'Ghi chú (Tùy chọn)',
+                inputPlaceholder: 'Nhập ghi chú (tùy chọn)',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return note.trim() || "Hoàn tiền được chấp nhận mà không có ghi chú đặc biệt";
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire(
-                    'Refund Accepted!',
-                    `Order ${orderId} has been accepted for refund. Note: ${note}`,
-                    'success'
-                );
-                location.reload();
-            })
-            .catch(error => {
-                Swal.fire(
-                    'Error!',
-                    'Failed to accept the refund.',
-                    'error'
-                );
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const note = result.value;
+                    fetch(`https://localhost:7280/api/Orders/AcceptRefund?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.fire(
+                                'Hoàn tiền đã được chấp nhận!',
+                                `Đơn hàng ${orderId} đã được chấp nhận hoàn tiền. Ghi chú: ${note}`,
+                                'success'
+                            );
+                            location.reload();
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi!',
+                                'Không thể chấp nhận hoàn tiền.',
+                                'error'
+                            );
+                        });
+                } else {
+                    Swal.fire(
+                        'Đã hủy',
+                        'Chấp nhận hoàn tiền đã bị hủy.',
+                        'info'
+                    );
+                }
             });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Refund acceptance was canceled.',
-                'info'
-            );
         }
-    });
-}
-function cancelRefund(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to cancel the refund request for this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, cancel refund!',
-        cancelButtonText: 'No, keep refund request!',
-        showLoaderOnConfirm: true,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`https://localhost:7280/api/Orders/CancelRefund?orderId=${orderId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire(
-                    'Refund Canceled!',
-                    `Refund for order ${orderId} has been canceled.`,
-                    'success'
-                );
-                location.reload();
-            })
-            .catch(error => {
-                Swal.fire(
-                    'Error!',
-                    'Failed to cancel the refund.',
-                    'error'
-                );
-            });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Refund cancellation was canceled.',
-                'info'
-            );
-        }
-    });
-}
-function reshipOrder(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to reship this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, reship it!',
-        cancelButtonText: 'No, cancel reship!',
-        input: 'textarea',
-        inputLabel: 'Note (Optional)',
-        inputPlaceholder: 'Enter any note (optional)',
-        inputAttributes: {
-            'aria-label': 'Type your note here'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            return note.trim() || "Reship with no special instructions";
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const note = result.value;
-            fetch(`https://localhost:7280/api/Orders/ReShip?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire(
-                    'Reship Successful!',
-                    `Order ${orderId} is being reshipped. Note: ${note}`,
-                    'success'
-                );
-                // Optional: You can update UI here
-                           location.reload();
 
-            })
-            .catch(error => {
-                Swal.fire(
-                    'Error!',
-                    'Failed to reship the order.',
-                    'error'
-                );
-            });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Reship request was canceled.',
-                'info'
-            );
-        }
-    });
-}
-
-function reorderOrder(orderId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to reorder this order?",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, reorder it!',
-        cancelButtonText: 'No, cancel!',
-        input: 'textarea',
-        inputLabel: 'Note (Optional)',
-        inputPlaceholder: 'Enter any note for the new order (optional)',
-        inputAttributes: {
-            'aria-label': 'Type your note here'
-        },
-        showLoaderOnConfirm: true,
-        preConfirm: (note) => {
-            return note.trim() || "Reorder with no special instructions";
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const note = result.value;
-            fetch(`https://localhost:7280/api/Orders/ReOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+        function cancelRefund(orderId) {
+            Swal.fire({
+                title: 'Bạn có chắc không?',
+                text: "Bạn muốn hủy yêu cầu hoàn tiền cho đơn hàng này?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Có, hủy yêu cầu hoàn tiền!',
+                cancelButtonText: 'Không, giữ yêu cầu hoàn tiền!',
+                showLoaderOnConfirm: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`https://localhost:7280/api/Orders/CancelRefund?orderId=${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.fire(
+                                'Hoàn tiền đã bị hủy!',
+                                `Hoàn tiền cho đơn hàng ${orderId} đã bị hủy.`,
+                                'success'
+                            );
+                            location.reload();
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi!',
+                                'Không thể hủy hoàn tiền.',
+                                'error'
+                            );
+                        });
+                } else {
+                    Swal.fire(
+                        'Đã hủy',
+                        'Hủy yêu cầu hoàn tiền đã bị hủy.',
+                        'info'
+                    );
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire(
-                    'Reorder Successful!',
-                    `Order ${orderId} has been reordered. Note: ${note}`,
-                    'success'
-                );
-                           location.reload();
-                // Optional: You can update UI here
-            })
-            .catch(error => {
-                Swal.fire(
-                    'Error!',
-                    'Failed to reorder the order.',
-                    'error'
-                );
             });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Reorder request was canceled.',
-                'info'
-            );
         }
-    });
-}
+        function reshipOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn muốn gửi lại đơn hàng này không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đúng, gửi lại!',
+                cancelButtonText: 'Không, hủy gửi lại!',
+                input: 'textarea',
+                inputLabel: 'Ghi chú (Tùy chọn)',
+                inputPlaceholder: 'Nhập ghi chú (tùy chọn)',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú của bạn tại đây'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return note.trim() || "Gửi lại mà không có chỉ dẫn đặc biệt";
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const note = result.value;
+                    fetch(`https://localhost:7280/api/Orders/ReShip?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.fire(
+                                'Gửi lại thành công!',
+                                `Đơn hàng ${orderId} đang được gửi lại. Ghi chú: ${note}`,
+                                'success'
+                            );
+                            location.reload();
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi!',
+                                'Không thể gửi lại đơn hàng.',
+                                'error'
+                            );
+                        });
+                } else {
+                    Swal.fire(
+                        'Đã hủy',
+                        'Yêu cầu gửi lại đã bị hủy.',
+                        'info'
+                    );
+                }
+            });
+        }
 
+        function reorderOrder(orderId) {
+            Swal.fire({
+                title: 'Bạn chắc chắn chứ?',
+                text: "Bạn muốn đặt lại đơn hàng này không?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Đúng, đặt lại!',
+                cancelButtonText: 'Không, hủy đặt lại!',
+                input: 'textarea',
+                inputLabel: 'Ghi chú (Tùy chọn)',
+                inputPlaceholder: 'Nhập ghi chú cho đơn hàng mới (tùy chọn)',
+                inputAttributes: {
+                    'aria-label': 'Nhập ghi chú của bạn tại đây'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: (note) => {
+                    return note.trim() || "Đặt lại mà không có chỉ dẫn đặc biệt";
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const note = result.value;
+                    fetch(`https://localhost:7280/api/Orders/ReOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.fire(
+                                'Đặt lại thành công!',
+                                `Đơn hàng ${orderId} đã được đặt lại. Ghi chú: ${note}`,
+                                'success'
+                            );
+                            location.reload();
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi!',
+                                'Không thể đặt lại đơn hàng.',
+                                'error'
+                            );
+                        });
+                } else {
+                    Swal.fire(
+                        'Đã hủy',
+                        'Yêu cầu đặt lại đã bị hủy.',
+                        'info'
+                    );
+                }
+            });
+        }
 
         function reloadOrderTable(status) {
-    fetch(`https://localhost:7280/api/Orders/GetOrdersByStatus?status=${status}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
+            fetch(`https://localhost:7280/api/Orders/GetOrdersByStatus?status=${status}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('orderTableBody').innerHTML = data;
+                })
+                .catch(error => {
+                    Swal.fire(
+                        'Lỗi!',
+                        'Không thể tải lại bảng đơn hàng.',
+                        'error'
+                    );
+                });
         }
-    })
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('orderTableBody').innerHTML = data;
-    })
-    .catch(error => {
-        Swal.fire(
-            'Error!',
-            'Failed to reload the order table.',
-            'error'
-        );
-    });
-}
 
 </script>
 

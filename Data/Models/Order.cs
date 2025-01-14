@@ -22,6 +22,7 @@ namespace Data.Models
 		public Guid CreateBy { get; set; }
         public DateTime? DayPayment { get; set; }
         public string CustomerName { get; set; }
+        public string PhoneNumber { get; set; }
 
         public decimal? AmountPaid { get; set; }             
         public decimal? Change { get; set; }
@@ -39,7 +40,7 @@ namespace Data.Models
 
 	public enum PaymentMethod
 	{
-		[Display(Name = "Cash")]
+		[Display(Name = "Tiền mặt")]
 		Cash = 0,
 		[Display(Name = "MoMo")]
 		MoMo = 1,
@@ -53,31 +54,31 @@ namespace Data.Models
 
 	public enum OrderStatus
 	{
-        [Display(Name = "Create Order")]
+        [Display(Name = "Tạo đơn hàng")]
         CreateOrder = 0,
-		[Display(Name = "Waiting for confirmation")]	
+		[Display(Name = "Chờ xác nhận")]	
 		WaitingForConfirmation = 1,
-		[Display(Name = "Prepare order")]
+		[Display(Name = "Chuẩn bị đơn hàng")]
         PrepareOrder = 2,
-		[Display(Name = "On Delivery")]
+		[Display(Name = "Giao hàng")]
         OnDelivery = 3,
-		[Display(Name = "Delivered")]
+		[Display(Name = "Đã giao")]
         Delivered = 4,
-		[Display(Name = "Complete")]
+		[Display(Name = "Hoàn thành")]
         Complete = 5,
 
 		// Trong trường hợp xảy ra thất thoát
-		[Display(Name = "Canceled")]
+		[Display(Name = "Đã Hủy")]
         Canceled = 6,
-		[Display(Name = "Lost goods")]
+		[Display(Name = "Mất đơn")]
         LostGoods = 7,
-		[Display(Name = "Refund")]
+		[Display(Name = "Hoàn trả")]
         Refund = 8,
-        [Display(Name = "Incorrect address information")]
+        [Display(Name = "Sai thông tin địa chỉ")]
         IncorrectAddress = 9,
-        [Display(Name = "Delivery man had a traffic accident")]
+        [Display(Name = "Tai nạn giao thông")]
         Accident = 10,
-		[Display(Name = "Products accepted for return")]
+		[Display(Name = "Xác nhận hoàn trả")]
 		AcceptRefund = 11
 
 
@@ -85,17 +86,17 @@ namespace Data.Models
 
 	public enum PaymentStatus
 	{
-		[Display(Name = "Pending")]
+		[Display(Name = "Chờ thanh toán")]
 		Pending,
-        [Display(Name = "Advance")]
+        [Display(Name = "Tạm ứng")]
         Advance,
-        [Display(Name = "Paid")]
+        [Display(Name = "Đã thanh toán")]
         Paid,
-        [Display(Name = "Failed")]
+        [Display(Name = "Thất bại")]
         Failed,
-        [Display(Name = "Processing")]
+        [Display(Name = "Đang xử lý")]
         Processing,
-        [Display(Name = "Refunded")]
+        [Display(Name = "Đã hoàn trả")]
         Refunded
     }
 }

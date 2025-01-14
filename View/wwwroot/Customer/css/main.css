@@ -1,9 +1,5 @@
 /*------------------------------------------------------------------
-Project:  
-Version:  
-Last change:  
-Assigned to:  Le Xuan Bach
-Primary use:  Company
+
 -------------------------------------------------------------------*/
 /*------------------------------------------------------------------
 [LAYOUT]
@@ -367,7 +363,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 }
 
 .main-menu > li > a {
-  font-family: Poppins-Medium;
+  font-family: none;
   font-size: 14px;
   color: #333;
   padding: 5px 0px;
@@ -2142,10 +2138,10 @@ input.num-product::-webkit-inner-spin-button {
 /*//////////////////////////////////////////////////////////////////
 [ S-Text 0 - 15 ]*/
 .stext-101 {
-  font-family: Poppins-Medium;
-  font-size: 15px;
-  line-height: 1.466667;
-  text-transform: uppercase;
+    font-family: Material-Design-Iconic-Font;
+    font-size: 15px;
+    line-height: 1.466667;
+    text-transform: uppercase;
 }
 
 .stext-102 {
@@ -2174,9 +2170,9 @@ input.num-product::-webkit-inner-spin-button {
 }
 
 .stext-106 {
-  font-family: Poppins-Regular;
-  font-size: 15px;
-  line-height: 1.2;
+    font-family: emoji;
+    font-size: 15px;
+    line-height: 1.2;
 }
 
 .stext-107 {
@@ -2265,9 +2261,9 @@ input.num-product::-webkit-inner-spin-button {
 }
 
 .mtext-102 {
-  font-family: Poppins-SemiBold;
-  font-size: 16px;
-  line-height: 1.6;
+    font-family: Montserrat-Bold;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 .mtext-103 {

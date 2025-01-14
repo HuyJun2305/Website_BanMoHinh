@@ -14,7 +14,7 @@
             <div id="orderForm" class="d-inline-block">
                 <!-- Lưu staffId vào input ẩn để sử dụng trong script -->
                 <input type="hidden" id="staffId" value="@Model.StaffId" />
-                <button id="createOrderBtn" class="btn btn-md btn-success">Create New Order</button>
+                <button id="createOrderBtn" class="btn btn-md btn-success">Tạo đơn hàng mới</button>
             </div>
             <hr />
             <div>
@@ -23,10 +23,10 @@
                      @if (Model.OrderId != null)
                     {
                         <h3 class="text-muted">
-                            Order Information: 
+                            Thông tin đơn hàng: 
                         </h3>
-                        <h5 class="text-muted">Order Id : <span id="orderHeader"> @Model.OrderId</span>  </h5>
-                        <h5 class="text-muted">Staff : <span>@Model.CreateBy</span> </h5>
+                        <h5 class="text-muted">Mã đơn hàng : <span id="orderHeader"> @Model.OrderId</span>  </h5>
+                        <h5 class="text-muted">Được tạo bởi : <span>@Model.CreateBy</span> </h5>
                     }
                     else{
                         <h3 id="orderHeader" class="text-muted">
@@ -40,7 +40,7 @@
                     @if (Model.OrderId != null)
                     {
                         <div id="addProductSection" class="d-inline-block">
-                            <button id="addProductBtn" class="btn btn-md btn-primary">Add Product For This Order</button>
+                            <button id="addProductBtn" class="btn btn-md btn-primary">Thêm sảm phẩm vào đơn hàng</button>
                         </div>
                     }
                     else
@@ -48,7 +48,9 @@
                         <!-- Nút để hiển thị Modal -->
                         <div id="addProductSection" class="d-inline-block">
                             <button id="addProductBtn"
-                                class="btn btn-md btn-primary" hidden> Add Product For This Order </button>
+                                        class="btn btn-md btn-primary" hidden>
+                                    Thêm sảm phẩm vào đơn hàng
+                                </button>
                         </div>
                     }
                 </div>
@@ -62,8 +64,8 @@
             {
                 <!-- Nếu không có đơn hàng, hiển thị trang trống hoặc thông báo -->
                 <div class="empty-page">
-                    <h4 class="text-center text-muted">No orders found.</h4>
-                    <p class="text-center">Your order history is empty.</p>
+                    <h4 class="text-center text-muted">Không tìm thấy đơn hàng</h4>
+                    <p class="text-center">Không có đơn hàng nào</p>
                 </div>
             }
             else
@@ -80,7 +82,7 @@
                                     data-order-id="@order.Id"
                                     type="button"
                                     role="tab">
-                                <span>Order - @stt</span>
+                                <span>Đơn hàng - @stt</span>
                                 <span class="btn-close delete-order-btn" aria-label="Close" data-order-id="@order.Id"></span>
                             </button>
                         </li>
@@ -97,11 +99,11 @@
         <div class="col-12">
             <div class="tab-content" id="orderTabsContent">
                 <div id="orderDetailsContent" class="tab-pane fade show active">
-                    <h3 class="text-center text-muted">Select an order to view details.</h3>
+                                <h3 class="text-center text-muted">Chọn một đơn hàng để xem chi tiết.</h3>
                 </div>
                 <div id="totalPriceContent" class="mt-3 text-end fw-bold fs-5">
                     <div class="order-summary mt-4">
-                    <h4>Total Order Price: <span id="orderTotal">0.00</span></h4>
+                    <h4>Tổng tiền tạm tính: <span id="orderTotal">0.00 VND</span></h4>
                 </div>                
             </div>
             </div>
@@ -115,16 +117,16 @@
         <!-- Khu vực nhập địa chỉ và số điện thoại (Chiếm 6 cột) -->
         <div class="col-md-6">
             <div id="customerInfo" class="mt-4 border p-3">
-                <h4>Customer Information</h4>
-                <button type="button" class="btn btn-info mt-2" id="isCustomerButton">Is Customer</button>
+                <h4>Thông tin khách hàng thân thiết</h4>
+                <button type="button" class="btn btn-info mt-2" id="isCustomerButton">Khách hàng thân thiết</button>
 
                 <!-- Dòng chứa các thông tin địa chỉ và số điện thoại -->
                 <div class="row">
                     <!-- Thành phố -->
                     <div class="col-md-6 mb-3">
-                        <label for="city" class="form-label">City</label>
+                        <label for="city" class="form-label">Thành phố</label>
                         <select class="form-select" id="city" required>
-                            <option value="">Select City</option>
+                            <option value="">Chọn thành phố</option>
                             <option value="Hanoi">Hanoi</option>
                             <option value="HoChiMinh">Ho Chi Minh</option>
                             <option value="DaNang">Da Nang</option>
@@ -133,9 +135,9 @@
 
                     <!-- Quận/Huyện -->
                     <div class="col-md-6 mb-3">
-                        <label for="district" class="form-label">District</label>
+                        <label for="district" class="form-label">Quận/Huyện</label>
                         <select class="form-select" id="district" required>
-                            <option value="">Select District</option>
+                            <option value="">Chọn quận/huyện</option>
                             <option value="DongDa">Dong Da</option>
                             <option value="HaiBaTrung">Hai Ba Trung</option>
                         </select>
@@ -145,9 +147,9 @@
                 <div class="row">
                     <!-- Phường/Xã -->
                     <div class="col-md-6 mb-3">
-                        <label for="ward" class="form-label">Ward</label>
+                        <label for="ward" class="form-label">Phường/Xã</label>
                         <select class="form-select" id="ward" required>
-                            <option value="">Select Ward</option>
+                            <option value="">Chọn phường/xã</option>
                             <option value="CuaNam">Cua Nam</option>
                             <option value="TrieuKhuc">Trieu Khuc</option>
                         </select>
@@ -155,24 +157,23 @@
 
                     <!-- Địa chỉ cụ thể -->
                     <div class="col-md-6 mb-3">
-                        <label for="specificAddress" class="form-label">Specific Address</label>
-                        <input type="text" class="form-control" id="specificAddress" placeholder="Enter your specific address" required />
+                        <label for="specificAddress" class="form-label">Địa chỉ cụ thể</label>
+                        <input type="text" class="form-control" id="specificAddress" placeholder="Nhập địa chỉ chi tiết của bạn " required />
                     </div>
 
                     <!-- Số điện thoại -->
                     <div class="col-md-6 mb-3">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number" required />
+                        <label for="phone" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="phone" placeholder="Nhập số điện thoại của bạn" required />
                     </div>
 
                     <!-- Ghi chú -->
                     <div class="col-md-6 mb-3">
-                        <label for="note" class="form-label">Note</label>
-                        <textarea class="form-control" id="note" rows="3" placeholder="Any additional note for the delivery?"></textarea>
+                        <label for="note" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="note" rows="3" placeholder="Ghi chú ?"></textarea>
                     </div>
 
                 </div>
-
 
             </div>
         </div>
@@ -180,7 +181,7 @@
         <!-- Khu vực thông tin đơn hàng (Chiếm 6 cột) -->
                     <div class="col-md-6">
                         <div id="orderInfo" class="mt-4 border p-3">
-                            <h4>Order Information</h4>
+                            <h4>Thông tin đơn hàng</h4>
 
                             <!-- Dòng chứa các thông tin giao hàng và lựa chọn vận chuyển -->
                             <div class="row">
@@ -188,12 +189,12 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" id="deliveryOption" />
-                                        <label class="form-check-label" for="deliveryOption">Choose Delivery</label>
+                                        <label class="form-check-label" for="deliveryOption">Giao hàng</label>
                                     </div>
                                 </div>
                                 <!-- Hiển thị thông tin đơn hàng -->
                                 <div class="col-md-6 mb-3">
-                                    <div id="orderDetailsText">Order summary will be shown here.</div>
+                                    <div id="orderDetailsText">Tóm tắt đơn hàng sẽ được hiển thị ở đây.</div>
                                 </div>
                             </div>
 
@@ -201,17 +202,17 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <!-- Voucher Input -->
-                                    <label for="voucherCode" class="form-label">Voucher Code</label>
-                                    <input type="text" class="form-control" id="voucherCode" placeholder="Enter your voucher code" />
-                                    <button type="button" class="btn btn-primary mt-2" id="applyVoucherButton">Apply Voucher</button>
+                                    <label for="voucherCode" class="form-label">Mã giảm giá</label>
+                                    <input type="text" class="form-control" id="voucherCode" placeholder="Nhập mã giảm giá " />
+                                    <button type="button" class="btn btn-primary mt-2" id="applyVoucherButton">Áp dụng mã giảm giá</button>
                                 </div>
 
                                 <!-- Hiển thị tổng tiền -->
                                 <div class="col-md-6 mb-3">
-                                    <p><strong>Total Price:</strong> <span id="totalPrice"></span></p>
-                                    <p><strong>Shipping Fee:</strong> <span id="shippingFee"></span></p>
-                                    <p><strong>Discount (Voucher):</strong> <span id="discount"></span></p>
-                                    <p><strong>Final Price:</strong> <span id="finalPrice"></span></p>
+                                    <p><strong>Tổng tiền:</strong> <span id="totalPrice">0</span></p>
+                                    <p><strong>Phí giao hàng:</strong> <span id="shippingFee">0</span></p>
+                                    <p><strong>Giảm giá (Mã giảm):</strong> <span id="discount">0</span></p>
+                                    <p><strong>Tổng giá trị:</strong> <span id="finalPrice">0</span></p>
                                 </div>
                             </div>
 
@@ -219,10 +220,8 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <!-- Phương thức thanh toán -->
-                                    <label for="paymentMethod" class="form-label">Payment Method</label>
+                                    <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
                                     <div class="payment-method-icons row g-1">
-                                        <!-- Sử dụng g-1 để giảm khoảng cách giữa các cột -->
-                                        <!-- Thêm class g-1 để có khoảng cách nhỏ giữa các cột -->
                                         <div class="col-md-3">
                                             <label class="payment-icon-container d-block text-center">
                                                 <input type="radio" name="paymentMethod" value="2" class="payment-icon" />
@@ -253,21 +252,15 @@
                                 <!-- Nút Check Out -->
                                 <div class="col-md-6 mb-3">                                  
                                     <div class="mb-3">
-                                        <input id="amountGivenInput" class="form-control" placeholder="Enter amount given" />
+                                        <input id="amountGivenInput" class="form-control" placeholder="Nhập số tiền khách đưa" />
                                     </div>
                                     <div>
-                                        <button type="button" class="btn btn-success w-100" id="checkOutButton">Check Out</button>
+                                        <button type="button" class="btn btn-success w-100" id="checkOutButton">Thanh toán</button>
                                     </div>
                                 </div>
                             </div>
-
-
-
                         </div>
                     </div>
-
-
-
     </div>
 </div>
         </div>
@@ -281,7 +274,7 @@
     <div class="modal-dialog modal-lg"> <!-- Thay đổi kích thước modal thành modal-lg -->
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Add Product</h5>
+                <h5 class="modal-title" id="productModalLabel">Thêm sản phẩm</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -294,14 +287,14 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Product Name</th>
-                            <th>Image</th>
-                            <th>Price</th>
-                            <th>Category</th>
-                            <th>Brand</th>
-                            <th>Size</th>
-                            <th>Quantity</th>
-                            <th>Action</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Ảnh</th>
+                            <th>Giá</th>
+                            <th>Danh mục</th>
+                            <th>Thương hiệu</th>
+                            <th>Kích cỡ</th>
+                            <th>Số lượng</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
@@ -311,7 +304,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button"
-                    class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -441,7 +434,7 @@
         const staffId = document.getElementById("staffId").value;
 
         if (!staffId) {
-            alert("Staff ID is missing. Please log in again.");
+                    alert("ID nhân viên bị thiếu. Vui lòng đăng nhập lại.");
             return;
         }
 
@@ -471,7 +464,7 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error("Failed to create the order");
+                            throw new Error("Không tạo được đơn hàng");
                 }
                 return response.json();
             })
@@ -479,8 +472,8 @@
                 location.reload(); 
             })
             .catch(error => {
-                console.error("Error creating order:", error);
-                alert("Failed to create the order. Please try again.");
+               console.error("Lỗi tạo đơn hàng: ", error);
+               alert("Không tạo được đơn hàng.Vui lòng thử lại.");
             });
     }
 
@@ -543,7 +536,7 @@
 
 // Hàm xóa Order
 function deleteOrder(orderId) {
-    if (!confirm("Are you sure you want to delete this order?")) return;
+            if (!confirm("Bạn có chắc chắn muốn xóa đơn hàng này không ? ")) return;
 
     fetch(`https://localhost:7280/api/Orders/DeleteOrderById?id=${orderId}`, {
         method: 'DELETE',
@@ -553,98 +546,108 @@ function deleteOrder(orderId) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error("Failed to delete the order");
+           throw new Error("Không xóa được đơn hàng");
         }
         location.reload(); // Reload lại trang sau khi xóa
     })
     .catch(error => {
         console.error("Error deleting order:", error);
-        alert("Failed to delete the order. Please try again.");
+                    alert("Không xóa được đơn hàng.Vui lòng thử lại.");
     });
 }
 
-function loadOrderDetails(orderId) {
-    const url = `https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId=${orderId}`;
+        function loadOrderDetails(orderId) {
+            const url = `https://localhost:7280/api/OrderDetails/GetOrderDetailByOrderId?orderId=${orderId}`;
 
-    fetch(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-        return response.json();
-    })
-    .then(data => {
-        const contentDiv = document.getElementById("orderDetailsContent");
-        contentDiv.innerHTML = ""; // Clear previous content
+            fetch(url, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error(`Phản hồi của mạng không ổn: ${response.statusText}`);
+                    return response.json();
+                })
+                .then(data => {
+                    const contentDiv = document.getElementById("orderDetailsContent");
+                    contentDiv.innerHTML = ""; // Clear previous content
 
-        if (data && data.length > 0) {
-            const rows = data.map((item, index) => {
-                const product = item.product;
-                const sizes = product?.productSizes?.find(ps => ps.size?.id === item.sizeId);
-                const price = product?.price ?? 0;
-                const totalPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.totalPrice ?? (item.quantity * price));
+                    if (data && data.length > 0) {
+                        const rows = data.map((item, index) => {
+                            const product = item.product;
+                            const sizes = product?.productSizes?.find(ps => ps.size?.id === item.sizeId);
+                            const price = product?.price ?? 0;
+                            const totalPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.totalPrice ?? (item.quantity * price));
 
-                return `
-                <tr data-id="${item.id}-${sizes?.size?.id}">
-                    <td>${index + 1}</td>
-                    <td><img src="${product?.images?.[0]?.url ?? '/path/404.png'}" alt="${product?.name ?? 'No Name'}" class="img-thumbnail" style="width: 120px;" /></td>
-                    <td>${product?.name ?? 'Unknown Product'}</td>
-                    <td>${product?.category?.name ?? 'N/A'}</td>
-                    <td>${product?.brand?.name ?? 'N/A'}</td>
-                    <td>${sizes?.size?.value ?? 'N/A'}</td>
-                    <td data-price="${price}">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <button class="btn btn-outline-secondary decrease-quantity mx-1" data-size-id="${sizes?.size?.id}" data-id="${item.productId}" data-price="${price}" type="button">-</button>
-                            <input type="number" class="form-control quantity-input text-center" data-size-id="${sizes?.size?.id}" data-id="${item.productId}" value="${item.quantity}" min="1" style="width: 60px;" />
-                            <button class="btn btn-outline-secondary increase-quantity mx-1" data-size-id="${sizes?.size?.id}" data-id="${item.productId}" data-price="${price}" type="button">+</button>
-                        </div>
-                    </td>
-                    <td class="total-price" data-id="${item.productId}">${totalPrice}</td>
-                    <td><button class="btn btn-danger btn-sm remove-product" data-id="${item.productId}" data-size-id="${sizes?.size?.id}">Remove</button></td>
-                </tr>
-                `;
-            });
+                            return `
+                        <tr data-id="${item.id}-${sizes?.size?.id}">
+                            <td>${index + 1}</td>
+                            <td><img src="${product?.images?.[0]?.url ?? '/path/404.png'}" alt="${product?.name ?? 'N/A'}" class="img-thumbnail" style="width: 120px;" /></td>
+                            <td>${product?.name ?? 'Unknown Product'}</td>
+                            <td>${product?.category?.name ?? 'N/A'}</td>
+                            <td>${product?.brand?.name ?? 'N/A'}</td>
+                            <td>${sizes?.size?.value ?? 'N/A'}</td>
+                            <td data-price="${price}">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-secondary decrease-quantity mx-1" data-size-id="${sizes?.size?.id}" data-id="${item.productId}" data-price="${price}" type="button">-</button>
+                                    <input type="number" class="form-control quantity-input text-center" data-size-id="${sizes?.size?.id}" data-id="${item.productId}" value="${item.quantity}" min="1" style="width: 60px;" />
+                                    <button class="btn btn-outline-secondary increase-quantity mx-1" data-size-id="${sizes?.size?.id}" data-id="${item.productId}" data-price="${price}" type="button">+</button>
+                                </div>
+                            </td>
+                            <td class="total-price" data-id="${item.productId}">${totalPrice}</td>
+                            <td><button class="btn btn-danger btn-sm remove-product" data-id="${item.productId}" data-size-id="${sizes?.size?.id}">Xóa</button></td>
+                        </tr>
+                        `;
+                        });
 
-            const table = `
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Image</th>
-                        <th>Product Name</th>
-                        <th>Category</th>
-                        <th>Brand</th>
-                        <th>Size</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>${rows.join('')}</tbody>
-            </table>
-            `;
-            contentDiv.innerHTML = table;
+                        const table = `
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Thương hiệu</th>
+                                <th>Kích cỡ</th>
+                                <th>Giá tiền</th>
+                                <th>Số lượng</th>
+                                <th>Tổng tiền</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows.join('')}</tbody>
+                    </table>
+                    `;
+                        contentDiv.innerHTML = table;
 
-            bindCartEvents(orderId, data); // Gắn sự kiện cho các nút tăng giảm
-        } else {
-            contentDiv.innerHTML = `
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr><th>#</th><th>Image</th><th>Product Name</th><th>Category</th><th>Brand</th><th>Size</th><th>Price</th><th>Quantity</th><th>Total Price</th><th>Actions</th></tr>
-                </thead>
-                <tbody><tr><td colspan="10" class="text-center"><img src="/path/no-product-found.png" alt="No Products Found" style="width: auto; height: 350px;" /></td></tr></tbody>
-            </table>
-            `;
+                        bindCartEvents(orderId, data); // Gắn sự kiện cho các nút tăng giảm
+
+                        // **Cập nhật tổng tiền sau khi render xong**
+                        updateOrderTotal();
+                    } else {
+                        contentDiv.innerHTML = `
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr><th>#</th><th>Image</th><th>Product Name</th><th>Category</th><th>Brand</th><th>Size</th><th>Price</th><th>Quantity</th><th>Total Price</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody><tr><td colspan="10" class="text-center"><img src="/path/no-product-found.png" alt="No Products Found" style="width: auto; height: 350px;" /></td></tr></tbody>
+                    </table>
+                    `;
+
+                        // Đặt tổng tiền bằng 0 nếu không có sản phẩm
+                        const orderTotalElement = document.getElementById("orderTotal");
+                        if (orderTotalElement) {
+                            orderTotalElement.textContent = '0 VND';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching order details:", error);
+                    document.getElementById("orderDetailsContent").innerHTML = "<p>Có lỗi khi tải thông tin chi tiết đơn hàng. Vui lòng thử lại sau.</p>";
+                });
         }
-    })
-    .catch(error => {
-        console.error("Error fetching order details:", error);
-        document.getElementById("orderDetailsContent").innerHTML = "<p>Error loading order details. Please try again later.</p>";
-    });
-}
+
 
 // Gắn sự kiện cho các nút tăng giảm số lượng
 function bindCartEvents(orderId, data) {
@@ -711,17 +714,17 @@ function updateOrderDetail(orderId, productId, sizeId, quantity) {
         if (response.ok) {
             return response.json();
         } else {
-            throw new Error(`Error updating order detail: ${response.statusText}`);
+            throw new Error(`Lỗi khi cập nhật đơn : ${response.statusText}`);
         }
     })
     .then(data => {
-        toastr.success("Order detail updated successfully!", "Success");
-        console.log("Order detail updated successfully:", data);
+                    toastr.success("Chi tiết đơn hàng đã được cập nhật thành công!", "Thành công");
+                    console.log("Chi tiết đơn hàng được cập nhật thành công:", data);
         return data;
     })
     .catch(error => {
-        toastr.error("Failed to update order detail. Please try again.", "Error");
-        console.error("Error updating order detail:", error);
+                    toastr.error("Không cập nhật được chi tiết đơn hàng. Vui lòng thử lại.", "Lỗi");
+        console.error("Lỗi khi cập nhật chi tiết đơn hàng:", error);
     });
 }
 
@@ -798,12 +801,12 @@ function removeProductFromOrder(orderId, productId, sizeId) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`Error removing product: ${response.statusText}`);
+            throw new Error(`Lỗi khi loại bỏ khỏi đơn: ${response.statusText}`);
         }
         return response.json();
     })
     .then(() => {
-        toastr.success('Product removed successfully!');
+        toastr.success('Sản phẩm đã loại bỏ khỏi đơn');
         updateOrderTotal();
         setTimeout(function () {
                 window.location.reload(); // Reload trang
@@ -811,8 +814,8 @@ function removeProductFromOrder(orderId, productId, sizeId) {
         // Cập nhật tổng tiền sau khi xóa sản phẩm
     })
     .catch(error => {
-        console.error("Error removing product:", error);
-        toastr.error('Failed to remove product. Please try again.');
+                    console.error("Lỗi xóa sản phẩm khỏi đơn: ", error);
+                    toastr.error('Không thể xóa sản phẩm.Vui lòng thử lại.');
     });
 }
 
@@ -854,7 +857,7 @@ function removeProductFromOrder(orderId, productId, sizeId) {
                             </td>
                         `;
                     } else {
-                        console.log("No product sizes found or it's not an array");
+                        console.log(" Không tìm thấy kích thước sản phẩm hoặc không phải là một mảng");
                     }
 
                     tableBody.appendChild(row);
@@ -867,8 +870,8 @@ function removeProductFromOrder(orderId, productId, sizeId) {
                     });
                 }
             } catch (error) {
-                console.error("Error fetching products:", error);
-                alert("Error loading products. Please try again later.");
+                console.error("Lỗi khi tìm nạp sản phẩm: ", error);
+                alert("Có lỗi khi tải sản phẩm. Vui lòng thử lại sau.");
             }
         });
 
@@ -880,11 +883,10 @@ function removeProductFromOrder(orderId, productId, sizeId) {
                 try {
                     const sizeResponse = await fetch(`https://localhost:7280/api/Sizes/${size.sizeId}`);
                     const sizeData = await sizeResponse.json();
-                    console.log("Size data:", sizeData);  // Kiểm tra dữ liệu size
 
                     optionsHtml += `<option value="${size.sizeId}">${sizeData.value || 'Unknown Size'}</option>`;
                 } catch (error) {
-                    console.error("Error fetching size data:", error);
+                    console.error("Lỗi khi lấy dữ liệu kích thước:", error);
                 }
             }
 
@@ -894,7 +896,7 @@ function removeProductFromOrder(orderId, productId, sizeId) {
         async function addOrUpdateOrderDetail(productId, sizeId, quantity) {
             const orderElement = document.querySelector('.nav-link.active');
             if (!orderElement) {
-                toastr.error("Order ID not found.");
+                toastr.error("Không tìm thấy mã đơn hàng.");
                 return;
             }
 
@@ -902,19 +904,19 @@ function removeProductFromOrder(orderId, productId, sizeId) {
             const quantityElement = document.getElementById(`quantity-${productId}`);
 
             if (!quantityElement) {
-                toastr.error("Quantity input not found.");
+                toastr.error("Không tìm thấy số lượng đầu vào.");
                 return;
             }
 
             const quantityValue = parseInt(quantityElement.value);
 
             if (isNaN(quantityValue) || quantityValue <= 0) {
-                toastr.error("Quantity must be a valid number greater than zero.");
+                toastr.error("Số lượng phải là một số hợp lệ lớn hơn 0.");
                 return;
             }
 
             if (!sizeId || !productId) {
-                toastr.error("Invalid Product or Size ID.");
+                toastr.error("Mã sản phẩm hoặc kích thước không hợp lệ.");
                 return;
             }
 
@@ -930,18 +932,18 @@ function removeProductFromOrder(orderId, productId, sizeId) {
 
                 if (!response.ok) {
                     const errorData = await response.json(); // Lấy dữ liệu lỗi từ response
-                    const errorMessage = errorData.title || 'An error occurred'; // Lấy title hoặc thông báo mặc định
-                    const errorDetail = errorData.detail || 'No additional details provided'; // Lấy detail hoặc thông báo mặc định
-                    toastr.error(`Error: ${errorMessage}\nDetails: ${errorDetail}`); // Hiển thị thông báo lỗi
+                    const errorMessage = errorData.title || 'Lỗi không mong muốn'; // Lấy title hoặc thông báo mặc định
+                    const errorDetail = errorData.detail || 'Không có chi tiết bổ sung được cung cấp'; // Lấy detail hoặc thông báo mặc định
+                    toastr.error(`Lỗi: ${errorMessage}\nDetails: ${errorDetail}`); // Hiển thị thông báo lỗi
                     return;
                 }
 
                 const data = await response.json();
-                toastr.success("Order detail updated successfully!");
+                toastr.success("Chi tiết đơn hàng đã cập nhật thành công");
                 location.reload();
             } catch (error) {
-                console.error('Error:', error);
-                toastr.error("An unexpected error occurred. Please try again later.");
+                console.error('Lõi:', error);
+                toastr.error("Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.");
             }
         }
 
@@ -969,15 +971,19 @@ document.getElementById('checkOutButton').addEventListener('click', function () 
     // Loại bỏ dấu phân cách nghìn và chuyển thành số nguyên
     var amountGiven = parseInt(amountGivenText.replace(/[^\d]/g, ''), 10);
 
+            if (amountGiven < totalAmount) {
+                toastr.error(`Số tiền khách đưa (${new Intl.NumberFormat('vi-VN').format(amountGiven)}) chưa đủ để thanh toán (${new Intl.NumberFormat('vi-VN').format(totalAmount)}).`);
+                return;
+            }
     if (isNaN(amountGiven) || amountGiven <= 0) {
-        toastr.error("Please enter a valid amount.");
+        toastr.error("Hãy nhập số tiền khách đưa");
         return;
     }
 
     // Lấy giá trị paymentMethod từ radio button được chọn
     var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
     if (paymentMethod === undefined) {
-        toastr.error("Please select a payment method.");
+        toastr.error("Hãy chọn phương thức thanh toán.");
         return;
     }
     console.log(amountGiven, totalAmount);
@@ -1030,7 +1036,6 @@ document.getElementById('amountGivenInput').addEventListener('input', function (
 });
 
     </script>
-
 
 
 

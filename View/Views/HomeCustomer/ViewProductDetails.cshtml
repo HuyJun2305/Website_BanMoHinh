@@ -79,35 +79,33 @@
 						<div class="rs1-select2 bor8 bg0">
 							<div>
 								<div id="sizeOptions" class="d-flex flex-wrap">
-									    @foreach (var size in Model.Sizes)
-											{
-											    if (size.Stock != 0)
-											    {
-											        <button type="button"
-											                class="btn btn-outline-secondary m-1 size-option"
-											                data-size-id="@size.SizeId"
-											                data-stock="@size.Stock"
-											                data-selected="@size.Selected">
-											            @size.Value
-											        </button>
-											        <input type="hidden" id="Size_@size.SizeId" name="Size_@size.SizeId" value="@size.Stock" />
-											    }
-											    else
-											    {
-											        <button type="button"
-											                class="btn btn-outline-secondary m-1 size-option"
-											                data-size-id="@size.SizeId"
-											                data-stock="@size.Stock"
-											                data-selected="@size.Selected"
-											                disabled>
-											            @size.Value
-											        </button>
-											    }
-											}
-									</div>
-								<!-- Input ẩn để lưu giá trị chọn -->
-
+									@foreach (var size in Model.Sizes)
+									{
+										if (size.Stock != 0)
+										{
+											<button type="button"
+													class="btn btn-outline-secondary m-1 size-option"
+													data-size-id="@size.SizeId"
+													data-stock="@size.Stock"
+													data-selected="@size.Selected">
+												@size.Value
+											</button>
+											<input type="hidden" id="Size_@size.SizeId" name="Size_@size.SizeId" value="@size.Stock" />
+										}
+										else
+										{
+											<button type="button"
+													class="btn btn-outline-secondary m-1 size-option"
+													data-size-id="@size.SizeId"
+													data-stock="@size.Stock"
+													disabled>
+												@size.Value
+											</button>
+										}
+									}
+								</div>
 							</div>
+
 						</div>
 						</<div>
 
@@ -498,104 +496,108 @@
 @section Scripts {
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const sizeButtons = document.querySelectorAll(".size-option");
+		document.addEventListener('DOMContentLoaded', function () {
+			const sizeButtons = document.querySelectorAll(".size-option");
 
-    // Xử lý sự kiện cho các nút kích thước
-    sizeButtons.forEach(button => {
-        // Kiểm tra nếu nút này được đánh dấu là "selected"
-        if (button.dataset.selected === "True") {
-            button.classList.add("selected");
-        }
+			// Xử lý sự kiện cho các nút kích thước
+			sizeButtons.forEach(button => {
+				// Nếu button có data-selected = "True", thêm class selected
+				if (button.dataset.selected === "True") {
+					button.classList.add("selected");
+				}
 
-        // Xử lý sự kiện click
-        button.addEventListener("click", function () {
-            // Loại bỏ class "selected" khỏi tất cả các nút
-            sizeButtons.forEach(btn => btn.classList.remove("selected"));
+				// Xử lý sự kiện click
+				button.addEventListener("click", function () {
+					// Loại bỏ class "selected" khỏi tất cả các nút
+					sizeButtons.forEach(btn => btn.classList.remove("selected"));
 
-            // Thêm class "selected" vào nút được click
-            this.classList.add("selected");
+					// Thêm class "selected" vào nút được click
+					this.classList.add("selected");
 
-            // Cập nhật giá trị cho các input ẩn tương ứng
-            const selectedSizeId = this.dataset.sizeId; // Lấy sizeId từ nút được chọn
-            const hiddenInput = document.querySelector(`#Size_${selectedSizeId}`);
-            if (hiddenInput) {
-                hiddenInput.value = selectedSizeId;  // Lưu sizeId vào input ẩn
-            }
-        });
-    });
+					// Cập nhật giá trị cho các input ẩn tương ứng
+					const selectedSizeId = this.dataset.sizeId; // Lấy sizeId từ nút được chọn
+					const hiddenInput = document.querySelector(`#Size_${selectedSizeId}`);
+					if (hiddenInput) {
+						hiddenInput.value = selectedSizeId;  // Lưu sizeId vào input ẩn
+					}
 
-    // Thêm sản phẩm vào giỏ hàng
-    const addToCartButtons = document.querySelectorAll('.js-addcart-detail');
+					// Cập nhật lại data-selected
+					sizeButtons.forEach(btn => {
+						btn.dataset.selected = "False";  // Đặt lại tất cả data-selected thành False
+					});
+					this.dataset.selected = "True";  // Đặt data-selected cho nút được chọn là True
+				});
+			});
 
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Lấy productId, cartId từ data attributes của button
-            const productId = button.getAttribute('data-product-id');
-            const cartId = button.getAttribute('data-cart-id');
-            const quantity = document.querySelector('#quantity') ? document.querySelector('#quantity').value : 1; // Lấy quantity từ input
+			// Thêm sản phẩm vào giỏ hàng
+			const addToCartButtons = document.querySelectorAll('.js-addcart-detail');
 
-            // Lấy sizeId từ nút "selected"
-            const selectedButton = document.querySelector('.size-option.selected');
-            const sizeId = selectedButton ? selectedButton.dataset.sizeId : null; // Lấy sizeId từ data-size-id của nút được chọn
+			addToCartButtons.forEach(button => {
+				button.addEventListener('click', function () {
+					// Lấy productId, cartId từ data attributes của button
+					const productId = button.getAttribute('data-product-id');
+					const cartId = button.getAttribute('data-cart-id');
+					const quantity = document.querySelector('#quantity') ? document.querySelector('#quantity').value : 1; // Lấy quantity từ input
 
-            // Kiểm tra nếu chưa chọn size
-            if (!sizeId) {
-                alert('Hãy chọn kích thước');
-                return;  // Ngừng xử lý nếu chưa chọn size
-            }
+					// Lấy sizeId từ nút "selected"
+					const selectedButton = document.querySelector('.size-option.selected');
+					const sizeId = selectedButton ? selectedButton.dataset.sizeId : null; // Lấy sizeId từ data-size-id của nút được chọn
 
-            // Kiểm tra nếu quantity hợp lệ
-            if (parseInt(quantity) <= 0) {
-                alert('Số lượng phải lớn hơn 0');
-                return;  // Ngừng xử lý nếu điều kiện không hợp lệ
-            }
+					// Kiểm tra nếu chưa chọn size
+					if (!sizeId) {
+						alert('Hãy chọn kích thước');
+						return;  // Ngừng xử lý nếu chưa chọn size
+					}
 
-            // Lấy tồn kho từ data-stock của button size
-            const selectedSizeButton = document.querySelector(`.size-option[data-size-id="${sizeId}"]`);
-            const stock = parseInt(selectedSizeButton ? selectedSizeButton.dataset.stock : 0);
+					// Kiểm tra nếu quantity hợp lệ
+					if (parseInt(quantity) <= 0) {
+						alert('Số lượng phải lớn hơn 0');
+						return;  // Ngừng xử lý nếu điều kiện không hợp lệ
+					}
 
-            // Kiểm tra tồn kho
-            if (parseInt(quantity) > stock) {
-                alert('Số lượng vượt quá số lượng tồn kho : ' + stock);
-                return;  // Ngừng xử lý nếu vượt quá số lượng tồn kho
-            }
-						console.log(productId, cartId, quantity, sizeId);
+					// Lấy tồn kho từ data-stock của button size
+					const selectedSizeButton = document.querySelector(`.size-option[data-size-id="${sizeId}"]`);
+					const stock = parseInt(selectedSizeButton ? selectedSizeButton.dataset.stock : 0);
 
-            // Kiểm tra các tham số hợp lệ
-            if (productId && cartId && quantity && sizeId && parseInt(quantity) > 0) {
-                // Xây dựng URL với query string
-                const url = `https://localhost:7280/api/CartDetail/AddToCart?cartId=${cartId}&productId=${productId}&quantity=${quantity}&sizeId=${sizeId}`;
+					// Kiểm tra tồn kho
+					if (parseInt(quantity) > stock) {
+						alert('Số lượng vượt quá số lượng tồn kho');
+						return;  // Ngừng xử lý nếu vượt quá số lượng tồn kho
+					}
+					console.log(productId, cartId, quantity, sizeId);
 
-                // Gửi yêu cầu POST đến API AddToCart
-                fetch(url, {  // Gửi yêu cầu với query string
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            // Thành công, hiển thị thông báo
+					// Kiểm tra các tham số hợp lệ
+					if (productId && cartId && quantity && sizeId && parseInt(quantity) > 0) {
+						// Xây dựng URL với query string
+						const url = `https://localhost:7280/api/CartDetail/AddToCart?cartId=${cartId}&productId=${productId}&quantity=${quantity}&sizeId=${sizeId}`;
 
-                            alert('Sản phẩm đã được thêm vào giỏ hàng!');
+						// Gửi yêu cầu POST đến API AddToCart
+						fetch(url, {  // Gửi yêu cầu với query string
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						})
+							.then(response => {
+								if (response.ok) {
+									// Thành công, hiển thị thông báo
+									alert('Sản phẩm đã được thêm vào giỏ hàng!');
 									location.reload();
-                        } else {
-                            // Lỗi HTTP khác ngoài 2xx
-                            throw new Error(`Request failed with status ${response.status}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error.message);
-                        alert('Không thể thêm sản phẩm vào giỏ hàng. Error: ' + error.message);
-                    });
+								} else {
+									// Lỗi HTTP khác ngoài 2xx
+									throw new Error(`Request failed with status ${response.status}`);
+								}
+							})
+							.catch(error => {
+								console.error('Error:', error.message);
+								alert('Không thể thêm sản phẩm vào giỏ hàng. Error: ' + error.message);
+							});
 
-            } else {
-                alert('Thông tin không hợp lệ.');
-            }
-        });
-    });
-});
-
+					} else {
+						alert('Thông tin không hợp lệ.');
+					}
+				});
+			});
+		});
 	</script>
 }

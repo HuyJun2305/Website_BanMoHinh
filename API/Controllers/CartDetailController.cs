@@ -112,7 +112,7 @@ namespace API.Controllers
                 // Trả về lỗi 500 nếu có sự cố trong quá trình xử lý
                 return StatusCode(500, new { success = false, message = "An error occurred during checkout.", details = ex.InnerException?.Message });
             }
-        }
+            }
 
 
     }

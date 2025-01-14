@@ -11,20 +11,20 @@
 <div class="cont">
     <div class="form sign-in">
         <form asp-action="Login" asp-controller="Authentication" method="post">
-            <h2>Welcome</h2>
+            <h2>Chào mừng</h2>
             <label>
-                <span asp-for="Username">Username</span>
+                <span asp-for="Username">Tên người dùng</span>
                 <input asp-for="Username" type="text" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </label>
             <label>
-                <span>Password</span>
+                <span>Mật khẩu</span>
                 <input asp-for="Password" type="password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </label>
-            <p class="forgot-pass">Forgot password?</p>
+            <p class="forgot-pass">Quên mật khẩu?</p>
             <button type="submit" value="Create" style="background-color: #000;">
-                Sign In
+                Đăng nhập
             </button>
         </form> 
     </div>
@@ -32,31 +32,31 @@
         <div class="img">
             <div class="img__text m--up">
 
-                <h3>Don't have an account? Please Sign up!</h3>
+                <h3>Bạn chưa có tài khoản? Hãy đăng kí</h3>
             </div>
             <div class="img__text m--in">
 
-                <h3>If you already has an account, just sign in.</h3>
+                <h3>Nếu bạn đã có tài khoản hãy đăng nhập</h3>
             </div>
             <div class="img__btn">
-                <span class="m--up">Sign Up</span>
-                <span class="m--in">Sign In</span>
+                <span class="m--up">Đăng kí</span>
+                <span class="m--in">Đăng nhập</span>
             </div>
         </div>
         <div class="form sign-up">
             <form asp-action="Register" method="post">
-                <h2>Create your Account</h2>
+                <h2>Tạo tài khoản của bạn</h2>
                 <div class="row">
                     <div class="col-md-12">
                          <label>
-                            <span asp-for="Username">Username</span>
+                            <span asp-for="Username">Tên người dùng</span>
                             <input asp-for="Username" type="text" />
                             <span asp-validation-for="Username" class="text-danger"></span>
                         </label>
                     </div>
                     <div class="col-md-6">
                         <label>
-                            <span asp-for="PhoneNumber">Phone Number</span>
+                            <span asp-for="PhoneNumber">Số điện thoại</span>
                             <input asp-for="PhoneNumber" type="text" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </label>
@@ -72,7 +72,7 @@
                 
                 <div class="col-md-12">
                     <label>
-                        <span asp-for="FullName">Full Name</span>
+                        <span asp-for="FullName">Họ tên</span>
                         <input asp-for="FullName" type="text" />
                         <span asp-validation-for="FullName" class="text-danger"></span>
 
@@ -80,13 +80,13 @@
                 </div>
                 <div class="col-md-12">
                     <label>
-                        <span asp-for="Password">Password</span>
+                        <span asp-for="Password">Mật khẩu</span>
                         <input asp-for="Password" type="password" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </label>
                 </div>
                 <button type="submit" value="Create" style="background-color: #000; margin-top:1rem">
-                    Sign Up
+                    Đăng kí
                 </button>
             </form>
         </div>

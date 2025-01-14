@@ -23,15 +23,13 @@
 }
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Your Orders</h2>
-
     <!-- Nav Bar for Order Status -->
     <ul class="nav nav-tabs" id="orderTabs">
         @foreach (var status in mainStatuses)
         {
             <li class="nav-item" role="presentation">
                 <a class="nav-link @((status == OrderStatus.WaitingForConfirmation) ? "active" : "")" id="status-@status-tab" data-bs-toggle="tab" href="#status-@status" role="tab" aria-controls="status-@status" aria-selected="@(status == OrderStatus.WaitingForConfirmation ? "true" : "false")">
-                    @status
+                    @status.GetDisplayName()
                 </a>
             </li>
         }
@@ -50,11 +48,11 @@
                         {
                             <div class="order-card card shadow-sm" style="width: 350px; margin-bottom: 15px;">
                                 <div class="card-body">
-                                    <h6 class="card-title"><strong>Order Date:</strong> @order.DayCreate.ToString("dd/MM/yyyy")</h6>
-                                    <p><strong>Total:</strong> @order.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))</p>
+                                    <h6 class="card-title"><strong>Ngày đặt:</strong> @order.DayCreate.ToString("dd/MM/yyyy")</h6>
+                                    <p><strong>Tổng tiền:</strong> @order.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))</p>
 
                                     <div class="mt-3">
-                                        <h6><strong>Products:</strong></h6>
+                                        <h6><strong>Sản phẩm:</strong></h6>
                                         <ul class="list-group list-group-flush">
                                             @foreach (var detail in order.OrderDetails)
                                             {
@@ -67,25 +65,25 @@
                                     </div>
 
                                     <div class="d-flex gap-3 mt-3 justify-content-end">
-                                        <button class="btn btn-info btn-sm" onclick="viewOrderDetails('@order.Id')">Details</button>
+                                        <button class="btn btn-info btn-sm" onclick="viewOrderDetails('@order.Id')">Chi tiết</button>
                                         @if (order.Status == OrderStatus.WaitingForConfirmation || order.Status == OrderStatus.PrepareOrder)
                                         {
-                                            <button class="btn btn-danger btn-sm" onclick="showCancelOrderModal('@order.Id')">Cancel</button>
+                                            <button class="btn btn-danger btn-sm" onclick="showCancelOrderModal('@order.Id')">Hủy</button>
                                         }
                                         else if (order.Status == OrderStatus.Canceled)
                                         {
-                                            <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
+                                            <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Đặt lại</button>
                                         }
                                         else if (order.Status == OrderStatus.Complete)
                                         {
                                             if (order.Status == OrderStatus.Refund)
                                             {
-                                                <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
+                                                <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Đặt lại</button>
                                             }
                                             else
                                             {
-                                                <button class="btn btn-warning btn-sm" onclick="refundOrder('@order.Id')">Refund</button>
-                                                <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Re-Order</button>
+                                                <button class="btn btn-warning btn-sm" onclick="refundOrder('@order.Id')">Hoàn trả</button>
+                                                <button class="btn btn-primary btn-sm" onclick="reorderOrder('@order.Id')">Đặt lại</button>
                                             }
                                         }
                                     </div>
@@ -99,7 +97,7 @@
                     <!-- Hiển thị hình ảnh và thông báo "No orders found for this status" -->
                     <div class="text-center">
                         <img src="/path/404.png" alt="No Orders" class="img-fluid" style="max-width: 200px;" />
-                        <p class="mt-3 text-muted">No orders found for this status.</p>
+                        <p class="mt-3 text-muted">Không có đơn hàng nào ở trạng thái này !</p>
                     </div>
                 }
             </div>
@@ -111,7 +109,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4 shadow-lg">
             <div class="modal-header bg-secondary text-white">
-                <h5 class="modal-title fw-bold" id="orderDetailsModalLabel">Order Details</h5>
+                <h5 class="modal-title fw-bold" id="orderDetailsModalLabel">Chi tiết đơn hàng</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -123,8 +121,8 @@
                 </div>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" id="cancelOrderButton" onclick="showCancelOrderModal(currentOrderId)">Cancel Order</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-danger" id="cancelOrderButton" onclick="showCancelOrderModal(currentOrderId)">Hủy đơn</button>
             </div>
         </div>
     </div>
@@ -135,7 +133,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 shadow-lg">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold" id="cancelOrderModalLabel">Cancel Order</h5>
+                <h5 class="modal-title fw-bold" id="cancelOrderModalLabel">Hủy đơn hàng</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -143,8 +141,8 @@
                 <textarea id="cancelReason" class="form-control" rows="3" placeholder="Enter reason..."></textarea>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" onclick="submitCancelOrder()">Submit</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-danger" onclick="submitCancelOrder()">Xác nhận</button>
             </div>
         </div>
     </div>
@@ -260,15 +258,15 @@
                         orderDetailsContent.innerHTML = "<p>No items found for this order.</p>";
                     } else {
                         orderDetailsContent.innerHTML = `
-                                <h5 class="text-start fw-bold mb-3">Order ID: ${orderId}</h5>
+                                <h5 class="text-start fw-bold mb-3">Mã đơn: ${orderId}</h5>
                                 <table class="table table-bordered mt-3 text-center">
                                     <thead class="table-light">
                                         <tr>
                                             <th>#</th>
-                                            <th>Product</th>
-                                            <th>Size</th>
-                                            <th>Quantity</th>
-                                            <th>Total Price</th>
+                                            <th>Sản phẩm</th>
+                                            <th>Kích cỡ</th>
+                                            <th>Số lượng</th>
+                                            <th>Tổng tiền</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -294,19 +292,19 @@
                             `;
                     }
                 } else {
-                    orderDetailsContent.innerHTML = "<p>Failed to load order details.</p>";
+                    orderDetailsContent.innerHTML = "<p>Hiển thị chi tiết đơn thất bại</p>";
                 }
             } catch (error) {
-                console.error('Error fetching order details:', error);
-                orderDetailsContent.innerHTML = "<p>An error occurred while loading order details.</p>";
+                console.error('Lỗi hiển thị dữ liệu:', error);
+                orderDetailsContent.innerHTML = "<p>Đã xảy ra lỗi khi tải thông tin chi tiết đơn hàng.</p > ";
             }
         }
-    </script>
+    </script>   
     <script>
         function reorderOrder(orderId) {
-    const confirmReorder = confirm("Do you want to reorder this order?");
+            const confirmReorder = confirm("Bạn có muốn sắp xếp lại đơn hàng này không?");
     if (confirmReorder) {
-        const note = prompt("Enter any note for the new order (optional):", "Reorder with no special instructions");
+                const note = prompt("Nhập bất kỳ ghi chú nào cho đơn hàng mới (tùy chọn):", "Đặt hàng lại mà không cần hướng dẫn đặc biệt");
         fetch(`https://localhost:7280/api/Orders/ReOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
             method: 'POST',
             headers: {
@@ -315,20 +313,20 @@
         })
         .then(response => response.json())
         .then(data => {
-            alert(`Reorder Successful! Order ${orderId} has been reordered. Note: ${note}`);
+            alert(`Đặt hàng thành công! Đơn hàng ${orderId} đã được đặt lại. Ghi chú: ${note}`);
             // Optional: You can update UI here
         })
         .catch(error => {
-            alert('Failed to reorder the order.');
+             alert('Không thể sắp xếp lại đơn hàng.');
         });
     } else {
-        alert('Reorder request was canceled.');
+             alert('Yêu cầu đặt hàng lại đã bị hủy.');
     }
 }
 function refundOrder(orderId) {
-    const confirmRefund = confirm("Do you want to refund this order?");
+            const confirmRefund = confirm("Bạn có muốn hoàn lại đơn hàng này không?");
     if (confirmRefund) {
-        const note = prompt("Please attach a drive link that displays the product image :", "Refund with no special instructions");
+       const note = prompt("Vui lòng đính kèm liên kết driver hiển thị hình ảnh sản phẩm :", "Hoàn tiền mà không cần hướng dẫn đặc biệt");
         fetch(`https://localhost:7280/api/Orders/RefundOrder?orderId=${orderId}&note=${encodeURIComponent(note)}`, {
             method: 'POST',
             headers: {
@@ -337,14 +335,14 @@ function refundOrder(orderId) {
         })
         .then(response => response.json())
         .then(data => {
-            alert(`Refund Initiated! Order ${orderId} is being refunded. Note: ${note}`);
+                        alert(`Đã bắt đầu hoàn tiền! Đơn hàng ${orderId} đang được hoàn tiền. Lưu ý: ${note}`);
             // Optional: You can update UI here
         })
         .catch(error => {
-            alert('Failed to process the refund.');
+                        alert('Không thể xử lý việc hoàn tiền.');
         });
     } else {
-        alert('Refund request was canceled.');
+                alert('Yêu cầu hoàn tiền đã bị hủy.');
     }
 }
 

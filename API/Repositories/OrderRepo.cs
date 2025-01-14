@@ -109,7 +109,9 @@ namespace API.Repositories
         public async Task<Order> GetOrderById(Guid id)
         {
             return await _context.Orders
-                                 .Include(p => p.Account).Include(p => p.OrderAddresses)  // Bao gồm thông tin liên quan đến Account
+                                 .Include(p => p.Account).Include(p => p.OrderDetails)
+                                    .ThenInclude(p => p.Product)
+                                 .Include(p => p.OrderAddresses)  // Bao gồm thông tin liên quan đến Account
                                  .FirstOrDefaultAsync(o => o.Id == id);  // Lọc theo ID đơn hàng
         }
         public async Task SaveChanges()
@@ -382,22 +384,31 @@ namespace API.Repositories
                 throw new Exception("Order not found");
             }
 
+            var customer = await _context.Accounts
+       .AsNoTracking()
+       .FirstOrDefaultAsync(c => c.Id == oldOrder.AccountId);
+
+            if (customer == null)
+            {
+                throw new Exception("Customer not found for the order");
+            }
             // Cập nhật trạng thái của đơn hàng cũ
-            oldOrder.Status = OrderStatus.Canceled; // Thêm trạng thái "Mất đơn hàng"
+            oldOrder.Status = OrderStatus.Canceled; 
             oldOrder.PaymentStatus = PaymentStatus.Paid;
             oldOrder.Note = note;
 
             // Tạo một đơn hàng mới với thông tin từ đơn hàng cũ
             var newOrder = new Order
             {
-                Id = Guid.NewGuid(), // Tạo ID mới
-                CustomerName = oldOrder.CustomerName,
+                Id = Guid.NewGuid(),
+                CustomerName = customer.Name,
+                PhoneNumber = customer.PhoneNumber,
                 Price = oldOrder.Price,
                 PaymentMethods = oldOrder.PaymentMethods,
                 PaymentStatus = PaymentStatus.Pending,
-                DayCreate = DateTime.Now, // Đặt lại ngày tạo mới
-                Status = OrderStatus.WaitingForConfirmation, // Đặt trạng thái mới là "Chờ xác nhận"
-                Note = "Reorder.",
+                DayCreate = DateTime.Now, 
+                Status = OrderStatus.WaitingForConfirmation, 
+                Note = note,
 
                 // Sao chép chi tiết đơn hàng
                 OrderDetails = oldOrder.OrderDetails.Select(od => new OrderDetail
@@ -412,7 +423,6 @@ namespace API.Repositories
 
             // Thêm đơn hàng mới vào cơ sở dữ liệu
             _context.Orders.Add(newOrder);
-
             // Lưu các thay đổi vào cơ sở dữ liệu
             await _context.SaveChangesAsync();
         }
@@ -650,6 +660,7 @@ namespace API.Repositories
         {
             return await _context.Orders
            .Include(o => o.OrderAddresses)
+           .Include(o => o.OrderDetails).ThenInclude(o => o.Product).ThenInclude(p => p.ProductSizes).ThenInclude(p => p.Size)
            .FirstOrDefaultAsync(o => o.Id == orderId);
 
         }

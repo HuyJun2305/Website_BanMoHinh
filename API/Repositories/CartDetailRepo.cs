@@ -227,9 +227,14 @@ namespace API.Repositories
 
                 // Lấy thông tin giỏ hàng
                 var cart = await _context.Carts
-                    .Where(c => c.Id == cartId)
-                    .Select(c => new { c.AccountId, AccountName = c.Account.UserName })
-                    .FirstOrDefaultAsync();
+            .Where(c => c.Id == cartId)
+            .Select(c => new
+            {
+                c.AccountId,
+                AccountName = c.Account.UserName,
+                PhoneNumber = c.Account.PhoneNumber 
+            })
+            .FirstOrDefaultAsync();
 
                 if (cart == null)
                     throw new KeyNotFoundException("Cart not found for the selected cart details");
@@ -249,7 +254,8 @@ namespace API.Repositories
                     ShippingFee = shippingFee,
                     PaymentMethods = PaymentMethod.Cash,
                     Status = OrderStatus.WaitingForConfirmation,
-                    CustomerName = cart.AccountName ?? "Guest"
+                    CustomerName = cart.AccountName ?? "Guest",
+                    PhoneNumber = cart.PhoneNumber
                 };
                 await _context.Orders.AddAsync(newOrder);
 

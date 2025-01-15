@@ -12,7 +12,11 @@ namespace API.IRepositories
         Task Update(ProductDto productDto);
         Task Delete(Guid productId);
         Task SaveChanges();
-        Task<List<Product>> GetFilteredProduct(string? searchQuery = null,  Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null);
+        Task<List<Product>> GetSearch(string? searchQuery = null);
+        Task<List<Product>> GetFilterProducts(List<string>? material,
+	List<string>? size,
+	List<string>? brands,
+	string? priceRange);
         Task AddSize(Guid productId, Guid sizeId);
         Task DistributeStockToProductSizesAsync(Guid productId, int totalStock, Dictionary<Guid, int> productSizesStock);
     }

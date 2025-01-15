@@ -1,4 +1,4 @@
-
+﻿
 (function ($) {
     "use strict";
 
@@ -128,43 +128,31 @@
 
     /*==================================================================
     [ Isotope ]*/
-    var $topeContainer = $('.isotope-grid');
-    var $filter = $('.filter-tope-group');
+    var $topeContainer = $('.isotope-grid'); // Grid ch?a các item
+    var $filter = $('.filter-tope-group');  // Group ch?a các nút filter
 
-    // filter items on button click
-    $filter.each(function () {
-        $filter.on('click', 'button', function () {
-            var filterValue = $(this).attr('data-filter');
-            $topeContainer.isotope({filter: filterValue});
-        });
-        
+    // X? lý khi nh?n vào button filter
+    $filter.on('click', 'button', function () {
+        var filterValue = $(this).attr('data-filter'); // L?y giá tr? filter t? data-filter
+        $topeContainer.isotope({ filter: filterValue }); // L?c item theo filter
     });
 
-    // init Isotope
+    // Kh?i t?o Isotope khi trang t?i xong
     $(window).on('load', function () {
-        var $grid = $topeContainer.each(function () {
-            $(this).isotope({
-                itemSelector: '.isotope-item',
-                layoutMode: 'fitRows',
-                percentPosition: true,
-                animationEngine : 'best-available',
-                masonry: {
-                    columnWidth: '.isotope-item'
-                }
-            });
+        $topeContainer.isotope({
+            itemSelector: '.isotope-item', // Selector c?a t?ng item
+            layoutMode: 'fitRows',        // Ch? ?? b? c?c
+            percentPosition: true,        // S? d?ng % ?? tính toán v? trí
+            masonry: {
+                columnWidth: '.isotope-item' // Kích th??c c?t (tùy ch?nh theo kích th??c item)
+            }
         });
     });
 
-    var isotopeButton = $('.filter-tope-group button');
-
-    $(isotopeButton).each(function(){
-        $(this).on('click', function(){
-            for(var i=0; i<isotopeButton.length; i++) {
-                $(isotopeButton[i]).removeClass('how-active1');
-            }
-
-            $(this).addClass('how-active1');
-        });
+    // X? lý tr?ng thái active cho các button
+    $('.filter-tope-group button').on('click', function () {
+        $('.filter-tope-group button').removeClass('how-active1'); // Xóa class active c?
+        $(this).addClass('how-active1'); // Thêm class active vào nút ???c ch?n
     });
 
     /*==================================================================

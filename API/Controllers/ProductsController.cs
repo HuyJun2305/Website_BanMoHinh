@@ -14,17 +14,33 @@ namespace API.Controllers
         {
             _productRepo = productRepos;
         }
-        //Tìm kiếm sản phẩm 
-        [HttpGet("filterAndsearch")]
-        public async Task<ActionResult<List<Product>>> FilterProduct(string? searchQuery = null, Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
-        {
-            var product = await _productRepo.GetFilteredProduct(searchQuery,  brandId, materialId, categoryId);
-            if (product == null || product.Count == 0)
-            {
-                return NotFound();
-            }
+		//Tìm kiếm sản phẩm 
+		[HttpGet("Filter")]
+		public async Task<ActionResult<List<Product>>> FilterProduct(
+	[FromQuery] List<string>? material,
+	[FromQuery] List<string>? size,
+	[FromQuery] List<string>? brand,
+	[FromQuery] string? priceRange)
+		{
+			// Kiểm tra nếu các tham số null, nếu null thì gán thành danh sách rỗng
+			material = material ?? new List<string>();
+			size = size ?? new List<string>();
+			brand = brand ?? new List<string>();
+
+			// Gọi repo để lấy các sản phẩm theo bộ lọc
+			var products = await _productRepo.GetFilterProducts(material, size, brand, priceRange);
+			return Ok(products);
+		}
+
+
+
+		[HttpGet("Search")]
+        public async Task<ActionResult<List<Product>>> SearchProduct(string? searchQuery)
+		{
+            var product = await _productRepo.GetSearch(searchQuery);
             return Ok(product);
         }
+
         //Get all
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProduct()

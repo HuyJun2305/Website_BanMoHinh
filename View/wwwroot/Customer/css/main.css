@@ -1959,7 +1959,7 @@ input.num-product::-webkit-inner-spin-button {
 }
 
 .table-shopping-cart .table_head th {
-  font-family: Poppins-Bold;
+  font-family: none;
   font-size: 13px;
   color: #555;
   text-transform: uppercase;
@@ -1970,11 +1970,11 @@ input.num-product::-webkit-inner-spin-button {
 
 }
 
-.table-shopping-cart td {
-  font-family: Poppins-Regular;
-  color: #555;
-  line-height: 1.6;
-}
+    .table-shopping-cart td {
+        font-family: none;
+        color: #555;
+        line-height: 1.6;
+    }
 
 
 

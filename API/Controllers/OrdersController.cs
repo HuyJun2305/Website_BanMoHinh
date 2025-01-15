@@ -39,9 +39,9 @@ namespace API.Controllers
 			}
 			catch (Exception ex)
 			{
-				return BadRequest(new { message = ex.Message });
-			}
-		}
+                    return Problem(detail: ex.Message, title: "Create failed");
+            }
+        }
 		[HttpPost("CheckOutInStore")]
 		public async Task<ActionResult> CheckOutInStore([FromQuery] Guid orderId, [FromQuery] Guid staffId, [FromQuery]  decimal amountGiven,  PaymentMethod paymentMethod)
 		{

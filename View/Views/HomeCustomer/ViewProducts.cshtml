@@ -12,24 +12,23 @@
 	<div class="container">
 		<div class="flex-w flex-sb-m p-b-52">
 			<div class="flex-w flex-l-m filter-tope-group m-tb-10">
-				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
+				<button style="font-family: Montserrat" class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
 					Tất cả
 				</button>
 
-				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".women">
+				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".pre-order">
 					Pre - Order
 				</button>
+				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".legend-of-star-general-fan">
+					Legend Of Star General Fan
+				</button>
 
-				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".men">
+				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".gundam">
 					Gumdam
 				</button>
 
-				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".bag">
+				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".figure">
 					Figure
-				</button>
-
-				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".shoes">
-					Blindbox Artoyys
 				</button>
 
 			</div>
@@ -51,20 +50,29 @@
 			<!-- Search product -->
 			<div class="dis-none panel-search w-full p-t-10 p-b-15">
 				<div class="bor8 dis-flex p-l-15">
-					<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+					<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04" type="button">
 						<i class="zmdi zmdi-search"></i>
 					</button>
 
-					<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+					<input class="mtext-107 cl2 size-114 plh2 p-r-15"
+						   type="text"
+						   id="search-product"
+						   name="search-product"
+						   placeholder="Search"
+						   oninput="debouncedSearch()">
 				</div>
+				<!-- Kết quả tìm kiếm -->
+				<div id="search-results" class="p-t-15"></div>
 			</div>
+
+
 
 			<!-- Filter -->
 			<div class="dis-none panel-filter w-full p-t-10">
 				<div class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
 					<div class="filter-col1 p-r-15 p-b-27">
 						<div class="mtext-102 cl2 p-b-15">
-							Sắp xếp theo
+							<p style="font-family: Montserrat">Sắp xếp theo</p>
 						</div>
 
 						<ul>
@@ -108,86 +116,64 @@
 
 					<div class="filter-col2 p-r-15 p-b-27">
 						<div class="mtext-102 cl2 p-b-15">
-							Giá
+							<p style="font-family: Montserrat">Giá</p>
 						</div>
-
 						<ul>
 							<li class="p-b-6">
-								<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-									All
-								</a>
+								<a href="#" class="filter-link stext-106 trans-04 filter-link-active" data-filter="All" onclick="applyFilter('priceRange', 'All')">All</a>
 							</li>
-
 							<li class="p-b-6">
-								<a href="#" class="filter-link stext-106 trans-04">
-									100,000 - 500,000 VND
-								</a>
+								<a href="#" class="filter-link stext-106 trans-04" data-filter="100000-500000" onclick="applyFilter('priceRange', '100000-500000')">100,000 - 500,000 VND</a>
 							</li>
-
 							<li class="p-b-6">
-								<a href="#" class="filter-link stext-106 trans-04">
-									500,000 - 1,000,000 VND
-								</a>
+								<a href="#" class="filter-link stext-106 trans-04" data-filter="500000-1000000" onclick="applyFilter('priceRange', '500000-1000000')">500,000 - 1,000,000 VND</a>
 							</li>
-
 							<li class="p-b-6">
-								<a href="#" class="filter-link stext-106 trans-04">
-									1,000,000 - 2,500,000 VND
-								</a>
+								<a href="#" class="filter-link stext-106 trans-04" data-filter="1000000-2500000" onclick="applyFilter('priceRange', '1000000-2500000')">1,000,000 - 2,500,000 VND</a>
 							</li>
-
 							<li class="p-b-6">
-								<a href="#" class="filter-link stext-106 trans-04">
-									2,500,000 - 5,000,000 VND
-								</a>
+								<a href="#" class="filter-link stext-106 trans-04" data-filter="2500000-5000000" onclick="applyFilter('priceRange', '2500000-5000000')">2,500,000 - 5,000,000 VND</a>
 							</li>
-
 							<li class="p-b-6">
-								<a href="#" class="filter-link stext-106 trans-04">
-									5,000,000 VND trở lên
-								</a>
+								<a href="#" class="filter-link stext-106 trans-04" data-filter="5000000-up" onclick="applyFilter('priceRange', '5000000-trở lên')">5,000,000 VND trở lên</a>
 							</li>
 						</ul>
 					</div>
 
+
 					<div class="filter-col3 p-r-15 p-b-27">
 						<div class="mtext-102 cl2 p-b-15">
-							Chất liệu
+							<p style="font-family: Montserrat">Chất liệu</p>
 						</div>
 
 						<div class="flex-w p-t-4 m-r--5">
-							@foreach (var brand in Model.Products)
+							@foreach (var material in Model.Products.Select(p => p.Material.Name).Distinct())
 							{
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									@brand.Material.Name
-								</a>
+								<a href="#" class="filter-item flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5" onclick="applyFilter('material', '@material')">@material</a>
 							}
 						</div>
+
 						<div class="mtext-102 cl2 p-b-15">
-							Kích cỡ
+							<p style="font-family: Montserrat">Kích cỡ</p>
 						</div>
 
 						<div class="flex-w p-t-4 m-r--5">
-							@foreach (var brand in Model.Products)
+							@foreach (var size in Model.Products.SelectMany(p => p.ProductSizes.Select(s => s.Size.Value)).Distinct())
 							{
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									@brand.ProductSizes.FirstOrDefault().Size.Value
-								</a>
+								<a href="#" class="filter-item flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5" onclick="applyFilter('size', '@size')">@size</a>
 							}
 						</div>
 					</div>
 
 					<div class="filter-col4 p-b-27">
 						<div class="mtext-102 cl2 p-b-15">
-							Thương hiệu
+							<p style="font-family: Montserrat">Thương hiệu</p>
 						</div>
 
 						<div class="flex-w p-t-4 m-r--5">
-							@foreach (var brand in Model.Products)
+							@foreach (var brand in Model.Products.Select(p => p.Brand.Name).Distinct())
 							{
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									@brand.Brand.Name
-								</a>
+								<a href="#" class="filter-item flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5" onclick="applyFilter('brand', '@brand')">@brand</a>
 							}
 						</div>
 					</div>
@@ -195,57 +181,57 @@
 			</div>
 		</div>
 
-		<div class="row isotope-grid">
+		<div class="row isotope-grid" id="product-list">
 			@foreach (var item in Model.Products)
-                {
-				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
-                    <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                        <!-- Block2 -->
-                        <div class="block2">
-                            <div class="block2-pic hov-img0">
-                                <!-- Carousel for Images -->
-                                <div id="carousel-@item.Id" class="carousel slide" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                        @foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
-                                        {
-                                            <div class="carousel-item @(image.index == 0 ? "active" : "")">
-											<img src="@Url.Content(image.value.URL)" style="width:250px; height:200px;" alt="Product Image">
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
+			{
+				<!-- Sử dụng item.Category.Name để gán lớp động -->
+				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item @item.Category.Name.ToLower()">
+					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+						<!-- Block2 -->
+						<div class="block2">
+							<div class="block2-pic hov-img0">
+								<!-- Carousel for Images -->
+								<div id="carousel-@item.Id" class="carousel slide" data-bs-ride="carousel">
+									<div class="carousel-inner" style="border: 1px solid #ddd; border-radius: 5px; ">
+										@foreach (var image in Model.Images.Where(i => i.ProductId == item.Id).Select((value, index) => new { value, index }))
+										{
+											<div class="carousel-item @(image.index == 0 ? "active" : "")">
+												<img src="@Url.Content(image.value.URL)" style="width:250px; height:200px;object-fit: cover; object-position: center;" alt="Product Image">
+											</div>
+										}
+									</div>
+								</div>
 
-                                <!-- Quick View Button -->
-                                <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                    Xem ngay
-                                </a>
-                            </div>
+								<!-- Quick View Button -->
+								<a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+									Xem ngay
+								</a>
+							</div>
 
-                            <div class="block2-txt flex-w flex-t p-t-14">
-                                <div class="block2-txt-child1 flex-col-l">
-									<a href="@Url.Action("ViewProductDetails", "HomeCustomer", new { id = item.Id })" 
+							<div class="block2-txt flex-w flex-t p-t-14">
+								<div class="block2-txt-child1 flex-col-l">
+									<a href="@Url.Action("ViewProductDetails", "HomeCustomer", new { id = item.Id })"
 									   class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-									    @item.Name
+										@item.Name
 									</a>
-                                    <span class="stext-105 cl3">
+									<span class="stext-105 cl3">
 										@item.Price.ToString("#,0 VND", new System.Globalization.CultureInfo("vi-VN"))
-                                    </span>
-                                </div>
-                                <div class="block2-txt-child2 flex-r p-t-3">
-                                    <!-- Wishlist Button -->
-                                    <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                        <img class="icon-heart1 dis-block trans-04" src="@Url.Content("~/Customer/images/icons/icon-heart-01.png")" alt="ICON">
-                                        <img class="icon-heart2 dis-block trans-04 ab-t-l" src="@Url.Content("~/Customer/images/icons/icon-heart-02.png")" alt="ICON">
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+									</span>
+								</div>
+								<div class="block2-txt-child2 flex-r p-t-3">
+									<!-- Wishlist Button -->
+									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+										<img class="icon-heart1 dis-block trans-04" src="/Customer/images/icons/icon-heart-01.png" alt="ICON">
+										<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/Customer/images/icons/icon-heart-02.png" alt="ICON">
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
-
-			}		
-			</div>
-					<!-- Load more -->
+			}
+		</div>
+		<!-- Load more -->
 				<div class="flex-c-m flex-w w-full p-t-45">
 						<a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">
 						Hiển thị thêm
@@ -254,4 +240,305 @@
 
 	</div>
 </section>
+
+@section Styles{
+	<style>
+		/* Hiệu ứng hover cho các thẻ <a> trong filter-col3 */
+		 .filter-item:hover {
+			background-color: #f0f0f0; /* Màu nền khi hover */
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+			border-color: #4CAF50; /* Màu viền khi hover */
+		}
+
+		/* Hiệu ứng khi click vào thẻ <a> trong filter-col3 */
+		 .filter-item.active {
+			background-color: #4CAF50; /* Màu nền khi click */
+			color: white; /* Màu chữ khi click */
+			border-color: #4CAF50; /* Màu viền khi click */
+			transform: scale(1.05); /* Phóng to khi click */
+			transition: all 0.3s ease;
+		}
+
+		#search-results {
+			margin-top: 10px;
+			background: #f9f9f9;
+			border: 1px solid #ddd;
+			padding: 10px;
+			border-radius: 4px;
+			max-height: 300px;
+			overflow-y: auto;
+		}
+
+			#search-results div {
+				padding: 10px 0;
+				border-bottom: 1px solid #eee;
+			}
+
+				#search-results div:last-child {
+					border-bottom: none;
+				}
+
+		.product-img {
+			width: 50px;
+			height: 50px;
+			object-fit: cover;
+			margin-right: 10px;
+			border-radius: 4px;
+		}
+
+		.product-info {
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+			.product-info h4 {
+				margin: 0;
+				font-size: 16px;
+				color: #333;
+			}
+
+			.product-info p {
+				margin: 5px 0 0;
+				font-size: 14px;
+				color: #666;
+			}
+
+				.product-info p.stext-102.cl4 {
+					color: #ff5c5c; /* Màu chữ cho giá tiền */
+					font-weight: bold;
+					margin-top: 5px;
+				}
+
+	</style>
+}
 	
+@section Scripts{
+	<script>
+		// Biến timeout cho hàm debounce
+		let timeout = null;
+
+		// Hàm debounce
+		function debouncedSearch() {
+			clearTimeout(timeout);
+			timeout = setTimeout(() => {
+				searchProducts();
+			}, 300); // Delay 300ms
+		}
+
+		// Hàm gửi yêu cầu tìm kiếm
+		async function searchProducts() {
+			const query = document.getElementById("search-product").value.trim();
+
+			// Nếu ô tìm kiếm trống, xóa kết quả và dừng xử lý
+			if (query === "") {
+				document.getElementById("search-results").innerHTML = "";
+				return;
+			}
+
+			try {
+				// Gọi API tìm kiếm
+				const response = await fetch(`https://localhost:7280/api/Products/Search?searchQuery=${encodeURIComponent(query)}`);
+
+				// Kiểm tra phản hồi
+				if (!response.ok) {
+					throw new Error("Failed to fetch search results");
+				}
+
+				// Nhận danh sách sản phẩm
+				const products = await response.json();
+
+				// Hiển thị kết quả
+				renderSearchResults(products);
+			} catch (error) {
+				console.error("Error during search:", error);
+			}
+		}
+
+		// Hàm hiển thị kết quả tìm kiếm
+		function renderSearchResults(products) {
+			const resultsContainer = document.getElementById("search-results");
+
+			// Nếu không có sản phẩm
+			if (products.length === 0) {
+				resultsContainer.innerHTML = "<p class='cl2'>No products found</p>";
+				return;
+			}
+
+			// Tạo HTML cho các sản phẩm
+			resultsContainer.innerHTML = products
+				.map(
+					(product) =>
+						`<div class="p-b-15">
+							<a href="/HomeCustomer/ViewProductDetails/${product.id}" class="flex align-center hov-cl1 trans-04">
+								<img src="${product.images?.[0]?.url || '/default-image.png'}" alt="${product.name}" class="product-img" />
+								<div class="product-info">
+									<h4 class="mtext-107 cl2">${product.name}</h4>
+									<p class="stext-102 cl4 font-bold">${formatPrice(product.price)}</p>
+									<p class="stext-102 cl2">${product.description || "No description available"}</p>
+								</div>
+							</a>
+						</div>`
+				)
+				.join("");
+		}
+		function formatPrice(price) {
+			return price ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price) : "Liên hệ";
+		}
+	</script>
+<script>
+		// Giả sử selectedFilters là đối tượng lưu trữ giá trị lọc
+		let selectedFilters = {
+			priceRange: 'All',  // Mặc định: không có bộ lọc giá
+			material: [],  // Chất liệu mặc định là mảng rỗng
+			size: [],      // Kích cỡ mặc định là mảng rỗng
+			brand: []      // Thương hiệu mặc định là mảng rỗng
+		};
+
+		// Hàm áp dụng bộ lọc và gửi yêu cầu tới API
+		function applyFilter(filterType, value) {
+			const filterLinks = document.querySelectorAll('.filter-item');
+			const link = event.target;
+
+			// Đảm bảo selectedFilters[filterType] là mảng trước khi thao tác
+			if (!Array.isArray(selectedFilters[filterType])) {
+				selectedFilters[filterType] = [];
+			}
+
+			// Đảm bảo selectedFilters.priceRange luôn có giá trị hợp lệ
+			if (filterType === 'priceRange') {
+				// Nếu không chọn giá trị nào (All) thì khởi tạo lại giá trị
+				if (!value || value === 'All') {
+					selectedFilters[filterType] = [];
+				} else {
+					selectedFilters[filterType] = [value]; // Nếu có giá trị cụ thể, gán cho priceRange
+				}
+			} else {
+				const isSelected = selectedFilters[filterType].includes(value);
+				if (isSelected) {
+					// Nếu đã chọn, xóa bỏ giá trị khỏi mảng
+					selectedFilters[filterType] = selectedFilters[filterType].filter(item => item !== value);
+					link.classList.remove('active');
+				} else {
+					// Nếu chưa chọn, thêm giá trị vào mảng
+					selectedFilters[filterType].push(value);
+					link.classList.add('active');
+				}
+			}
+
+			// Cập nhật URL API với các tham số lọc
+			let apiUrl = 'https://localhost:7280/api/Products/Filter?';
+
+			// Cập nhật tham số material, size, và brand dưới dạng các tham số riêng biệt
+			if (selectedFilters.material && selectedFilters.material.length > 0) {
+				selectedFilters.material.forEach(item => {
+					apiUrl += `material=${item}&`;
+				});
+			}
+			if (selectedFilters.size && selectedFilters.size.length > 0) {
+				selectedFilters.size.forEach(item => {
+					apiUrl += `size=${item}&`;
+				});
+			}
+			if (selectedFilters.brand && selectedFilters.brand.length > 0) {
+				selectedFilters.brand.forEach(item => {
+					apiUrl += `brand=${item}&`;
+				});
+			}
+			if (selectedFilters.priceRange && selectedFilters.priceRange.length > 0) {
+				selectedFilters.priceRange.forEach(item => {
+					apiUrl += `priceRange=${item}&`;
+				});
+			}
+
+			// Loại bỏ dấu & cuối cùng nếu có
+			apiUrl = apiUrl.endsWith('&') ? apiUrl.slice(0, -1) : apiUrl;
+
+			// Hiển thị URL API trong console để kiểm tra
+			console.log("API URL:", apiUrl);
+
+			// Gửi yêu cầu đến API
+			fetch(apiUrl)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error(`HTTP error! Status: ${response.status}`);
+					}
+					return response.json(); // Chuyển đổi phản hồi thành JSON
+				})
+				.then(data => {
+					// Kiểm tra nếu dữ liệu là hợp lệ
+					if (data && Array.isArray(data)) {
+						updateProductList(data);  // Cập nhật danh sách sản phẩm
+					} else {
+						throw new Error('Invalid JSON data received');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					alert('Đã xảy ra lỗi khi tải sản phẩm. Vui lòng thử lại sau!');
+				});
+		}
+
+
+
+		// Hàm cập nhật lại danh sách sản phẩm khi có thay đổi
+		function updateProductList(products) {
+			let productList = document.getElementById("product-list");
+			productList.innerHTML = ''; // Xóa danh sách cũ
+
+			// Duyệt qua danh sách sản phẩm và hiển thị
+			products.forEach(item => {
+				let productHTML = `
+						<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${item.category.name.toLowerCase()}">
+							<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+								<div class="block2">
+									<div class="block2-pic hov-img0">
+										<div id="carousel-${item.id}" class="carousel slide" data-bs-ride="carousel">
+											<div class="carousel-inner" style="border: 1px solid #ddd; border-radius: 5px;">
+												${item.images.map((image, index) => `
+													<div class="carousel-item ${index === 0 ? 'active' : ''}">
+														<img src="${image.url}" style="width:250px; height:200px;object-fit: cover; object-position: center;" alt="Product Image">
+													</div>
+												`).join('')}
+											</div>
+										</div>
+										<a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">Xem ngay</a>
+									</div>
+									<div class="block2-txt flex-w flex-t p-t-14">
+										<div class="block2-txt-child1 flex-col-l">
+											<a href="/HomeCustomer/ViewProductDetails/${item.id}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">${item.name}</a>
+											<span class="stext-105 cl3">${item.price.toLocaleString('vi-VN')} VND</span>
+										</div>
+										<div class="block2-txt-child2 flex-r p-t-3">
+											<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+												<img class="icon-heart1 dis-block trans-04" src="/Customer/images/icons/icon-heart-01.png" alt="ICON">
+												<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/Customer/images/icons/icon-heart-02.png" alt="ICON">
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					`;
+				productList.innerHTML += productHTML; // Thêm sản phẩm vào danh sách
+			});
+		}
+
+		// Đảm bảo rằng khi người dùng chọn một bộ lọc, giá trị sẽ được cập nhật
+		document.querySelectorAll('.filter-link').forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault(); // Ngăn chặn hành vi mặc định (ví dụ: reload trang)
+				console.log('Filter clicked', e.target);
+
+				// Cập nhật giao diện bộ lọc
+				document.querySelectorAll('.filter-link').forEach(item => item.classList.remove('filter-link-active'));
+				e.target.classList.add('filter-link-active');
+
+				// Cập nhật giá trị bộ lọc và gọi hàm lọc
+				applyFilter(e.target.dataset.filterType, e.target.dataset.filter);
+			});
+		});
+
+</script>
+
+}

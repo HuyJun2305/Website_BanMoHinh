@@ -204,35 +204,7 @@ namespace API.Repositories
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
         }
-        public async Task<List<Product>> GetFilteredProduct(string? searchQuery = null, Guid? brandId = null, Guid? materialId = null, Guid? categoryId = null)
-        {
-            var query = _context.Products
-                .Include(p => p.Brand)
-                .Include(p => p.Material).Include(p => p.Category)
-                .AsQueryable();
-
-            //Lọc thương hiệu 
-            if (brandId.HasValue)
-            {
-                query = query.Where(p => p.Brand.Id == brandId.Value);
-            }
-            //
-            if (materialId.HasValue)
-            {
-                query = query.Where(p => p.Material.Id == materialId.Value);
-            }
-            if (categoryId.HasValue)
-            {
-                query = query.Where(p => p.Category.Id == categoryId.Value);
-            }
-            //tìm kiếm theo tên sản phẩm 
-            if (!string.IsNullOrWhiteSpace(searchQuery))
-            {
-                query = query.Where(p => p.Name.Contains(searchQuery));
-            }
-            return await query.ToListAsync();
-        }
-        public async Task AddSize(Guid productId, Guid sizeId)
+		public async Task AddSize(Guid productId, Guid sizeId)
         {
             // Kiểm tra sản phẩm có tồn tại không
             var productExists = await _context.Products.AnyAsync(p => p.Id == productId);
@@ -267,11 +239,78 @@ namespace API.Repositories
             // Lưu thay đổi vào cơ sở dữ liệu
             await _context.SaveChangesAsync();
         }
-
         public async Task<List<ProductSize>> GetAllProductSizes()
         {
             return await _context.ProductSizes.Include(ps => ps.Size).ToListAsync();
         }
-    }
+		public async Task<List<Product>> GetSearch(string? searchQuery = null)
+		{
+			var query = _context.Products.Include(i => i.Images)
+				.AsQueryable();
+
+			if (!string.IsNullOrWhiteSpace(searchQuery))
+			{
+				query = query.Where(p => EF.Functions.Like(p.Name, $"%{searchQuery}%"));
+			}
+
+			return await query.ToListAsync();
+		}
+
+		public async Task<List<Product>> GetFilterProducts(
+	List<string>? material,
+	List<string>? size,
+	List<string>? brands,
+	string? priceRange)
+		{
+			var products = _context.Products
+						.Include(p => p.Material)
+						.Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+						.Include(p => p.Brand)
+						.Include(p => p.Category)
+						.Include(i => i.Images)
+						.AsQueryable();
+
+			// Lọc theo nhiều material nếu có
+			if (material != null && material.Any())
+			{
+				products = products.Where(p => material.Contains(p.Material.Name));
+			}
+
+			// Lọc theo nhiều size nếu có
+			if (size != null && size.Any())
+			{
+				products = products.Where(p => p.ProductSizes.Any(ps => size.Contains(ps.Size.Value)));
+			}
+
+			// Lọc theo nhiều brand nếu có
+			if (brands != null && brands.Any())
+			{
+				products = products.Where(p => brands.Contains(p.Brand.Name));
+			}
+
+			// Lọc theo price range nếu có
+			if (!string.IsNullOrEmpty(priceRange))
+			{
+				var ranges = priceRange.Split("-");
+				if (ranges.Length == 2 && decimal.TryParse(ranges[0], out var minPrice) && decimal.TryParse(ranges[1], out var maxPrice))
+				{
+					products = products.Where(p => p.Price >= minPrice && p.Price <= maxPrice);
+				}
+				else if (priceRange.Contains("trở lên"))
+				{
+					if (decimal.TryParse(ranges[0], out var min))
+					{
+						products = products.Where(p => p.Price >= min);
+					}
+				}
+			}
+
+			// Kiểm tra xem có sản phẩm hay không, nếu không trả về danh sách trống
+			var result = await products.ToListAsync();
+			return result ?? new List<Product>();  // Trả về danh sách trống nếu không có kết quả
+		}
+
+
+	}
 
 }

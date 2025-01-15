@@ -65,9 +65,6 @@
                                                 <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
                                                     <i class="bi bi-info-circle"></i>
                                                 </button>
-                                                <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
-                                                    <i class="bi bi-geo-alt"></i>
-                                                </button>
                                             }
                                             else if (status == OrderStatus.PrepareOrder) // "Đang chuẩn bị"
                                             {
@@ -79,9 +76,6 @@
                                                 </button>
                                                 <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
                                                     <i class="bi bi-info-circle"></i>
-                                                </button>
-                                                <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
-                                                    <i class="bi bi-geo-alt"></i>
                                                 </button>
                                             }
                                             else if (status == OrderStatus.OnDelivery) // "Đang giao hàng"
@@ -101,9 +95,7 @@
                                                 <button class="btn btn-info btn-sm" onclick="orderInfo('@order.OrderId')" title="Show order">
                                                     <i class="bi bi-info-circle"></i>
                                                 </button>
-                                                <button class="btn btn-secondary btn-sm" onclick="addressInfo('@order.OrderId')" title="Show Address">
-                                                    <i class="bi bi-geo-alt"></i>
-                                                </button>
+
                                             }
                                             else if (status == OrderStatus.Delivered) // "Đã giao"
                                             {

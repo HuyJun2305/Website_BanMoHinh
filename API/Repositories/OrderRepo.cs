@@ -83,6 +83,7 @@ namespace API.Repositories
                 PaymentMethods = PaymentMethod.Cash,
                 Status = OrderStatus.CreateOrder,
                 CustomerName = customerAccount?.Name ?? "Guest",
+                PhoneNumber = customerAccount?.PhoneNumber ?? "None",
                 VoucherId = voucherId
             };
 
@@ -134,72 +135,89 @@ namespace API.Repositories
         }
         public async Task CheckOutInStore(Guid orderId, Guid staffId, decimal amountGiven, PaymentMethod paymentMethod)
         {
-            // Lấy thông tin đơn hàng cùng với chi tiết và sản phẩm
+            // Truy vấn thông tin đơn hàng, chỉ lấy thông tin cần thiết và không tracking
+            var orderData = await _context.Orders
+                .AsNoTracking() // Không tracking để giảm chi phí bộ nhớ
+                .Where(o => o.Id == orderId)
+                .Select(o => new
+                {
+                    o.Id,
+                    o.Status,
+                    OrderDetails = o.OrderDetails.Select(od => new
+                    {
+                        od.ProductId,
+                        od.Quantity,
+                        od.SizeId,
+                        Product = new
+                        {
+                            od.Product.Id,
+                            od.Product.Name,
+                            od.Product.Price,
+                            ProductSizes = od.Product.ProductSizes.Select(ps => new
+                            {
+                                ps.SizeId,
+                                ps.Stock
+                            })
+                        }
+                    })
+                })
+                .FirstOrDefaultAsync();
+
+            if (orderData == null)
+                throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
+
+            if (!orderData.OrderDetails.Any())
+                throw new KeyNotFoundException("Đơn hàng không có sản phẩm nào.");
+
+            if (orderData.Status == OrderStatus.Complete)
+                throw new InvalidOperationException("Đơn hàng đã hoàn thành, không thể thanh toán lại.");
+
+            decimal totalPrice = 0;
+
+            // Tính tổng tiền và kiểm tra tồn kho
+            foreach (var detail in orderData.OrderDetails)
+            {
+                var productSize = detail.Product.ProductSizes.FirstOrDefault(ps => ps.SizeId == detail.SizeId);
+                if (productSize == null)
+                    throw new KeyNotFoundException($"Không tìm thấy kích thước cho sản phẩm {detail.Product.Name}.");
+
+                if (detail.Quantity > productSize.Stock)
+                    throw new InvalidOperationException($"Sản phẩm {detail.Product.Name} không đủ hàng. Tồn kho hiện tại: {productSize.Stock}.");
+
+                totalPrice += detail.Quantity * detail.Product.Price;
+            }
+
+            if (amountGiven < totalPrice)
+                throw new InvalidOperationException("Số tiền khách hàng đưa không đủ để thanh toán.");
+
+            decimal change = amountGiven - totalPrice;
+
+            // Truy vấn lại thực thể cần cập nhật, không dùng AsNoTracking
             var order = await _context.Orders
-                .Include(o => o.Account)
+                .Where(o => o.Id == orderId)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
-                    .ThenInclude(p => p.ProductSizes) // Bao gồm thông tin về ProductSizes
-                .FirstOrDefaultAsync(o => o.Id == orderId);
+                        .ThenInclude(p => p.ProductSizes)
+                .FirstOrDefaultAsync();
 
             if (order == null)
             {
                 throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
             }
 
-            // Kiểm tra nếu đơn hàng không có chi tiết
-            if (!order.OrderDetails.Any())
+            // Cập nhật tồn kho và trạng thái
+            foreach (var detail in order.OrderDetails)
             {
-                throw new KeyNotFoundException("Đơn hàng không có sản phẩm nào.");
-            }
-
-            // Kiểm tra trạng thái đơn hàng (đảm bảo không thay đổi đơn hàng đã hoàn thành)
-            if (order.Status == OrderStatus.Complete)
-            {
-                throw new InvalidOperationException("Đơn hàng đã hoàn thành, không thể thanh toán lại.");
-            }
-
-            decimal totalPrice = 0;
-
-            // Kiểm tra từng sản phẩm trong đơn hàng
-            foreach (var orderDetail in order.OrderDetails)
-            {
-                if (orderDetail.Product == null)
+                var productSize = detail.Product.ProductSizes.FirstOrDefault(ps => ps.SizeId == detail.SizeId);
+                if (productSize != null)
                 {
-                    throw new KeyNotFoundException($"Sản phẩm với ID {orderDetail.ProductId} không tồn tại.");
+                    // Giảm số lượng tồn kho của ProductSize
+                    productSize.Stock -= detail.Quantity;
                 }
 
-                // Kiểm tra tồn kho trong ProductSize
-                var productSize = orderDetail.Product.ProductSizes
-                    .FirstOrDefault(ps => ps.SizeId == orderDetail.SizeId); // Lấy thông tin size tương ứng
-
-                if (productSize == null)
-                {
-                    throw new KeyNotFoundException($"Không tìm thấy thông tin kích thước cho sản phẩm {orderDetail.Product.Name}.");
-                }
-
-                // Kiểm tra tồn kho trong ProductSize
-                if (orderDetail.Quantity > productSize.Stock)
-                {
-                    throw new InvalidOperationException($"Sản phẩm {orderDetail.Product.Name} (Size: {productSize.Size.Value}) không đủ hàng. Số lượng yêu cầu: {orderDetail.Quantity}, Tồn kho hiện tại: {productSize.Stock}.");
-                }
-
-                // Cộng tổng tiền cho đơn hàng
-                totalPrice += orderDetail.Quantity * orderDetail.Product.Price;
-
-                // Giảm số lượng tồn kho trong ProductSize
-                productSize.Stock -= orderDetail.Quantity;
-                _context.Entry(productSize).State = EntityState.Modified; // Đánh dấu ProductSize đã thay đổi
+                // Giảm số lượng tồn kho của sản phẩm chính
+                detail.Product.Stock -= detail.Quantity;
             }
-
-            // Kiểm tra xem khách hàng có đủ tiền để thanh toán không
-            if (amountGiven < totalPrice)
-            {
-                throw new InvalidOperationException("Số tiền khách hàng đưa không đủ để thanh toán.");
-            }
-
-            // Tính tiền thừa trả lại cho khách
-            decimal change = amountGiven - totalPrice;
 
             // Cập nhật trạng thái đơn hàng
             order.Status = OrderStatus.Complete;
@@ -211,20 +229,14 @@ namespace API.Repositories
             order.AmountPaid = amountGiven;
             order.Change = change;
 
-            // Cập nhật số lượng kho tổng của sản phẩm trong bảng Product
-            foreach (var orderDetail in order.OrderDetails)
-            {
-                if (orderDetail.Product != null)
-                {
-                    // Giảm số lượng tồn kho của sản phẩm chính trong bảng Product
-                    orderDetail.Product.Stock -= orderDetail.Quantity;
-                    _context.Entry(orderDetail.Product).State = EntityState.Modified; // Đánh dấu Product đã thay đổi
-                }
-            }
-
+            // Đánh dấu trạng thái của đơn hàng là Modified
             _context.Entry(order).State = EntityState.Modified;
+
+            // Lưu các thay đổi vào cơ sở dữ liệu
             await _context.SaveChangesAsync();
         }
+
+
 
         public async Task<List<Order>> GetOrderStatus()
         {
@@ -374,7 +386,7 @@ namespace API.Repositories
         public async Task ReOrder(Guid orderId, string? note)
         {
             // Tìm đơn hàng cũ
-            var oldOrder = await _context.Orders
+            var oldOrder = await _context.Orders.Include(o => o.OrderAddresses)
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product).AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == orderId);
@@ -398,6 +410,7 @@ namespace API.Repositories
             oldOrder.Note = note;
 
             // Tạo một đơn hàng mới với thông tin từ đơn hàng cũ
+            // Tạo một đơn hàng mới với thông tin từ đơn hàng cũ
             var newOrder = new Order
             {
                 Id = Guid.NewGuid(),
@@ -406,9 +419,10 @@ namespace API.Repositories
                 Price = oldOrder.Price,
                 PaymentMethods = oldOrder.PaymentMethods,
                 PaymentStatus = PaymentStatus.Pending,
-                DayCreate = DateTime.Now, 
-                Status = OrderStatus.WaitingForConfirmation, 
+                DayCreate = DateTime.Now,
+                Status = OrderStatus.WaitingForConfirmation,
                 Note = note,
+                ShippingFee = oldOrder.ShippingFee,
 
                 // Sao chép chi tiết đơn hàng
                 OrderDetails = oldOrder.OrderDetails.Select(od => new OrderDetail
@@ -418,8 +432,18 @@ namespace API.Repositories
                     SizeId = od.SizeId,
                     Quantity = od.Quantity,
                     TotalPrice = od.TotalPrice,
-                }).ToList()
+                }).ToList(),
+
+                // Sao chép địa chỉ giao hàng
+                OrderAddresses = new OrderAddress
+                {
+                    City = oldOrder.OrderAddresses.City,
+                    District = oldOrder.OrderAddresses.District,
+                    Ward = oldOrder.OrderAddresses.Ward,
+                    AddressDetail = oldOrder.OrderAddresses.AddressDetail,
+                }
             };
+
 
             // Thêm đơn hàng mới vào cơ sở dữ liệu
             _context.Orders.Add(newOrder);

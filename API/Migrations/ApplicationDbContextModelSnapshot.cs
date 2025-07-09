@@ -131,9 +131,15 @@ namespace API.Migrations
                     b.HasData(
                         new
                         {
+<<<<<<< HEAD
                             Id = new Guid("51ff5693-a6ce-442a-9d83-12458cc745c0"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "6f708cb1-18e3-46bc-980d-36baa0657851",
+=======
+                            Id = new Guid("304245b8-2502-4121-902e-67c259bb7fa9"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "5c7c1b83-29fd-4be5-be60-736032da78a9",
+>>>>>>> master
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             ImgUrl = "",
@@ -141,18 +147,31 @@ namespace API.Migrations
                             Name = "khoong",
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
+<<<<<<< HEAD
                             PasswordHash = "AQAAAAEAACcQAAAAEMzLiJGghAlJFiPydMjH9jjivB0dw1FyfUlYptg1gRXNPeJ2Ffbd4kBlY80yWaimqg==",
                             PhoneNumber = "chua co",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "01c83425-7d75-416a-869f-df98a69d5f85",
+=======
+                            PasswordHash = "AQAAAAEAACcQAAAAEOYgapkwKatreXcj74dQCr9SaHSBbhoCkqYHVBjC8zAy5jj7qIbX8ItdrkrQ8E2vAA==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "d61a95b2-4f8e-4969-81d2-acdbd0cf7fac",
+>>>>>>> master
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         },
                         new
                         {
+<<<<<<< HEAD
                             Id = new Guid("4d406dec-a298-4fdc-a13d-d130e9e9f0dc"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "13be331e-fa61-46c2-b615-f4836b29dfaa",
+=======
+                            Id = new Guid("1b63aa74-3be4-4332-9e5c-1c21af988cc6"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "68de6017-b7a8-4903-ad51-f9179d7f4b3d",
+>>>>>>> master
                             Email = "staff@gmail.com",
                             EmailConfirmed = false,
                             ImgUrl = "",
@@ -160,18 +179,31 @@ namespace API.Migrations
                             Name = "khoong",
                             NormalizedEmail = "STAFF@GMAIL.COM",
                             NormalizedUserName = "STAFF",
+<<<<<<< HEAD
                             PasswordHash = "AQAAAAEAACcQAAAAELqLY3ccVlZg+zzBjvEOKMQchUg/6rY4jXt/6JLS33I6FZebTDB4K8d2kL6IVkP8PQ==",
                             PhoneNumber = "chua co",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "046a450b-817f-4431-af59-3d88ebf6dfd6",
+=======
+                            PasswordHash = "AQAAAAEAACcQAAAAEAWRoUlfjPry1LXXAGWeAm3Reeg5ThhoCZPECnVWrxq3ikrm41E/+YNKkS8MukyI8A==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "c806533d-f965-479d-bf96-7913ff3417f2",
+>>>>>>> master
                             TwoFactorEnabled = false,
                             UserName = "staff"
                         },
                         new
                         {
+<<<<<<< HEAD
                             Id = new Guid("fd0739ee-5a47-4536-8c94-f42edf320484"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "7340dcc8-0219-4c90-a1bb-a410805c0be0",
+=======
+                            Id = new Guid("6b4c2e1d-863c-436e-83f0-38392c147185"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "bff4f990-82a4-4122-8900-4d33a60c9666",
+>>>>>>> master
                             Email = "user1@gmail.com",
                             EmailConfirmed = false,
                             ImgUrl = "",
@@ -179,10 +211,17 @@ namespace API.Migrations
                             Name = "khoong",
                             NormalizedEmail = "USER1@GMAIL.COM",
                             NormalizedUserName = "USER1",
+<<<<<<< HEAD
                             PasswordHash = "AQAAAAEAACcQAAAAEPUzlF3GVrjURApJqL4DzvRZkspGsK3+hAkmIYcq3VlvzSbf0QvsNmKs/iI9WffJNA==",
                             PhoneNumber = "chua co",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "443b12ff-a7b3-44f2-9006-8f01be83ed19",
+=======
+                            PasswordHash = "AQAAAAEAACcQAAAAEAStKD7wspL2SH2MT3elvhpBHrG4xaK4IouZhEAGSKOUqQ3kn0rwIB5pypAlMYSx6w==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "4f427bfd-1588-4683-abdc-9f585a37cac2",
+>>>>>>> master
                             TwoFactorEnabled = false,
                             UserName = "user1"
                         });
@@ -630,22 +669,37 @@ namespace API.Migrations
                     b.HasData(
                         new
                         {
+<<<<<<< HEAD
                             Id = new Guid("10daa91f-e4f3-478f-b467-267768cace22"),
                             ConcurrencyStamp = "14e47b88-4a62-4d95-b200-aa4db3bc7cb1",
+=======
+                            Id = new Guid("76efa2ec-6ca5-48f1-8a45-4458c277fb4d"),
+                            ConcurrencyStamp = "bcd342e5-9f14-45a3-bee3-e0d6a1e6eee4",
+>>>>>>> master
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
+<<<<<<< HEAD
                             Id = new Guid("f19760dd-de02-40e0-9e7e-549ff5bcaede"),
                             ConcurrencyStamp = "b9a538cc-0406-499a-ad94-5a26814cfacf",
+=======
+                            Id = new Guid("7445f46a-4179-4cf9-9e3f-5a6a4ef99d8d"),
+                            ConcurrencyStamp = "3d1bd742-31c4-42f0-bb4c-f5c2c2396322",
+>>>>>>> master
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         },
                         new
                         {
+<<<<<<< HEAD
                             Id = new Guid("4d316c80-5797-4d95-b2f5-2ecf2081a625"),
                             ConcurrencyStamp = "23ed26be-80d2-4d44-8494-de842429630b",
+=======
+                            Id = new Guid("ec18ed63-4aac-4a6e-acb7-53513a74a8cd"),
+                            ConcurrencyStamp = "8a26ace4-2d73-4c6d-aea1-0407dd90da18",
+>>>>>>> master
                             Name = "Customer",
                             NormalizedName = "CUSTOMER"
                         });
@@ -737,6 +791,7 @@ namespace API.Migrations
                     b.HasData(
                         new
                         {
+<<<<<<< HEAD
                             UserId = new Guid("51ff5693-a6ce-442a-9d83-12458cc745c0"),
                             RoleId = new Guid("10daa91f-e4f3-478f-b467-267768cace22")
                         },
@@ -754,6 +809,25 @@ namespace API.Migrations
                         {
                             UserId = new Guid("fd0739ee-5a47-4536-8c94-f42edf320484"),
                             RoleId = new Guid("4d316c80-5797-4d95-b2f5-2ecf2081a625")
+=======
+                            UserId = new Guid("304245b8-2502-4121-902e-67c259bb7fa9"),
+                            RoleId = new Guid("76efa2ec-6ca5-48f1-8a45-4458c277fb4d")
+                        },
+                        new
+                        {
+                            UserId = new Guid("304245b8-2502-4121-902e-67c259bb7fa9"),
+                            RoleId = new Guid("7445f46a-4179-4cf9-9e3f-5a6a4ef99d8d")
+                        },
+                        new
+                        {
+                            UserId = new Guid("1b63aa74-3be4-4332-9e5c-1c21af988cc6"),
+                            RoleId = new Guid("7445f46a-4179-4cf9-9e3f-5a6a4ef99d8d")
+                        },
+                        new
+                        {
+                            UserId = new Guid("6b4c2e1d-863c-436e-83f0-38392c147185"),
+                            RoleId = new Guid("ec18ed63-4aac-4a6e-acb7-53513a74a8cd")
+>>>>>>> master
                         });
                 });
 

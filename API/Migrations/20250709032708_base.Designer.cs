@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241214020338__add_side_to_od")]
-    partial class _add_side_to_od
+    [Migration("20250709032708_base")]
+    partial class @base
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -129,6 +129,65 @@ namespace API.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("304245b8-2502-4121-902e-67c259bb7fa9"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "5c7c1b83-29fd-4be5-be60-736032da78a9",
+                            Email = "admin@gmail.com",
+                            EmailConfirmed = false,
+                            ImgUrl = "",
+                            LockoutEnabled = false,
+                            Name = "khoong",
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAEAACcQAAAAEOYgapkwKatreXcj74dQCr9SaHSBbhoCkqYHVBjC8zAy5jj7qIbX8ItdrkrQ8E2vAA==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "d61a95b2-4f8e-4969-81d2-acdbd0cf7fac",
+                            TwoFactorEnabled = false,
+                            UserName = "admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("1b63aa74-3be4-4332-9e5c-1c21af988cc6"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "68de6017-b7a8-4903-ad51-f9179d7f4b3d",
+                            Email = "staff@gmail.com",
+                            EmailConfirmed = false,
+                            ImgUrl = "",
+                            LockoutEnabled = false,
+                            Name = "khoong",
+                            NormalizedEmail = "STAFF@GMAIL.COM",
+                            NormalizedUserName = "STAFF",
+                            PasswordHash = "AQAAAAEAACcQAAAAEAWRoUlfjPry1LXXAGWeAm3Reeg5ThhoCZPECnVWrxq3ikrm41E/+YNKkS8MukyI8A==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "c806533d-f965-479d-bf96-7913ff3417f2",
+                            TwoFactorEnabled = false,
+                            UserName = "staff"
+                        },
+                        new
+                        {
+                            Id = new Guid("6b4c2e1d-863c-436e-83f0-38392c147185"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "bff4f990-82a4-4122-8900-4d33a60c9666",
+                            Email = "user1@gmail.com",
+                            EmailConfirmed = false,
+                            ImgUrl = "",
+                            LockoutEnabled = false,
+                            Name = "khoong",
+                            NormalizedEmail = "USER1@GMAIL.COM",
+                            NormalizedUserName = "USER1",
+                            PasswordHash = "AQAAAAEAACcQAAAAEAStKD7wspL2SH2MT3elvhpBHrG4xaK4IouZhEAGSKOUqQ3kn0rwIB5pypAlMYSx6w==",
+                            PhoneNumber = "chua co",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "4f427bfd-1588-4683-abdc-9f585a37cac2",
+                            TwoFactorEnabled = false,
+                            UserName = "user1"
+                        });
                 });
 
             modelBuilder.Entity("Data.Models.Brand", b =>
@@ -559,6 +618,29 @@ namespace API.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("76efa2ec-6ca5-48f1-8a45-4458c277fb4d"),
+                            ConcurrencyStamp = "bcd342e5-9f14-45a3-bee3-e0d6a1e6eee4",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("7445f46a-4179-4cf9-9e3f-5a6a4ef99d8d"),
+                            ConcurrencyStamp = "3d1bd742-31c4-42f0-bb4c-f5c2c2396322",
+                            Name = "Staff",
+                            NormalizedName = "STAFF"
+                        },
+                        new
+                        {
+                            Id = new Guid("ec18ed63-4aac-4a6e-acb7-53513a74a8cd"),
+                            ConcurrencyStamp = "8a26ace4-2d73-4c6d-aea1-0407dd90da18",
+                            Name = "Customer",
+                            NormalizedName = "CUSTOMER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -643,6 +725,28 @@ namespace API.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("304245b8-2502-4121-902e-67c259bb7fa9"),
+                            RoleId = new Guid("76efa2ec-6ca5-48f1-8a45-4458c277fb4d")
+                        },
+                        new
+                        {
+                            UserId = new Guid("304245b8-2502-4121-902e-67c259bb7fa9"),
+                            RoleId = new Guid("7445f46a-4179-4cf9-9e3f-5a6a4ef99d8d")
+                        },
+                        new
+                        {
+                            UserId = new Guid("1b63aa74-3be4-4332-9e5c-1c21af988cc6"),
+                            RoleId = new Guid("7445f46a-4179-4cf9-9e3f-5a6a4ef99d8d")
+                        },
+                        new
+                        {
+                            UserId = new Guid("6b4c2e1d-863c-436e-83f0-38392c147185"),
+                            RoleId = new Guid("ec18ed63-4aac-4a6e-acb7-53513a74a8cd")
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
